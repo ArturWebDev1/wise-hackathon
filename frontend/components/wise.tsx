@@ -410,12 +410,14 @@ export function DashedCard({
   onPress,
   children,
   compact = false,
+  trailing,
 }: {
   title: string;
   icon: LucideIcon;
   onPress?: () => void;
   children?: ReactNode;
   compact?: boolean;
+  trailing?: ReactNode;
 }) {
   const card = (
     <View
@@ -433,6 +435,7 @@ export function DashedCard({
         <Copy bold size={compact ? 17 : 20} style={{ flex: 1 }}>
           {title}
         </Copy>
+        {trailing}
         {onPress ? <ChevronRight size={22} color={c.forest} strokeWidth={1.8} /> : null}
       </View>
       {children}

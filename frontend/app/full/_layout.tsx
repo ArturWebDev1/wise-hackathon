@@ -4,6 +4,7 @@ import { Home, CreditCard, Users, ArrowLeftRight, ArrowLeft } from 'lucide-react
 import * as Haptics from 'expo-haptics';
 import { Copy } from '@/components/wise';
 import { wise as c } from '@/lib/wise-theme';
+import { useWise } from '@/lib/wise-store';
 
 function BackToLite() {
   return (
@@ -28,9 +29,10 @@ function BackToLite() {
 }
 
 export default function FullLayout() {
+  const helper = useWise((s) => s.role) === 'nikita';
   return (
     <View style={{ flex: 1, backgroundColor: c.white }}>
-      <BackToLite />
+      {helper ? null : <BackToLite />}
       <Tabs
         screenOptions={{
           headerShown: false,
@@ -82,6 +84,9 @@ export default function FullLayout() {
             tabBarIcon: ({ color }) => <ArrowLeftRight size={23} color={color} strokeWidth={1.8} />,
           }}
         />
+        <Tabs.Screen name="family" options={{ href: null }} />
+        <Tabs.Screen name="requests" options={{ href: null }} />
+        <Tabs.Screen name="history" options={{ href: null }} />
       </Tabs>
     </View>
   );

@@ -10,6 +10,8 @@ import {
   TrendingUp,
   Gift,
   ChevronRight,
+  Clock3,
+  ShieldCheck,
 } from 'lucide-react-native';
 import { Screen, TopBar, Copy, Pill, DashedCard, IconCircle } from '@/components/wise';
 import { wise as c } from '@/lib/wise-theme';
@@ -17,6 +19,8 @@ import { useWise, money } from '@/lib/wise-store';
 
 export default function FullHome() {
   const balance = useWise((s) => s.balance);
+  const helper = useWise((s) => s.role) === 'nikita';
+  const pending = useWise((s) => s.transfers.filter((t) => t.status === 'pending').length);
   return (
     <Screen style={{ padding: 20, gap: 20 }}>
       <TopBar full />
@@ -45,6 +49,29 @@ export default function FullHome() {
           </Pill>
         </View>
       </View>
+      {helper ? (
+        pending ? (
+          <Pressable
+            onPress={() => router.push('/full/requests')}
+            style={{ backgroundColor: c.yellow, borderRadius: 24, padding: 20, gap: 8 }}
+          >
+            <Clock3 size={24} color={c.yellowText} strokeWidth={1.8} />
+            <Copy bold size={18} color={c.yellowText}>
+              {pending} {pending === 1 ? 'request needs' : 'requests need'} your answer
+            </Copy>
+            <Copy size={14} color={c.yellowText}>
+              Review transfer
+            </Copy>
+          </Pressable>
+        ) : (
+          <DashedCard
+            title="Family protection"
+            icon={ShieldCheck}
+            compact
+            onPress={() => router.push('/full/family')}
+          />
+        )
+      ) : null}
       <Pressable
         onPress={() => router.push('/onboarding')}
         style={{
