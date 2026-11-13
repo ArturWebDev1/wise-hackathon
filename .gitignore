@@ -1,0 +1,27 @@
+# Build outputs and dependencies
+node_modules/
+.next/
+out/
+coverage/
+target/
+*.tsbuildinfo
+.cache/
+
+# Personal editor and operating-system state
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.DS_Store
+Thumbs.db
+*.log
+test-results.xml
+
+# Explicitly tracked .env files contain disposable development defaults.
+# Keep private overrides, production settings, and keys outside Git.
+.env.*
+!.env.example
+!.env.development
+*.pem
+*.key
