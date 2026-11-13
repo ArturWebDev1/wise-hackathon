@@ -1,6 +1,6 @@
 # Hackathon workspace
 
-Spring Boot + Next.js + PostgreSQL. One day, five developers, small independently owned features.
+Spring Boot + Expo (React Native, runs on web and phones) + PostgreSQL. One day, five developers, small independently owned features.
 
 ## First run
 
@@ -21,21 +21,21 @@ cd backend
 
 On Windows PowerShell use `.\mvnw.cmd spring-boot:run` instead.
 
-In a third terminal:
+In a third terminal, the Expo app (Wise Lite):
 
 ```sh
 cd frontend
 npm ci
-npm run dev
+npm start        # press w for web, or scan the QR code with Expo Go
 ```
 
 On PowerShell, use `npm.cmd` if the execution policy blocks `npm.ps1`.
 
-Open [localhost:3000](http://localhost:3000) and click **Check connection**. Success confirms the browser → Next.js → Spring Boot → PostgreSQL path. Direct backend check: [localhost:8080/api/status](http://localhost:8080/api/status).
+The app talks to a **temporary Node API** in `api-prototype/` (port 3001) until the Spring Boot backend implements the same contract, [docs/developers/nikita/wise-lite-api.md](docs/developers/nikita/wise-lite-api.md). Start it in a fourth terminal; see [api-prototype/README.md](api-prototype/README.md). Spring Boot direct check: [localhost:8080/api/status](http://localhost:8080/api/status).
 
-The tracked root `.env` contains disposable Postgres credentials. Compose reads it automatically; Spring explicitly imports it when launched from `backend/`. The tracked `frontend/.env` sets the server-only backend URL. No copying or private credential exchange is required for the baseline.
+The tracked root `.env` contains disposable Postgres credentials. Compose reads it automatically; Spring explicitly imports it when launched from `backend/`. `frontend/.env.example` documents the optional `EXPO_PUBLIC_API_URL`. No copying or private credential exchange is required for the baseline.
 
-Postgres listens on localhost:5432, backend on :8080, frontend on :3000. If 5432 is occupied, change `POSTGRES_PORT` in root `.env`, recreate the container, and restart the backend. If changing backend port, also update `frontend/.env`. Coordinate changes to these shared files.
+Postgres listens on localhost:5432, backend on :8080, api-prototype on :3001, Expo web on :8081. If 5432 is occupied, change `POSTGRES_PORT` in root `.env`, recreate the container, and restart the backend. If the API port changes, set `EXPO_PUBLIC_API_URL` for the app. Coordinate changes to these shared files.
 
 ## Start a task
 
