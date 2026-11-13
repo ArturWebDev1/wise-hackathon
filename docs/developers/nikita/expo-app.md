@@ -1,6 +1,6 @@
 # План: перенос Wise Lite (Expo) в репозиторий
 
-Ветка: `nikita-wise-lite`. Язык: русский.
+Ветка: `codex/nikita-wise-lite`. Язык: русский.
 
 ## Цель
 Перенести готовое приложение Wise Lite в `frontend/` (вместо Next.js), оставить рабочий
