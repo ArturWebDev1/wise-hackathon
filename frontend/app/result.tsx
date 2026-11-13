@@ -5,6 +5,7 @@ import * as Haptics from 'expo-haptics';
 import { Screen, Statement, Heading, Copy, Pill, IconCircle, Empty } from '@/components/wise';
 import { useWise, money, type Transfer } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
+import { LitePendingResult } from '@/features/lite/lite-pending-result';
 
 export default function Result() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -35,6 +36,8 @@ export default function Result() {
         </Empty>
       </Screen>
     );
+  if (transfer.status === 'pending' && role === 'maria')
+    return <LitePendingResult transfer={transfer} />;
   const copy = resultCopy(transfer, role === 'nikita');
   const success = copy.kind === 'success';
   const blocked = copy.kind === 'blocked';
