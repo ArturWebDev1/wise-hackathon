@@ -7,6 +7,10 @@ target/
 *.tsbuildinfo
 .cache/
 
+# Next.js-generated files
+/frontend/next-env.d.ts
+/frontend/AGENTS.md
+
 # Personal editor and operating-system state
 .idea/
 .vscode/
