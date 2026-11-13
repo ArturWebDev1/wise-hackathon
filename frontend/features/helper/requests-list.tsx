@@ -1,10 +1,9 @@
 import { View } from 'react-native';
-import { router } from 'expo-router';
 import { ShieldCheck } from 'lucide-react-native';
 import { Copy, Empty, Heading, TransferRow } from '@/components/wise';
 import { useWise, type Transfer } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
-import { BackLink, HelperOnly } from './helper-only';
+import { HelperOnly, goBack } from './helper-only';
 
 export function RequestsList() {
   const transfers = useWise((s) => s.transfers);
@@ -14,10 +13,9 @@ export function RequestsList() {
   const answered = requests.filter((t) => t.status !== 'pending');
   return (
     <HelperOnly>
-      <BackLink to="/full/family" />
       <Heading>Requests</Heading>
       {requests.length ? null : (
-        <Empty icon={ShieldCheck} action="Back" onPress={() => router.navigate('/full/family')}>
+        <Empty icon={ShieldCheck} action="Back" onPress={goBack}>
           No requests yet. Risky transfers from Mom will appear here.
         </Empty>
       )}

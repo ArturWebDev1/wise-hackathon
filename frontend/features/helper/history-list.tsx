@@ -1,16 +1,14 @@
 import { View } from 'react-native';
-import { router } from 'expo-router';
 import { ShieldCheck } from 'lucide-react-native';
 import { Empty, Heading, TransferRow } from '@/components/wise';
 import { useWise } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
-import { BackLink, HelperOnly } from './helper-only';
+import { HelperOnly, goBack } from './helper-only';
 
 export function HistoryList() {
   const transfers = useWise((s) => s.transfers);
   return (
     <HelperOnly>
-      <BackLink to="/full/family" />
       <Heading>Maria’s history</Heading>
       {transfers.length ? (
         <View>
@@ -21,7 +19,7 @@ export function HistoryList() {
           ))}
         </View>
       ) : (
-        <Empty icon={ShieldCheck} action="Back" onPress={() => router.navigate('/full/family')}>
+        <Empty icon={ShieldCheck} action="Back" onPress={goBack}>
           Maria’s transfers will appear here.
         </Empty>
       )}

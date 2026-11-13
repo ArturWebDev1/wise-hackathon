@@ -14,20 +14,23 @@
    флаги причин, подсказка со щитом, Approve (зелёная), Decline (красный контур), «Call Mom» текстом.
    После решения — экран с галочкой: «Approved.» / «Declined.» / «Expired.», сумма и одна строка.
 2. `app/full/payments.tsx` — пунктирная карточка «Family protection», только для роли Nikita.
-3. `app/full/family.tsx` — хаб из трёх карточек: Requests (N), Protection rules (`/rules`), Maria’s history.
-4. `app/full/requests.tsx` — все pending-запросы (не только первый) и отдельно уже отвеченные.
-5. `app/full/history.tsx` — все операции Марии.
-6. `app/full/_layout.tsx` — скрыть новые маршруты из таб-бара (`href: null`).
+3. `app/family-protection.tsx` — хаб из трёх карточек: Requests (N), Protection rules (`/rules`), Maria’s history.
+4. `app/family-requests.tsx` — все pending-запросы (не только первый) и отдельно уже отвеченные.
+5. `app/family-history.tsx` — все операции Марии.
+6. Для роли Nikita `(tabs)/index.tsx` перенаправляет в `/full`; в `full/_layout.tsx` скрыта полоса «Back to Wise Lite»; на `full/index.tsx` баннер запросов или карточка «Family protection».
+
+Экраны 3–5 лежат в корне `app/` как обычные Stack-экраны (как `approval`, `rules`). Внутри `app/full/` они
+были скрытыми табами, и `Redirect` из `(tabs)/index` возвращал на `/full`.
 
 ## Мои пути
-`app/approval.tsx`, `app/full/**`, `features/helper/**`, `docs/developers/nikita/**`.
+`app/approval.tsx`, `app/family-*.tsx`, `app/full/**`, `features/helper/**`, `docs/developers/nikita/**`.
 
 ## Общие файлы
 В этой задаче **не меняются**: `lib/wise-store.ts`, `components/wise.tsx`, `lib/wise-theme.ts`,
 `global.css`, `app/_layout.tsx`, `package.json`, lockfile.
-Ждут устного согласования с командой (предложенный владелец — Nikita, но не подтверждён):
-`app/rules.tsx` (убрать дубли серых подписей, переключатель в строку заголовка),
-`app/result.tsx` (убрать «You can return home.», упростить текст).
+Изменены по прямому указанию разработчика (напомнить команде): `app/(tabs)/index.tsx` (Redirect для Nikita,
+удалён `HelperHome`), `app/rules.tsx` (переключатель в строке заголовка, без дублей подписей),
+`components/wise.tsx` (`DashedCard`: необязательный `trailing`). `app/result.tsx` не менялся.
 
 ## Ограничения
 - Вход и список людей для запросов денег не делаем: нет эндпоинтов в контракте.

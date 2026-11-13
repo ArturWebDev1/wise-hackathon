@@ -84,9 +84,6 @@ export default function FullLayout() {
             tabBarIcon: ({ color }) => <ArrowLeftRight size={23} color={color} strokeWidth={1.8} />,
           }}
         />
-        <Tabs.Screen name="family" options={{ href: null }} />
-        <Tabs.Screen name="requests" options={{ href: null }} />
-        <Tabs.Screen name="history" options={{ href: null }} />
       </Tabs>
     </View>
   );

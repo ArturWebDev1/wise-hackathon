@@ -18,7 +18,7 @@ export default function Payments() {
           title="Family protection"
           icon={ShieldCheck}
           compact
-          onPress={() => router.push('/full/family')}
+          onPress={() => router.push('/family-protection')}
         />
       ) : null}
       <DashedCard

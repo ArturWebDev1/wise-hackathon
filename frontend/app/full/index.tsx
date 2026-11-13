@@ -52,7 +52,7 @@ export default function FullHome() {
       {helper ? (
         pending ? (
           <Pressable
-            onPress={() => router.push('/full/requests')}
+            onPress={() => router.push('/family-requests')}
             style={{ backgroundColor: c.yellow, borderRadius: 24, padding: 20, gap: 8 }}
           >
             <Clock3 size={24} color={c.yellowText} strokeWidth={1.8} />
@@ -68,7 +68,7 @@ export default function FullHome() {
             title="Family protection"
             icon={ShieldCheck}
             compact
-            onPress={() => router.push('/full/family')}
+            onPress={() => router.push('/family-protection')}
           />
         )
       ) : null}
