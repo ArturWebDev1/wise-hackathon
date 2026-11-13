@@ -5,9 +5,10 @@ Owner/presenter: assign when the problem is known. Coordinate shared edits.
 ## Baseline smoke check
 
 1. Start Postgres: `docker compose up -d --wait`.
-2. Start Spring Boot from `backend/` and Next.js from `frontend/` (root README commands).
-3. Open `http://localhost:3000` and click **Check connection**.
-4. Expected: **Connected. Backend and PostgreSQL are ready.**
+2. Start `api-prototype/` and the Expo app from `frontend/` (root README commands).
+3. Open `http://localhost:8081` in two browser tabs. Choose **I'm Maria** in one and **I'm Nikita** in the other.
+4. Expected: the Maria tab shows the home screen with a balance of 4 000 €.
+5. Spring Boot status check: `http://localhost:8080/api/status`.
 
 ## Product demo — fill after agreeing the MVP
 
