@@ -1,8 +1,15 @@
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { Input, Label } from 'heroui-native';
-import { UserRoundPlus, CircleAlert, ShieldCheck, Users } from 'lucide-react-native';
+import {
+  ArrowRight,
+  ChevronRight,
+  UserRoundPlus,
+  CircleAlert,
+  ShieldCheck,
+  Users,
+} from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import {
   Screen,
@@ -12,8 +19,6 @@ import {
   Row,
   DashedCard,
   GreyCard,
-  Calculator,
-  Avatar,
   Statement,
   IconCircle,
   ErrorCopy,
@@ -30,6 +35,9 @@ import {
   type Recipient,
 } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
+import { LiteAmountInput } from '@/features/lite/lite-amount-input';
+import { LiteCloseButton } from '@/features/lite/lite-close-button';
+import { LiteConfirmCard } from '@/features/lite/lite-confirm-card';
 
 type SendParams = {
   stage?: string;
@@ -39,6 +47,15 @@ type SendParams = {
   amount?: string;
 };
 export default function Send() {
+  return (
+    <>
+      <Stack.Screen options={{ headerRight: () => <LiteCloseButton /> }} />
+      <SendContent />
+    </>
+  );
+}
+
+function SendContent() {
   const params = useLocalSearchParams<SendParams>();
   const stage = params.stage ?? 'who';
   const recipient = recipients.find((r) => r.id === params.recipient) ?? {
@@ -214,10 +231,67 @@ function Amount({
     onContinue(amount);
   };
   return (
-    <Screen footer={<Pill onPress={next}>Continue</Pill>}>
+    <Screen
+      footer={
+        <Pressable
+          accessibilityRole="button"
+          onPress={next}
+          style={{
+            minHeight: 64,
+            borderRadius: 32,
+            backgroundColor: c.green,
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: 12,
+          }}
+        >
+          <Copy size={20} bold color={c.forest}>
+            Continue
+          </Copy>
+          <ArrowRight size={22} color={c.forest} />
+        </Pressable>
+      }
+    >
       <Heading>How much to {recipient.name}?</Heading>
-      <Calculator
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Change recipient, currently ${recipient.name}`}
+        onPress={() => router.back()}
+        style={{
+          minHeight: 64,
+          borderRadius: 32,
+          backgroundColor: c.card,
+          paddingHorizontal: 14,
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 12,
+        }}
+      >
+        <View
+          style={{
+            width: 42,
+            height: 42,
+            borderRadius: 21,
+            backgroundColor: c.forest,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Copy size={20} bold color={c.white}>
+            {recipient.name.charAt(0).toUpperCase()}
+          </Copy>
+        </View>
+        <Copy size={18} bold style={{ flex: 1 }} numberOfLines={1}>
+          {recipient.name}
+        </Copy>
+        <ChevronRight size={22} color={c.forest} />
+      </Pressable>
+      <LiteAmountInput
         value={value}
+        label="You send"
+        showTransferDetails
+        cardTone="gray"
         onChange={(v) => {
           setValue(v);
           setError('');
@@ -304,26 +378,11 @@ function Confirm({ recipient, amount }: { recipient: Recipient; amount: number }
   return (
     <Screen
       footer={<Pill onPress={() => void send()} loading={busy}>{`Send ${money(amount)}`}</Pill>}
+      style={{ gap: 32 }}
     >
       <Stack.Screen options={{ title: 'Check and send' }} />
       <Heading>All looking right?</Heading>
-      <GreyCard style={{ alignItems: 'center', paddingVertical: 32, gap: 20 }}>
-        <Avatar initials={recipient.initials} size={72} badge />
-        <Copy bold size={24}>
-          To {recipient.name}
-        </Copy>
-        <Copy bold size={48} style={{ letterSpacing: -2 }}>
-          {money(amount)}
-        </Copy>
-        <Copy size={18} color={c.muted}>
-          {risky ? 'Nikita will check this first' : 'Arrives in seconds'}
-        </Copy>
-        {recipient.iban ? (
-          <Copy size={14} color={c.muted} style={{ textAlign: 'center' }}>
-            {recipient.iban.replace(/(.{4})/g, '$1 ').trim()}
-          </Copy>
-        ) : null}
-      </GreyCard>
+      <LiteConfirmCard recipient={recipient} amount={amount} risky={risky} />
       {risky ? (
         <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
           <ShieldCheck size={24} color={c.forest} />

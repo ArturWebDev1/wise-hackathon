@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View, Share, Linking, Platform } from 'react-native';
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import { Share2, MessageCircle, Send, MessageSquare, Link, Users } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import {
@@ -8,7 +8,6 @@ import {
   Heading,
   Copy,
   Row,
-  Calculator,
   Pill,
   GreyCard,
   Avatar,
@@ -18,8 +17,19 @@ import {
 } from '@/components/wise';
 import { useWise, recipients, money, type Recipient } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
+import { LiteAmountInput } from '@/features/lite/lite-amount-input';
+import { LiteCloseButton } from '@/features/lite/lite-close-button';
 
 export default function RequestMoney() {
+  return (
+    <>
+      <Stack.Screen options={{ headerRight: () => <LiteCloseButton /> }} />
+      <RequestMoneyContent />
+    </>
+  );
+}
+
+function RequestMoneyContent() {
   const favourites = useWise((s) => s.favouriteIds);
   const [recipient, setRecipient] = useState<Recipient | null>(null);
   const [value, setValue] = useState('50');
@@ -118,8 +128,10 @@ export default function RequestMoney() {
         }
       >
         <Heading>How much from {recipient?.name}?</Heading>
-        <Calculator
+        <LiteAmountInput
           value={value}
+          label="You request"
+          hint="Demo request · No money moves here"
           onChange={(v) => {
             setValue(v);
             setError('');
