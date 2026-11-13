@@ -26,8 +26,8 @@
 `app/approval.tsx`, `app/family-*.tsx`, `app/full/**`, `features/helper/**`, `docs/developers/nikita/**`.
 
 ## Общие файлы
-В этой задаче **не меняются**: `lib/wise-store.ts`, `components/wise.tsx`, `lib/wise-theme.ts`,
-`global.css`, `app/_layout.tsx`, `package.json`, lockfile.
+В этой задаче **не меняются**: `lib/wise-store.ts`, `lib/wise-theme.ts`, `global.css`,
+`app/_layout.tsx`, `package.json`, lockfile.
 Изменены по прямому указанию разработчика (напомнить команде): `app/(tabs)/index.tsx` (Redirect для Nikita,
 удалён `HelperHome`), `app/rules.tsx` (переключатель в строке заголовка, без дублей подписей),
 `components/wise.tsx` (`DashedCard`: необязательный `trailing`). `app/result.tsx` не менялся.
