@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class Households {
+    static final BigDecimal DEFAULT_THRESHOLD = new BigDecimal("250.00");
+
     private final AccountRepository accounts;
     private final ProtectionRepository protections;
     private final TransferRepository transfers;
@@ -43,13 +46,35 @@ public class Households {
     }
 
     public Person lookup(String actorId, String wiseId) {
-        if (wiseId == null || !wiseId.strip().matches("[A-Za-z0-9_.-]{1,64}")) {
-            throw error(HttpStatus.BAD_REQUEST, "Enter a valid Wise ID.");
-        }
-        return accounts.findByWiseId(wiseId.strip().toLowerCase(Locale.ROOT))
+        return findByWiseId(wiseId)
                 .filter(account -> !account.id().equals(actorId) || protections.existsByHelperId(actorId))
                 .map(Households::person)
                 .orElseThrow(() -> error(HttpStatus.NOT_FOUND, "No account found for this Wise ID."));
+    }
+
+    @Transactional
+    public void connect(String ownerId, String helperWiseId) {
+        AccountEntity helper = findByWiseId(helperWiseId)
+                .filter(account -> account.passwordHash() != null)
+                .orElseThrow(() -> error(HttpStatus.NOT_FOUND, "No sign-in account found for this Wise ID."));
+        String helperId = helper.id();
+        if (ownerId.equals(helperId)) {
+            throw error(HttpStatus.BAD_REQUEST, "Choose a helper other than yourself.");
+        }
+
+        // Serialize competing links for either account, including attempts with the roles reversed.
+        accounts.lockAccounts(List.of(ownerId, helperId));
+        var existing = protections.findById(ownerId);
+        if (existing.isPresent() && existing.get().helperId().equals(helperId)) {
+            return;
+        }
+        if (existing.isPresent() || protections.existsByHelperId(ownerId) || protections.existsById(helperId)
+                || protections.existsByHelperId(helperId)) {
+            throw error(HttpStatus.CONFLICT, "One of these accounts already belongs to a protected household.");
+        }
+        var protection = new ProtectionEntity(ownerId, helperId, DEFAULT_THRESHOLD, true);
+        protection.replaceRequestPeople(List.of(helperId));
+        protections.save(protection);
     }
 
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
@@ -75,8 +100,16 @@ public class Households {
         var allowed = protection.requestPeople();
         var requestPeople = allowed.isEmpty() ? List.<Person>of()
                 : accounts.findByIdInOrderByDisplayNameAscIdAsc(allowed).stream().map(Households::person).toList();
-        return new State(account(signedIn, helper), ownerId, balance, signedIn.balance(), protection.threshold(),
-                protection.checkNew(), items, recipients, requestPeople);
+        Map<String, Long> protectionOffAt = new HashMap<>(2);
+        if (protection.thresholdOffAt() != null && protection.thresholdOffAt().isAfter(now)) {
+            protectionOffAt.put("limit", protection.thresholdOffAt().toEpochMilli());
+        }
+        if (protection.checkNewOffAt() != null && protection.checkNewOffAt().isAfter(now)) {
+            protectionOffAt.put("checkNew", protection.checkNewOffAt().toEpochMilli());
+        }
+        BigDecimal activeLimit = protection.thresholdEnabledAt(now) ? protection.threshold() : null;
+        return new State(account(signedIn, helper), ownerId, balance, signedIn.balance(), activeLimit,
+                protection.checkNewAt(now), protectionOffAt, items, recipients, requestPeople);
     }
 
     @Transactional
@@ -85,12 +118,21 @@ public class Households {
     }
 
     @Transactional
-    public void checkNew(String helperId, Boolean enabled) {
+    public void thresholdRule(String helperId, Boolean enabled) {
+        if (enabled == null) {
+            throw error(HttpStatus.BAD_REQUEST, "Choose whether to check transfers above the threshold.");
+        }
         ProtectionEntity protection = helperProtection(helperId);
+        protection.changeThresholdRule(enabled, Instant.ofEpochMilli(transfers.currentEpochMillis()));
+    }
+
+    @Transactional
+    public void checkNew(String helperId, Boolean enabled) {
         if (enabled == null) {
             throw error(HttpStatus.BAD_REQUEST, "Choose whether to check new recipients.");
         }
-        protection.changeCheckNew(enabled);
+        ProtectionEntity protection = helperProtection(helperId);
+        protection.changeCheckNew(enabled, Instant.ofEpochMilli(transfers.currentEpochMillis()));
     }
 
     @Transactional
@@ -124,6 +166,13 @@ public class Households {
     private ProtectionEntity helperProtection(String helperId) {
         return protections.lockByHelperId(helperId).orElseThrow(
                 () -> error(HttpStatus.FORBIDDEN, "Only the assigned helper can change these settings."));
+    }
+
+    private Optional<AccountEntity> findByWiseId(String wiseId) {
+        if (wiseId == null || !wiseId.strip().matches("[A-Za-z0-9_.-]{1,64}")) {
+            throw error(HttpStatus.BAD_REQUEST, "Enter a valid Wise ID.");
+        }
+        return accounts.findByWiseId(wiseId.strip().toLowerCase(Locale.ROOT));
     }
 
     private AccountEntity findAccount(String id) {
@@ -168,6 +217,6 @@ public class Households {
             boolean aboveLimit, boolean isNew, BigDecimal limitAtCreation) {}
 
     public record State(Account account, String ownerId, BigDecimal balance, BigDecimal accountBalance,
-            BigDecimal limit, boolean checkNew,
+            BigDecimal limit, boolean checkNew, Map<String, Long> protectionOffAt,
             List<Transfer> transfers, List<Person> recipients, List<Person> requestPeople) {}
 }

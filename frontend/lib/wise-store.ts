@@ -45,6 +45,7 @@ export type SharedData = {
   checkNew: boolean;
   scamPause: boolean;
   favouriteIds: string[];
+  requestPeople: Recipient[];
   protectionOffAt: Partial<Record<RuleKey, number>>;
   inviteSent: boolean;
   consent: boolean;
@@ -59,7 +60,7 @@ type WiseState = SharedData & {
   setRole: (role: Role | null) => void;
   setLimit: (limit: number) => Promise<void>;
   toggleRule: (key: RuleKey, enabled: boolean) => Promise<void>;
-  toggleFavourite: (id: string) => Promise<void>;
+  setRequestPerson: (id: string, enabled: boolean) => Promise<void>;
   invite: () => Promise<void>;
   agree: () => Promise<void>;
   reset: () => Promise<void>;
@@ -79,6 +80,7 @@ const EMPTY_STATE: SharedData = {
   checkNew: true,
   scamPause: false,
   favouriteIds: [],
+  requestPeople: [],
   protectionOffAt: {},
   inviteSent: false,
   consent: true,
@@ -92,6 +94,36 @@ let signingIn: { role: Role; promise: Promise<string> } | undefined;
 let syncStarted = false;
 let refreshAfterHydration: (() => void) | undefined;
 const pendingTransfers = new Map<string, { key: string; reasons?: ApprovalReason[] }>();
+
+function attemptFor(operation: string) {
+  const attempt = pendingTransfers.get(operation) ?? {
+    key: [
+      Date.now(),
+      Math.random().toString(36).slice(2),
+      Math.random().toString(36).slice(2),
+    ].join('-'),
+  };
+  pendingTransfers.set(operation, attempt);
+  return attempt;
+}
+
+async function completeTransfer(operation: string, submit: () => Promise<SpringMutation>) {
+  try {
+    const result = await submit();
+    pendingTransfers.delete(operation);
+    return result;
+  } catch (error) {
+    if (
+      error instanceof ApiError &&
+      error.status >= 400 &&
+      error.status < 500 &&
+      error.status !== 401
+    ) {
+      pendingTransfers.delete(operation);
+    }
+    throw error;
+  }
+}
 
 function recipientView(person: Person): Recipient {
   return (
@@ -110,7 +142,9 @@ function toSharedState(state: SpringState): SharedData {
     balance: state.accountBalance,
     limit: state.limit,
     checkNew: state.checkNew,
+    protectionOffAt: state.protectionOffAt ?? {},
     favouriteIds: state.recipients.map((person) => person.id),
+    requestPeople: state.requestPeople.map(recipientView),
     transfers: state.transfers.map((item) => ({
       ...item,
       recipient: recipientView(item.recipient),
@@ -193,17 +227,10 @@ export const useWise = create<WiseState>()(
           if (recipient.iban)
             return unavailable('This demo can send only to existing Wise accounts.');
           const operation = JSON.stringify([get().role, recipient.id, amount]);
-          const attempt = pendingTransfers.get(operation) ?? {
-            key: [
-              Date.now(),
-              Math.random().toString(36).slice(2),
-              Math.random().toString(36).slice(2),
-            ].join('-'),
-          };
-          pendingTransfers.set(operation, attempt);
+          const attempt = attemptFor(operation);
           const expectedApproval = isRisky(get(), recipient, amount);
-          return mutate(async (token) => {
-            try {
+          return mutate((token) =>
+            completeTransfer(operation, async () => {
               const payment = { recipientId: recipient.id, amount };
               if (!attempt.reasons) {
                 const { reasons } = await request<{ reasons: ApprovalReason[] }>(
@@ -217,30 +244,25 @@ export const useWise = create<WiseState>()(
                 }
                 attempt.reasons = reasons;
               }
-              const result = await request<SpringMutation>(
+              return request<SpringMutation>(
                 'POST',
                 '/transfers',
                 token,
                 { ...payment, expectedReasons: attempt.reasons },
                 attempt.key,
               );
-              pendingTransfers.delete(operation);
-              return result;
-            } catch (error) {
-              if (
-                error instanceof ApiError &&
-                error.status >= 400 &&
-                error.status < 500 &&
-                error.status !== 401
-              ) {
-                pendingTransfers.delete(operation);
-              }
-              throw error;
-            }
-          });
+            }),
+          );
         },
-        sendToMaria: () =>
-          unavailable('Sending to Maria from this screen is unavailable in this demo.'),
+        sendToMaria: (amount) => {
+          const operation = JSON.stringify([get().role, 'to-protected-account', amount]);
+          const { key } = attemptFor(operation);
+          return mutate((token) =>
+            completeTransfer(operation, () =>
+              request<SpringMutation>('POST', '/transfers/to-protected-account', token, { amount }, key),
+            ),
+          );
+        },
         decide: async (id, approve) => {
           await send('POST', `/transfers/${id}/decision`, { approve });
         },
@@ -248,21 +270,23 @@ export const useWise = create<WiseState>()(
           await send('PUT', '/settings/limit', { limit });
         },
         toggleRule: async (key, enabled) => {
-          if (key === 'checkNew') {
-            await send('PUT', '/settings/rules/checkNew', { enabled });
+          if (key === 'scamPause') {
+            await unavailable('Scam Pause is unavailable in this demo.');
             return;
           }
-          await unavailable(
-            key === 'limit'
-              ? 'The approval threshold is always enabled.'
-              : 'Scam Pause is unavailable in this demo.',
-          );
+          await send('PUT', `/settings/rules/${key}`, { enabled });
         },
-        toggleFavourite: () => unavailable('This list is based on completed transfers.'),
+        setRequestPerson: async (id, enabled) => {
+          const allowed = get().requestPeople.map((person) => person.id);
+          const accountIds = enabled ? [...new Set([...allowed, id])] : allowed.filter((person) => person !== id);
+          await send('PUT', '/settings/request-people', { accountIds });
+        },
         invite: () => unavailable('Maria and Nikita are already linked for this demo.'),
         agree: () => unavailable('Maria and Nikita are already linked for this demo.'),
-        reset: () =>
-          unavailable('This demo has no reset action. Use a fresh demo database schema.'),
+        reset: async () => {
+          await send('POST', '/demo/reset', undefined);
+          pendingTransfers.clear();
+        },
       };
     },
     {

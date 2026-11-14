@@ -27,6 +27,17 @@ public interface TransferRepository extends JpaRepository<TransferEntity, UUID> 
             """)
     List<TransferEntity> findHistory(String ownerId);
 
+    @Query("""
+            SELECT COUNT(t) > 0 FROM TransferEntity t
+            WHERE (t.senderId IN :ids AND t.recipientId NOT IN :ids)
+               OR (t.senderId NOT IN :ids AND t.recipientId IN :ids)
+            """)
+    boolean existsBetweenDemoAndOtherAccounts(Collection<String> ids);
+
+    @Modifying
+    @Query("DELETE FROM TransferEntity t WHERE t.senderId IN :ids AND t.recipientId IN :ids")
+    int deleteDemoTransfers(Collection<String> ids);
+
     @Query(value = "SELECT CAST(FLOOR(EXTRACT(EPOCH FROM clock_timestamp()) * 1000) AS bigint)", nativeQuery = true)
     long currentEpochMillis();
 

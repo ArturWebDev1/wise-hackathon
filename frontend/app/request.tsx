@@ -15,7 +15,7 @@ import {
   WiseMark,
   Empty,
 } from '@/components/wise';
-import { useWise, recipients, money, type Recipient } from '@/lib/wise-store';
+import { useWise, money, type Recipient } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
 import { LiteAmountInput } from '@/features/lite/lite-amount-input';
 import { LiteCloseButton } from '@/features/lite/lite-close-button';
@@ -30,7 +30,8 @@ export default function RequestMoney() {
 }
 
 function RequestMoneyContent() {
-  const favourites = useWise((s) => s.favouriteIds);
+  const requestPeople = useWise((s) => s.requestPeople);
+  const ready = useWise((s) => s.ready);
   const [recipient, setRecipient] = useState<Recipient | null>(null);
   const [value, setValue] = useState('50');
   const [stage, setStage] = useState<'who' | 'amount' | 'share'>('who');
@@ -81,29 +82,33 @@ function RequestMoneyContent() {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   };
-  if (stage === 'who')
+  const recipientRemoved =
+    !shared && recipient !== null && !requestPeople.some((person) => person.id === recipient.id);
+
+  if (stage === 'who' || recipientRemoved)
     return (
       <Screen>
         <Heading>Who do you want to ask?</Heading>
         <View>
-          {recipients
-            .filter((r) => favourites.includes(r.id))
-            .map((r) => (
-              <Row
-                key={r.id}
-                initials={r.initials}
-                badge
-                title={r.name}
-                subtitle={r.relationship}
-                onPress={() => {
-                  setRecipient(r);
-                  setStage('amount');
-                }}
-              />
-            ))}
-          {!favourites.length ? (
-            <Empty icon={Users} action="Choose favourites" onPress={() => router.push('/rules')}>
-              Add someone to ask for money.
+          {recipientRemoved ? <ErrorCopy>This person is no longer on your list.</ErrorCopy> : null}
+          {requestPeople.map((r) => (
+            <Row
+              key={r.id}
+              initials={r.initials}
+              badge
+              title={r.name}
+              subtitle={r.relationship}
+              onPress={() => {
+                setRecipient(r);
+                setError('');
+                setStage('amount');
+              }}
+            />
+          ))}
+          {!ready ? <Copy>Loading your list…</Copy> : null}
+          {ready && !requestPeople.length ? (
+            <Empty icon={Users} action="Back home" onPress={() => router.dismissTo('/')}>
+              Nikita hasn’t added anyone you can ask for money yet.
             </Empty>
           ) : null}
         </View>

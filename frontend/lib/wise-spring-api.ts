@@ -9,9 +9,11 @@ export type SpringState = {
   account: Person & { role: 'owner' | 'helper' };
   balance: number | null;
   accountBalance: number;
-  limit: number;
+  limit: number | null;
   checkNew: boolean;
+  protectionOffAt: Partial<Record<'limit' | 'checkNew', number>>;
   recipients: Person[];
+  requestPeople: Person[];
   transfers: {
     id: string;
     recipient: Person;

@@ -12,6 +12,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -47,7 +48,8 @@ public class Transfers {
         if (!accounts.existsById(recipientId)) {
             throw error(HttpStatus.NOT_FOUND, "Recipient not found.");
         }
-        return approvalReasons(ownerId, recipientId, value, protection);
+        return approvalReasons(ownerId, recipientId, value, protection,
+                Instant.ofEpochMilli(transfers.snapshotEpochMillis()));
     }
 
     @Transactional
@@ -55,9 +57,7 @@ public class Transfers {
             List<String> expectedReasons) {
         BigDecimal value = transferAmount(amount);
         validateRecipient(ownerId, recipientId);
-        if (idempotencyKey == null || idempotencyKey.isBlank() || idempotencyKey.length() > 128) {
-            throw error(HttpStatus.BAD_REQUEST, "An Idempotency-Key of at most 128 characters is required.");
-        }
+        validateKey(idempotencyKey);
         if (expectedReasons == null || expectedReasons.stream().anyMatch(
                 reason -> reason == null || !REASONS.contains(reason))) {
             throw error(HttpStatus.BAD_REQUEST, "Expected approval reasons are required.");
@@ -68,17 +68,14 @@ public class Transfers {
         }
 
         ProtectionEntity protection = protections.lockByOwnerId(ownerId).orElseThrow(Transfers::unavailable);
-        var match = transfers.findBySenderIdAndIdempotencyKey(ownerId, idempotencyKey);
-        if (match.isPresent()) {
-            TransferEntity previous = match.get();
-            if (previous.recipientId().equals(recipientId) && previous.amount().compareTo(value) == 0) {
-                return previous.id();
-            }
-            throw error(HttpStatus.CONFLICT, "This idempotency key was used for a different transfer.");
+        var previous = previousTransfer(ownerId, recipientId, value, idempotencyKey);
+        if (previous.isPresent()) {
+            return previous.get();
         }
 
         var locked = lockAccounts(ownerId, recipientId);
-        List<String> reasons = approvalReasons(ownerId, recipientId, value, protection);
+        Instant now = Instant.ofEpochMilli(transfers.currentEpochMillis());
+        List<String> reasons = approvalReasons(ownerId, recipientId, value, protection, now);
         if (!expected.equals(Set.copyOf(reasons))) {
             throw error(HttpStatus.CONFLICT, "Approval reasons changed. Review the transfer again.");
         }
@@ -88,7 +85,6 @@ public class Transfers {
 
         UUID id = UUID.randomUUID();
         boolean pending = !reasons.isEmpty();
-        Instant now = Instant.ofEpochMilli(transfers.currentEpochMillis());
         transfers.save(new TransferEntity(id, ownerId, recipientId, value, pending ? "pending" : "sent",
                 reasons.contains(ABOVE_THRESHOLD), reasons.contains(NEW_RECIPIENT), protection.threshold(), now,
                 pending ? now.plus(APPROVAL_WINDOW) : null, idempotencyKey));
@@ -96,6 +92,30 @@ public class Transfers {
             locked.sender().debit(value);
             locked.recipient().credit(value);
         }
+        return id;
+    }
+
+    @Transactional
+    public UUID sendToProtectedAccount(String helperId, BigDecimal amount, String idempotencyKey) {
+        BigDecimal value = transferAmount(amount);
+        validateKey(idempotencyKey);
+        ProtectionEntity protection = protections.lockByHelperId(helperId).orElseThrow(Transfers::unavailable);
+        String recipientId = protection.ownerId();
+        var previous = previousTransfer(helperId, recipientId, value, idempotencyKey);
+        if (previous.isPresent()) {
+            return previous.get();
+        }
+
+        var locked = lockAccounts(helperId, recipientId);
+        if (locked.sender().balance().compareTo(value) < 0) {
+            throw error(HttpStatus.BAD_REQUEST, "There is not enough money for this transfer.");
+        }
+        UUID id = UUID.randomUUID();
+        Instant now = Instant.ofEpochMilli(transfers.currentEpochMillis());
+        transfers.save(new TransferEntity(id, helperId, recipientId, value, "sent",
+                false, false, protection.threshold(), now, null, idempotencyKey));
+        locked.sender().debit(value);
+        locked.recipient().credit(value);
         return id;
     }
 
@@ -130,13 +150,28 @@ public class Transfers {
         return ownerId;
     }
 
+    private Optional<UUID> previousTransfer(String senderId, String recipientId, BigDecimal amount, String key) {
+        return transfers.findBySenderIdAndIdempotencyKey(senderId, key).map(previous -> {
+            if (previous.recipientId().equals(recipientId) && previous.amount().compareTo(amount) == 0) {
+                return previous.id();
+            }
+            throw error(HttpStatus.CONFLICT, "This idempotency key was used for a different transfer.");
+        });
+    }
+
+    private static void validateKey(String key) {
+        if (key == null || key.isBlank() || key.length() > 128) {
+            throw error(HttpStatus.BAD_REQUEST, "An Idempotency-Key of at most 128 characters is required.");
+        }
+    }
+
     private List<String> approvalReasons(String ownerId, String recipientId, BigDecimal amount,
-            ProtectionEntity protection) {
+            ProtectionEntity protection, Instant now) {
         var reasons = new ArrayList<String>(2);
-        if (amount.compareTo(protection.threshold()) > 0) {
+        if (protection.thresholdEnabledAt(now) && amount.compareTo(protection.threshold()) > 0) {
             reasons.add(ABOVE_THRESHOLD);
         }
-        if (protection.checkNew() && !transfers.existsBySenderIdAndRecipientIdAndStatusIn(
+        if (protection.checkNewAt(now) && !transfers.existsBySenderIdAndRecipientIdAndStatusIn(
                 ownerId, recipientId, SUCCEEDED)) {
             reasons.add(NEW_RECIPIENT);
         }

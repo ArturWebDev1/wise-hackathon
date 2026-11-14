@@ -22,13 +22,19 @@ export default function Rules() {
   const checkNew = useWise((s) => s.checkNew);
   const scamPause = useWise((s) => s.scamPause);
   const scheduled = useWise((s) => s.protectionOffAt);
-  const favourites = useWise((s) => s.favouriteIds);
+  const requestPeople = useWise((s) => s.requestPeople);
+  const ready = useWise((s) => s.ready);
   const toggleRule = useWise((s) => s.toggleRule);
   const setLimit = useWise((s) => s.setLimit);
-  const toggleFavourite = useWise((s) => s.toggleFavourite);
+  const setRequestPerson = useWise((s) => s.setRequestPerson);
   const helper = role === 'nikita';
   const enabledLimit = limit !== null;
   const [error, setError] = useState('');
+  const [savingRequestPeople, setSavingRequestPeople] = useState(false);
+  const requestCandidates = [
+    ...recipients,
+    ...requestPeople.filter((person) => !recipients.some((known) => known.id === person.id)),
+  ];
   const change = (action: Promise<void>) => {
     setError('');
     action
@@ -39,6 +45,10 @@ export default function Rules() {
   };
   const toggle = (key: 'limit' | 'checkNew' | 'scamPause', enabled: boolean) => {
     change(toggleRule(key, enabled));
+  };
+  const updateRequestPerson = (id: string, enabled: boolean) => {
+    setSavingRequestPeople(true);
+    change(setRequestPerson(id, enabled).finally(() => setSavingRequestPeople(false)));
   };
   return (
     <Screen>
@@ -126,9 +136,9 @@ export default function Rules() {
       </DashedCard>
       <View>
         <Copy size={20} bold>
-          Manage favourites
+          People Maria can ask for money
         </Copy>
-        {recipients.map((r) => (
+        {requestCandidates.map((r) => (
           <View
             key={r.id}
             style={[
@@ -146,10 +156,10 @@ export default function Rules() {
               </Copy>
             </View>
             <Switch
-              accessibilityLabel={`${r.name} is a favourite`}
-              isSelected={favourites.includes(r.id)}
-              isDisabled={!helper}
-              onSelectedChange={() => change(toggleFavourite(r.id))}
+              accessibilityLabel={`Maria can ask ${r.name} for money`}
+              isSelected={requestPeople.some((person) => person.id === r.id)}
+              isDisabled={!helper || !ready || savingRequestPeople}
+              onSelectedChange={(enabled) => updateRequestPerson(r.id, enabled)}
             />
           </View>
         ))}
