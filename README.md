@@ -45,16 +45,19 @@ Spring reads the root `.env` and serves [its status endpoint](http://localhost:8
 
 ## Two phones with Expo Go (Maria and Nikita)
 
-Both phones and the computer must be on the same Wi-Fi. Spring runs in Docker but must listen on the network, not only on localhost:
+Install Docker Desktop (running) and Node, then from the repository root run **one command** (Windows, macOS, Linux):
 
 ```sh
-BIND_ADDRESS=0.0.0.0 docker compose up -d --build --wait postgres backend
-cd frontend && npm ci && npx expo start --lan
+node scripts/demo.mjs
 ```
 
-Scan the QR code with Expo Go on both phones. On phone one choose **I'm Maria**, on phone two **I'm Nikita**: each phone keeps its own session, so both talk to the same Spring server and see each other's changes within about two seconds. The app finds Spring at the same host as Expo on port 8080; leave `EXPO_PUBLIC_API_URL` unset (or point it at `http://<computer LAN IP>:8080`).
+It finds this computer's Wi-Fi address, starts PostgreSQL and Spring Boot in Docker so they are reachable on the network, and starts Expo with that address in the QR code. The first run builds the backend and takes a few minutes. Scan the QR code with Expo Go on both phones. On phone one choose **I'm Maria**, on phone two **I'm Nikita**: each phone keeps its own session, both talk to the same Spring server and see each other's changes within about two seconds.
 
-CORS is only a browser rule and does not apply to Expo Go. A browser on another origin needs `WISEEASE_CORS_ORIGIN_PATTERN` (default `http://*:8081`). If a phone cannot connect, allow incoming connections for Docker and Node in the macOS firewall and check the computer's current LAN IP (it changes between networks).
+- Phones and the computer must be on the same Wi-Fi, and the Wi-Fi must let devices see each other (public or guest networks often do not). A phone hotspot is a reliable fallback: connect the computer and the other phone to it, then run the command again. The address changes whenever the network changes, so each new network needs a new QR code.
+- If a default port is taken: `node scripts/demo.mjs --postgres-port 5434 --server-port 8081 --expo-port 8082`. The address can be forced with `--lan-ip <address>`.
+- CORS is only a browser rule and does not apply to Expo Go. A browser on another origin needs `WISEEASE_CORS_ORIGIN_PATTERN` (default `http://*:8081`).
+- If a phone cannot connect, allow incoming connections for Docker and Node in the computer's firewall.
+- Stop Expo with Ctrl+C; stop the containers with `docker compose down`.
 
 ## Start a task
 
