@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View, Share } from 'react-native';
-import { Input, Label, Slider, Switch } from 'heroui-native';
+import { Input, Label, Slider } from 'heroui-native';
 import { Check, Send, SlidersHorizontal, UserRoundPlus } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import {
@@ -18,13 +18,24 @@ import { money } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
 import { Detail } from './detail';
 import { HelperOnly, goBack } from './helper-only';
+import { H1, Page } from './page';
 import { usePeople } from './people-store';
+import { WiseSwitch } from './wise-switch';
 
 type Stage = 'who' | 'rules' | 'invite' | 'done';
 const RELATIONSHIPS = ['Mom', 'Dad', 'Grandma', 'Grandpa', 'Other'];
+const NAME_PATTERN = /^\p{L}[\p{L}\s'’-]{1,59}$/u;
+
+function nameError(name: string, taken: string[]) {
+  if (!name) return 'Enter the person’s name.';
+  if (!NAME_PATTERN.test(name)) return 'Use letters only, at least 2 of them.';
+  if (taken.includes(name.toLowerCase())) return 'You already protect this person.';
+  return '';
+}
 
 export function AddPerson() {
   const add = usePeople((s) => s.add);
+  const people = usePeople((s) => s.people);
   const [stage, setStage] = useState<Stage>('who');
   const [name, setName] = useState('');
   const [choice, setChoice] = useState('Mom');
@@ -32,11 +43,14 @@ export function AddPerson() {
   const [limit, setLimit] = useState(250);
   const [checkNew, setCheckNew] = useState(true);
   const [error, setError] = useState('');
-  const person = name.trim();
+  const person = name.trim().replace(/\s+/g, ' ');
   const relationship = choice === 'Other' ? other.trim() : choice;
   const toRules = () => {
-    if (!person || !relationship) {
-      setError(person ? 'Write who they are to you.' : 'Enter the person’s name.');
+    const problem =
+      nameError(person, ['maria kask', ...people.map((p) => p.name.toLowerCase())]) ||
+      (relationship ? '' : 'Write who they are to you.');
+    if (problem) {
+      setError(problem);
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return;
     }
@@ -76,8 +90,8 @@ export function AddPerson() {
   return (
     <HelperOnly>
       {stage === 'who' ? (
-        <Screen footer={<Pill onPress={toRules}>Continue</Pill>}>
-          <Heading>Who do you want to protect?</Heading>
+        <Page footer={<Pill onPress={toRules}>Continue</Pill>}>
+          <H1>Who do you want to protect?</H1>
           <View style={styles.section}>
             <Label>
               <Label.Text style={{ fontSize: 20, fontFamily: 'Inter_600SemiBold' }}>
@@ -135,9 +149,9 @@ export function AddPerson() {
             </View>
           ) : null}
           {error ? <ErrorCopy>{error}</ErrorCopy> : null}
-        </Screen>
+        </Page>
       ) : stage === 'rules' ? (
-        <Screen
+        <Page
           footer={
             <View style={{ gap: 12 }}>
               <Pill onPress={() => setStage('invite')}>Continue</Pill>
@@ -145,7 +159,7 @@ export function AddPerson() {
             </View>
           }
         >
-          <Heading>Set the safety net</Heading>
+          <H1>Set the safety net</H1>
           <DashedCard title={`Ask me above ${money(limit)}`} icon={SlidersHorizontal} compact>
             <Slider
               value={limit}
@@ -176,7 +190,7 @@ export function AddPerson() {
             icon={UserRoundPlus}
             compact
             trailing={
-              <Switch
+              <WiseSwitch
                 accessibilityLabel="Ask for any new person"
                 isSelected={checkNew}
                 onSelectedChange={setCheckNew}
@@ -186,9 +200,9 @@ export function AddPerson() {
           <Copy size={16} color={c.muted}>
             You can change this any time in Protection rules.
           </Copy>
-        </Screen>
+        </Page>
       ) : (
-        <Screen
+        <Page
           footer={
             <View style={{ gap: 12 }}>
               <Pill icon={Send} onPress={sendInvite}>
@@ -198,7 +212,7 @@ export function AddPerson() {
             </View>
           }
         >
-          <Heading>{`Invite ${person}?`}</Heading>
+          <H1>{`Invite ${person}?`}</H1>
           <GreyCard style={{ padding: 20, gap: 12 }}>
             <Detail label="Who" value={`${person} · ${relationship}`} bold />
             <Detail label="Ask me above" value={money(limit)} />
@@ -207,7 +221,7 @@ export function AddPerson() {
           <Copy size={16} color={c.muted}>
             {`${person} gets a link for 24 hours. They confirm it’s them and agree that you protect them.`}
           </Copy>
-        </Screen>
+        </Page>
       )}
     </HelperOnly>
   );

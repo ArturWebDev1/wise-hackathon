@@ -1,15 +1,16 @@
 import { View } from 'react-native';
 import { ShieldCheck } from 'lucide-react-native';
-import { Empty, Heading, TransferRow } from '@/components/wise';
+import { Empty, TransferRow } from '@/components/wise';
 import { useWise } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
 import { HelperOnly, goBack } from './helper-only';
+import { H1 } from './page';
 
 export function HistoryList() {
   const transfers = useWise((s) => s.transfers);
   return (
     <HelperOnly>
-      <Heading>Maria’s history</Heading>
+      <H1>Maria’s history</H1>
       {transfers.length ? (
         <View>
           {transfers.map((t) => (

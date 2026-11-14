@@ -44,6 +44,7 @@ export type SharedData = {
   limit: number | null;
   checkNew: boolean;
   scamPause: boolean;
+  transferRecipients: Recipient[];
   favouriteIds: string[];
   requestPeople: Recipient[];
   protectionOffAt: Partial<Record<RuleKey, number>>;
@@ -52,6 +53,7 @@ export type SharedData = {
 };
 type WiseState = SharedData & {
   role: Role | null;
+  account: AccountView | null;
   ready: boolean;
   offline: boolean;
   submit: (recipient: Recipient, amount: number, pressured: boolean) => Promise<string>;
@@ -59,6 +61,7 @@ type WiseState = SharedData & {
   decide: (id: string, approve: boolean) => Promise<void>;
   setRole: (role: Role | null) => void;
   setLimit: (limit: number) => Promise<void>;
+  lookupRecipient: (wiseId: string) => Promise<Person>;
   toggleRule: (key: RuleKey, enabled: boolean) => Promise<void>;
   setRequestPerson: (id: string, enabled: boolean) => Promise<void>;
   invite: () => Promise<void>;
@@ -72,6 +75,17 @@ export const recipients: Recipient[] = [
   { id: 'olga', name: 'Olga', initials: 'OK', relationship: 'Your friend' },
 ];
 
+type AccountView = Pick<Person, 'name' | 'wiseId'> & { initials: string };
+
+const DEMO_ACCOUNT_DISPLAY: Record<Role, AccountView> = {
+  maria: { name: 'Maria', initials: 'MA', wiseId: 'maria' },
+  nikita: { name: 'Nikita', initials: 'NG', wiseId: 'nikita' },
+};
+
+export function useAccount() {
+  return useWise((state) => state.account ?? DEMO_ACCOUNT_DISPLAY[state.role ?? 'maria']);
+}
+
 const POLL_INTERVAL_MS = 1500;
 const EMPTY_STATE: SharedData = {
   balance: 0,
@@ -79,6 +93,7 @@ const EMPTY_STATE: SharedData = {
   limit: null,
   checkNew: true,
   scamPause: false,
+  transferRecipients: [],
   favouriteIds: [],
   requestPeople: [],
   protectionOffAt: {},
@@ -126,20 +141,27 @@ async function completeTransfer(operation: string, submit: () => Promise<SpringM
 }
 
 function recipientView(person: Person): Recipient {
-  return (
-    recipients.find((known) => known.id === person.id) ?? {
-      id: person.id,
-      name: person.name,
-      initials: initialsOf(person.name),
-      relationship: '',
-    }
-  );
+  const known = recipients.find((candidate) => candidate.id === person.id);
+  return {
+    id: person.id,
+    name: person.name,
+    initials: known?.initials ?? initialsOf(person.name),
+    relationship: known?.relationship ?? '',
+  };
 }
 
-function toSharedState(state: SpringState): SharedData {
+function toSharedState(state: SpringState): SharedData & { account: AccountView } {
+  const { id, name, wiseId } = state.account;
+  const account = {
+    name,
+    wiseId,
+    initials: id === 'maria' || id === 'nikita' ? DEMO_ACCOUNT_DISPLAY[id].initials : initialsOf(name),
+  };
   return {
     ...EMPTY_STATE,
+    account,
     balance: state.accountBalance,
+    transferRecipients: state.recipients.map(recipientView),
     limit: state.limit,
     checkNew: state.checkNew,
     protectionOffAt: state.protectionOffAt ?? {},
@@ -211,6 +233,7 @@ export const useWise = create<WiseState>()(
       return {
         ...EMPTY_STATE,
         role: null,
+        account: null,
         ready: false,
         offline: false,
         setRole: (role) => {
@@ -219,8 +242,15 @@ export const useWise = create<WiseState>()(
           const previous = session;
           session = undefined;
           signingIn = undefined;
-          set({ ...EMPTY_STATE, role, ready: !role, offline: false });
+          set({ ...EMPTY_STATE, role, account: null, ready: !role, offline: false });
           if (previous) void request('POST', '/auth/logout', previous.token).catch(() => undefined);
+        },
+        lookupRecipient: async (wiseId) => {
+          const role = get().role;
+          if (!role) throw new Error('Choose a demo account first.');
+          return withSession(role, (token) =>
+            request<Person>('GET', `/recipients/lookup?wiseId=${encodeURIComponent(wiseId)}`, token),
+          );
         },
         submit: (recipient, amount, pressured) => {
           if (pressured) return unavailable('Scam Pause is unavailable in this demo.');
@@ -259,7 +289,13 @@ export const useWise = create<WiseState>()(
           const { key } = attemptFor(operation);
           return mutate((token) =>
             completeTransfer(operation, () =>
-              request<SpringMutation>('POST', '/transfers/to-protected-account', token, { amount }, key),
+              request<SpringMutation>(
+                'POST',
+                '/transfers/to-protected-account',
+                token,
+                { amount },
+                key,
+              ),
             ),
           );
         },
@@ -278,7 +314,9 @@ export const useWise = create<WiseState>()(
         },
         setRequestPerson: async (id, enabled) => {
           const allowed = get().requestPeople.map((person) => person.id);
-          const accountIds = enabled ? [...new Set([...allowed, id])] : allowed.filter((person) => person !== id);
+          const accountIds = enabled
+            ? [...new Set([...allowed, id])]
+            : allowed.filter((person) => person !== id);
           await send('PUT', '/settings/request-people', { accountIds });
         },
         invite: () => unavailable('Maria and Nikita are already linked for this demo.'),
