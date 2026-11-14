@@ -10,11 +10,13 @@ import {
   ChevronRight,
   CircleHelp,
   CreditCard,
+  ChartNoAxesColumnIncreasing,
+  Eye,
+  EyeOff,
   Globe,
   Landmark,
   ScanLine,
   Shield,
-  ShieldCheck,
   X,
 } from 'lucide-react-native';
 import type { LucideIcon } from 'lucide-react-native';
@@ -221,50 +223,93 @@ function UsFlag() {
 
 export function FullHome() {
   const helper = useIsHelper();
-  const pending = useWise((s) => s.transfers.filter((t) => t.status === 'pending').length);
+  const balance = useWise((s) => s.balance);
+  const [showBalance, setShowBalance] = useState(false);
+  const pending = useWise(
+    (s) => s.transfers.filter(
+      (t) => t.direction === 'outgoing' && t.status === 'pending' && !t.expired,
+    ).length,
+  );
   const [hideSend, setHideSend] = useState(false);
   const [hideCard, setHideCard] = useState(false);
   const [hideShare, setHideShare] = useState(false);
   return (
     <FullPage header={<HomeHeader />}>
-      <View style={{ backgroundColor: c.yellow, borderRadius: 22, padding: 17, gap: 13 }}>
-        <View style={{ flexDirection: 'row', gap: 13 }}>
-          <View
+      {helper && pending > 0 ? (
+        <View accessibilityLiveRegion="polite">
+          <Tap
+            onPress={() => router.push('/family-requests')}
+            accessibilityLabel={`${pending} ${pending === 1 ? 'request' : 'requests'} waiting for your approval. Review requests.`}
             style={{
-              width: 39,
-              height: 39,
-              borderRadius: 20,
-              backgroundColor: '#3A341C',
+              flexDirection: 'row',
               alignItems: 'center',
-              justifyContent: 'center',
+              gap: 12,
+              padding: 16,
+              minHeight: 72,
+              borderRadius: 20,
+              backgroundColor: c.yellow,
             }}
           >
-            <Copy bold size={18} color={c.yellow}>
-              !
-            </Copy>
-          </View>
-          <View style={{ flex: 1, gap: 7 }}>
-            <Copy bold size={18} color="#3A341C">
-              Start using Wise now
-            </Copy>
-            <Copy size={14} color="#3A341C">
-              You can send and receive money once you’ve finished setting up your account.
-            </Copy>
+            <BellRing size={24} color={c.yellowText} strokeWidth={1.8} />
+            <View style={{ flex: 1, gap: 3 }}>
+              <Copy bold size={17} color={c.yellowText}>
+                {`${pending} ${pending === 1 ? 'request' : 'requests'} waiting`}
+              </Copy>
+              <Copy size={14} color={c.yellowText}>
+                Review and approve transfers
+              </Copy>
+            </View>
+            <ChevronRight size={20} color={c.yellowText} strokeWidth={2} />
+          </Tap>
+        </View>
+      ) : null}
+      <View style={{ gap: 6 }}>
+        <Copy size={20} color={ink}>
+          Total balance
+        </Copy>
+        <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
+          <Copy bold size={32} color={ink} style={{ lineHeight: 40, letterSpacing: -1 }}>
+            {showBalance
+              ? `${new Intl.NumberFormat('fr-FR', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(balance)} EUR`
+              : '**** EUR'}
+          </Copy>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
             <Tap
-              accessibilityRole="button"
+              onPress={() => setShowBalance((shown) => !shown)}
+              accessibilityLabel={showBalance ? 'Hide balance' : 'Show balance'}
               style={{
-                alignSelf: 'flex-start',
-                backgroundColor: '#3A341C',
-                borderRadius: 69,
-                paddingHorizontal: 18,
-                paddingVertical: 10,
-                marginTop: 4,
+                width: 48,
+                height: 48,
+                borderRadius: 24,
+                backgroundColor: c.card,
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
-              <Copy bold size={15} color={c.yellow}>
-                Finish setup
-              </Copy>
+              {showBalance ? (
+                <EyeOff size={22} color={c.forest} strokeWidth={2} />
+              ) : (
+                <Eye size={22} color={c.forest} strokeWidth={2} />
+              )}
             </Tap>
+            <View
+              accessible={false}
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 24,
+                backgroundColor: c.card,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <ChartNoAxesColumnIncreasing size={24} color={c.forest} strokeWidth={2} />
+            </View>
           </View>
         </View>
       </View>
@@ -295,15 +340,6 @@ export function FullHome() {
       </View>
 
       <H>Tasks</H>
-      {helper && pending ? (
-        <Task
-          icon={ShieldCheck}
-          title="Mom needs your help"
-          text={`${pending} ${pending === 1 ? 'transfer is' : 'transfers are'} waiting for your answer.`}
-          primary="Review"
-          onPrimary={() => router.push('/family-requests')}
-        />
-      ) : null}
       {hideSend ? null : (
         <Task
           icon={ArrowUp}

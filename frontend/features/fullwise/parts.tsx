@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import { View, Pressable, ScrollView } from 'react-native';
 import type { ViewStyle } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { ChevronRight, Plus } from 'lucide-react-native';
 import type { ComponentType } from 'react';
@@ -28,7 +27,7 @@ export function FullPage({
   children: ReactNode;
 }) {
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: c.white }}>
+    <View style={{ flex: 1, backgroundColor: c.white }}>
       {header ? (
         <View style={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 16 }}>{header}</View>
       ) : null}
@@ -39,7 +38,7 @@ export function FullPage({
         {children}
       </ScrollView>
       {footer ? <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>{footer}</View> : null}
-    </SafeAreaView>
+    </View>
   );
 }
 
