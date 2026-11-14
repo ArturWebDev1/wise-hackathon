@@ -1,33 +1,33 @@
 # Spring Boot backend
 
-Java 21 и PostgreSQL. Код WiseEASE лежит в `src/main/java/com/team/hackathon/features/wiselite/`. Порядок реализации и принятые решения описаны в [роадмапе](../docs/developers/levin/spring-boot-backend.md) и [заметках](../docs/developers/levin/spring-boot-decisions.md).
+The backend uses Java 21 and PostgreSQL. WiseEASE code lives in `src/main/java/com/team/hackathon/features/wiselite/`. See the [roadmap](../docs/developers/levin/spring-boot-backend.md) and [decision notes](../docs/developers/levin/spring-boot-decisions.md) for implementation details.
 
-## Запуск на Windows
+## Run on Windows
 
-Запусти PostgreSQL из корня репозитория.
+Start PostgreSQL from the repository root.
 
 ```powershell
 docker compose up -d --wait
 ```
 
-В другом терминале запусти бэкенд. Деморежим включён в корневом `.env`, который Spring читает при запуске из корня проекта или из `backend/`.
+Start the backend in another terminal. The root `.env` enables demo mode. Spring reads it when launched from the project root or from `backend/`.
 
 ```powershell
 cd backend
 .\mvnw.cmd spring-boot:run
 ```
 
-На macOS и Linux из `backend/` используй `./mvnw spring-boot:run`. API слушает `http://localhost:8080`. `/api/status` проверяет доступность базы. Аккаунты Марии и Никиты доступны по `maria@example.com` и `nikita@example.com` с демопаролем `WiseEaseDemo!`. Знакомые Марии (есть в истории): `anna`, `nikita`, `olga`. Новые для демо: `ola`, `liisa`, `pavel`; перевод им всегда ждёт одобрения Никиты.
+On macOS and Linux, run `./mvnw spring-boot:run` from `backend/`. The API listens at `http://localhost:8080`. `/api/status` checks database connectivity. Sign in to the demo as `maria@example.com` or `nikita@example.com` with the password `WiseEaseDemo!`. Maria's known recipients are `anna`, `nikita`, and `olga`. The new recipients for the demo are `ola`, `liisa`, and `pavel`. Transfers to these new recipients require Nikita's approval.
 
-В этой ветке существующие кнопки Марии и Никиты открывают демосессии Spring. Из `frontend/` запусти `npm ci`, затем `npm run start -- --go --lan` для Expo Go или `npm run start -- --web` для браузера. По умолчанию клиент использует порт `8080` на хосте Expo. `EXPO_PUBLIC_API_URL` позволяет переопределить адрес. На телефоне укажи LAN IP компьютера со Spring. Веб-адрес вне стандартного порта Expo задаётся через `WISEEASE_CORS_ORIGIN_PATTERN` на сервере.
+The existing Maria and Nikita buttons open Spring demo sessions in this branch. From `frontend/`, run `npm ci`, then `npm run start -- --go --lan` for Expo Go or `npm run start -- --web` for the browser. By default, the client uses port `8080` on the Expo host. Set `EXPO_PUBLIC_API_URL` to override the address. On a phone, use the LAN IP of the computer running Spring. To allow a web origin on a different Expo port, configure `WISEEASE_CORS_ORIGIN_PATTERN` on the server.
 
-## Схема PostgreSQL и демоданные
+## PostgreSQL schema and demo data
 
-Flyway применяет `src/main/resources/db/migration/V1__wiseease_schema.sql` перед запуском JPA. Hibernate проверяет соответствие сущностей схеме. Таблицы живут в отдельной схеме `wiseease`, старые `public.wl_*` и `public.we_*` остаются доступны старому коду.
+Flyway applies `src/main/resources/db/migration/V1__wiseease_schema.sql` before JPA starts. Hibernate validates the entities against the schema. The tables use the separate `wiseease` schema. The older `public.wl_*` and `public.we_*` tables remain available to legacy code.
 
-Данные загружает повторяемая миграция `R__wiseease_demo_seed.sql`. При `WISEEASE_DEMO_ENABLED=true` она создаёт демосемью с фиксированным демопаролем на чистой схеме. Повторное включение режима сохраняет уже созданные аккаунты, баланс и историю, в том числе данные прежнего Java-сидера. Выключение режима отключает вставку новых демоданных. Для чистой демонстрации укажи новый `WISEEASE_DB_SCHEMA`, например `wiseease_demo2`.
+The repeatable migration `R__wiseease_demo_seed.sql` loads demo data. With `WISEEASE_DEMO_ENABLED=true`, it creates the demo household with a fixed demo password in a clean schema. Turning demo mode back on preserves existing accounts, balances, and history, including data created by the previous Java seeder. With demo mode off, the migration skips new demo data. For a fresh demo, set `WISEEASE_DB_SCHEMA` to a new name such as `wiseease_demo2`.
 
-## Быстрая проверка API
+## Quick API check
 
 ```powershell
 $api = 'http://localhost:8080'
@@ -39,16 +39,16 @@ Invoke-RestMethod -Method Post -Uri "$api/transfers/preview" -Headers $headers -
     -Body (@{ recipientId = 'anna'; amount = 600 } | ConvertTo-Json)
 ```
 
-На чистых демоданных состояние покажет баланс 4 000 € и три перевода в истории (Anna 35 €, Nikita 120 €, Olga 25 €). Предпросмотр на `anna` и 600 вернёт `ABOVE_THRESHOLD`, на `ola` и 50 — `NEW_RECIPIENT`. Остальные методы описаны в [контракте API](../docs/developers/nikita/wise-lite-api.md).
+With fresh demo data, the state shows a €4,000 balance and three transfers in the history (Anna €35, Nikita €120, and Olga €25). A preview for €600 to `anna` returns `ABOVE_THRESHOLD`. A preview for €50 to `ola` returns `NEW_RECIPIENT`. See the [API contract](../docs/developers/nikita/wise-lite-api.md) for the other methods.
 
-## Код и проверки
+## Code and checks
 
-- `api/WiseEaseController.java` — HTTP-вход, работа с сессией и маршруты WiseEASE.
-- `application/Transfers.java` — причины одобрения, транзакции, сроки и решения.
-- `application/Households.java` — представление счёта, история, настройки и денежные запросы.
-- `application/Sessions.java` — вход и проверка токена сессии.
-- `infrastructure/entity/` — JPA-сущности. `infrastructure/repository/` — Spring Data JPA-репозитории. `src/main/resources/db/migration/` — схема и демоданные.
+- `api/WiseEaseController.java` handles HTTP entry points, sessions, and WiseEASE routes.
+- `application/Transfers.java` handles approval reasons, transactions, expiration, and decisions.
+- `application/Households.java` provides the account snapshot, history, settings, and money requests.
+- `application/Sessions.java` handles sign-in and session token validation.
+- `infrastructure/entity/` contains JPA entities. `infrastructure/repository/` contains Spring Data JPA repositories. `src/main/resources/db/migration/` contains the schema and demo data.
 
-Из `backend/` выполни `./mvnw verify` или `.\mvnw.cmd verify` на Windows. Проверки используют реальный PostgreSQL.
+Run `./mvnw verify` from `backend/` or `.\mvnw.cmd verify` on Windows. The tests use PostgreSQL.
 
-В `frontend/` команда `npm run check` запускает lint, TypeScript, Vitest и веб-сборку.
+From `frontend/`, `npm run check` runs lint, TypeScript, Vitest, and the web build.

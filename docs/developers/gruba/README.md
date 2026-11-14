@@ -1,81 +1,46 @@
 # Gruba
 
-- Предпочтительный язык общения: **русский**.
-- Личные планы и заметки: `docs/developers/gruba/`.
-- Перед реализацией прочитай корневой `AGENTS.md`, `docs/workflow.ru.md`, нужные разделы архитектуры, brief и согласованный план задачи.
-- Сначала обсуди план, затем сохрани его здесь. Укажи свои файлы и ссылку на единый API-контракт при совместной работе.
-- Свои документы и `.gitignore` можно организовать самостоятельно. Чужие заметки по умолчанию не редактировать.
+- Preferred language for communication: **Russian**.
+- Personal plans and notes: `docs/developers/gruba/`.
+- Before implementation, read the root `AGENTS.md`, `docs/workflow.ru.md`, the relevant sections of the architecture guide, the brief, and the agreed task plan.
+- Discuss the plan first and then save it here. List your files and link to the shared API contract when working with others.
+- You can organize your own documents and `.gitignore`. Leave other developers' notes to their owners by default.
 
-## План MVP: frontend WiseEASE / Lite (Maria)
+## MVP plan for the WiseEASE Lite frontend (Maria)
 
-### Цель и границы
+### Goal and scope
 
-Довести существующий Expo frontend до законченного сценария пожилого пользователя:
-баланс → отправка → ожидание решения помощника → результат без обновления страницы.
-Основные разделы: Home и Help; отправка, запрос и результат — дополнительные шаги.
-Использовать существующие экраны и компоненты; полный редизайн и перенос приложения не нужны.
+Complete the existing Expo flow for an older user: view the balance, send a transfer, wait for the helper's decision, and see the result without refreshing. Home and Help are the main sections. Sending, requesting, and viewing a result are additional steps. Reuse the existing screens and components. A full redesign or app migration is unnecessary.
 
-### Обязательные задачи
+### Required work
 
-1. **Home:** баланс, Send money, Request money, краткая история со статусами. Крупные
-   понятные кнопки, минимум действий, доступ к Help. Суммы и статусы брать из API.
-2. **Send:** избранный или новый получатель, имя/IBAN для нового, сумма, подтверждение,
-   проверка давления (существующий Scam Pause). Показать ошибки ввода, нехватки денег
-   и сети; блокировать повторное нажатие во время отправки.
-3. **Результат:** обычный перевод — успех; рискованный — ожидание помощника;
-   затем approved/declined, отдельно blocked и истечение срока. Ожидающий перевод
-   не уменьшает баланс. Approved уже означает исполненный перевод: второго вызова отправки нет.
-4. **Request money:** выбор контакта и суммы, создание сообщения и открытие системного
-   Share. Это демонстрационная ссылка: явно сообщать, что она не принимает оплату.
-   Реальные платёжные запросы не реализовывать без расширения общего контракта.
-5. **Help:** заметная кнопка звонка доверенному помощнику, информация о нём и доступ
-   к просмотру лимита/защит. Maria не может менять правила и избранных.
-   Проверить поведение звонка на телефоне и понятный fallback в браузере;
-   текущие номера демонстрационные, реальный контакт нужен только после согласования.
-6. **Согласие:** если показываем существующее приглашение, завершить пользовательскую
-   часть подтверждения. Не добавлять регистрацию, KYC или отзыв доступа без API-договорённости.
+1. **Home:** Show the balance, Send money, Request money, and a short history with statuses. Use large, clear buttons, keep the number of actions small, and provide access to Help. Read amounts and statuses from the API.
+2. **Send:** Choose a favorite or a new recipient. Collect the new recipient's name and IBAN, the amount, confirmation, and the existing Scam Pause pressure check. Show input, insufficient-funds, and network errors. Disable the submit button while sending.
+3. **Result:** Show success for a regular transfer and a waiting state for a risky one. Show approved and declined outcomes, with distinct states for blocked and expired transfers. Pending transfers leave the balance available. Approved means the transfer has already settled in the same operation.
+4. **Request money:** Select a contact and an amount, compose a message, and open the system share sheet. Label the demo link clearly as unable to accept payment. Implement real payment requests only after extending the shared contract.
+5. **Help:** Provide a prominent call button, information about the trusted helper, and read-only access to the threshold and protections. Maria cannot change rules or favorites. Check calling on a phone and a clear fallback in the browser. Current numbers are for the demo. Agree before using a real contact.
+6. **Consent:** If the existing invitation is shown, complete the user's confirmation step. Registration, KYC, and access revocation require an API agreement.
 
-### Владение файлами и совместная работа
+### File ownership and coordination
 
-- Свои экраны: `frontend/app/send.tsx`, `request.tsx`, `switch-mode.tsx`.
-- Новые компоненты/хуки пользовательской фичи: `frontend/features/lite/**`;
-  route-файлы оставлять тонкими по мере изменения, без массового рефакторинга.
-- Свои заметки: `docs/developers/gruba/**`.
-- **Предлагаемый единый владелец общих route-файлов — Nikita:**
-  `frontend/app/(tabs)/index.tsx`, `frontend/app/(tabs)/help.tsx`,
-  `frontend/app/onboarding.tsx`, `frontend/app/result.tsx`, `frontend/app/rules.tsx`.
-  Gruba готовит Lite-компоненты, Nikita подключает их и сохраняет обе роли.
-- Store/API/polling и общая навигация — Nikita. Изменения общих компонентов, темы,
-  global CSS, зависимостей и layout сначала согласовать с ним и командой по точным путям.
-  Это схема координации: перед общими правками подтвердить отсутствие параллельной работы.
+- Owned screens: `frontend/app/send.tsx`, `request.tsx`, and `switch-mode.tsx`.
+- New components and hooks for the user flow: `frontend/features/lite/**`. Keep route files thin as they are touched and avoid a broad refactor.
+- Personal notes: `docs/developers/gruba/**`.
+- **Nikita is the proposed single owner for shared routes:** `frontend/app/(tabs)/index.tsx`, `frontend/app/(tabs)/help.tsx`, `frontend/app/onboarding.tsx`, `frontend/app/result.tsx`, and `frontend/app/rules.tsx`. Gruba prepares the Lite components, and Nikita integrates them for both roles.
+- Nikita owns the store, API, polling, and shared navigation. Coordinate exact paths for changes to shared components, the theme, global CSS, dependencies, and layouts with Nikita and the team. Confirm there is no overlapping work before making shared edits.
 
-### API: единый источник
+### Shared API source
 
-[Контракт Wise Lite](../nikita/wise-lite-api.md) — единственный источник методов,
-JSON-примеров, ошибок и бизнес-правил; не создавать отдельный контракт.
-`api-prototype/` — работающая временная реализация, Spring Boot сохраняет этот интерфейс.
-Использовать `useWise` из `frontend/lib/wise-store.ts`: получение состояния,
-создание перевода и согласие уже подключены. Новые HTTP-клиенты и polling не нужны.
+The [Wise Lite contract](../nikita/wise-lite-api.md) is the single source for methods, JSON examples, errors, and business rules. `api-prototype/` is the working temporary implementation, and Spring Boot preserves the interface. Use `useWise` from `frontend/lib/wise-store.ts`, which already supports fetching state, creating a transfer, and recording consent. Reuse its HTTP client and polling.
 
-Ограничения: сейчас одна семья, роль локальная, серверных прав доступа нет;
-согласие само по себе не обеспечивает авторизацию. Настоящий login, отзыв доступа
-и платёжный запрос требуют согласованного дополнения канонического контракта.
-Порог сейчас на один перевод, не дневной/месячный. При `pressured: true` API
-всегда блокирует перевод; изменение зависимости от `scamPause` согласовать отдельно.
+The current scope has one household, a local role, and no server-side access checks. Consent alone does not grant authorization. Real sign-in, access revocation, and payment requests need an agreed update to the canonical contract. The threshold applies per transfer. The API always blocks a transfer when `pressured: true`. Agree separately on any change to its relationship with `scamPause`.
 
-### Шаги и проверки
+### Implementation and checks
 
-1. С UI/UX и Nikita зафиксировать экраны, тексты, границы общих файлов.
-2. Закончить отправку/результаты, затем Home/Help и демонстрационный Request money.
-3. Вместе с Nikita проверить две сессии: безопасный перевод проходит сразу;
-   превышение лимита и новый получатель ждут решения; approve списывает один раз,
-   decline не списывает; результат приходит без refresh.
-4. Проверить blocked, expired, неверный IBAN, недостаток денег, повторное нажатие,
-   недоступный API и восстановление соединения. Истечение проверять подготовленными
-   backend-данными, не ждать 12 часов и не добавлять обходной production endpoint.
-5. Выполнить `npm run check` из `frontend/`; сообщить фактические результаты.
-   Только необходимые поведенческие тесты изменённого потока.
+1. Agree on the screens, copy, and boundaries for shared files with UI/UX and Nikita.
+2. Finish Send and the result screens, followed by Home, Help, and the demo Request money flow.
+3. Check two sessions with Nikita. A safe transfer goes through immediately. A transfer above the threshold or to a new recipient waits for a decision. Approval debits the balance once, decline leaves it untouched, and the result appears without a refresh.
+4. Check blocked and expired transfers, invalid IBAN, insufficient funds, repeat taps, API downtime, and reconnection. Use prepared backend data to check expiration without waiting 12 hours or adding a production bypass endpoint.
+5. Run `npm run check` from `frontend/` and report the results. Add only essential behavior tests for the changed flow.
 
-Критерий готовности: на первом телефоне пользователь самостоятельно начинает перевод,
-понимает ожидание/итог и может получить помощь; изменение с другого телефона видно автоматически.
-Код пока не изменён: это согласованный по роли план, детализация UI — с дизайнером.
+The flow is ready when a user on the first phone can start a transfer independently, understand the wait and the result, and get help. Changes from the second phone should appear automatically. At this stage, the role-specific plan is agreed and code work is pending. Confirm UI details with the designer.

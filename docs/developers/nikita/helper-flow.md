@@ -1,73 +1,63 @@
-# План: сторона помощника (Nikita) в полном Wise
+# Trusted Helper flow in Full Wise (Nikita)
 
-Ветка: `codex/nikita-helper-flow`. Язык: русский.
-Источник API: [wise-lite-api.md](wise-lite-api.md) (без изменений, новых эндпоинтов нет).
-Общий план Артура: [README.md](README.md).
+Branch: `codex/nikita-helper-flow`. Working language: Russian.
+API source: [wise-lite-api.md](wise-lite-api.md). The plan uses the existing contract and endpoints.
+Artur's overall plan: [README.md](README.md).
 
-## Цель
-Никита из обычного (full) Wise открывает «Family protection» и видит запросы Марии, правила защиты
-и её историю. Экран одобрения и итоги приведены к утверждённым макетам.
+## Goal
 
-## Что делаем
-1. `app/approval.tsx` — по макету: без верхней карточки-колокольчика, без метки «Waiting»,
-   серая карточка Recipient / Amount / Requested («5 min ago») / IBAN (только если есть),
-   флаги причин, подсказка со щитом, Approve (зелёная), Decline (красный контур), «Call Mom» текстом.
-   После решения — экран с галочкой: «Approved.» / «Declined.» / «Expired.», сумма и одна строка.
-2. `app/full/payments.tsx` — пунктирная карточка «Family protection», только для роли Nikita.
-3. `app/family-protection.tsx` — список людей, которых защищает Nikita: Maria (с числом ожидающих запросов),
-   добавленные люди и пунктирная карточка «Add someone to protect».
-   `app/family-person.tsx?id=` — у Марии три карточки: Requests (N), Protection rules (`/rules`), Maria’s history;
-   у добавленного человека — статус «Invite sent», выбранные правила и «Remove».
-   `app/family-add.tsx` — добавление в три шага: имя и кем приходится → лимит и проверка новых получателей →
-   приглашение (системный Share, ссылка на 24 часа) → «Invite sent.»
-4. `app/family-requests.tsx` — все pending-запросы (не только первый) и отдельно уже отвеченные.
-5. `app/family-history.tsx` — все операции Марии.
-6. Для роли Nikita `(tabs)/index.tsx` перенаправляет в `/full`; в `full/_layout.tsx` скрыта полоса «Back to Wise Lite»; на `full/index.tsx` баннер запросов или карточка «Family protection».
+Nikita opens “Family protection” from regular Wise and sees Maria's requests, protection rules, and history. Match the approval and result screens to the agreed designs.
 
-Экраны 3–5 лежат в корне `app/` как обычные Stack-экраны (как `approval`, `rules`). Внутри `app/full/` они
-были скрытыми табами, и `Redirect` из `(tabs)/index` возвращал на `/full`.
+## Scope
 
-## Полный Wise один в один (по скриншотам настоящего приложения)
-Home, Cards, Recipients и Payments пересобраны по скриншотам реального Wise и захардкожены:
-Home: баннер «Start using Wise now», «Welcome to Wise», Send / Add money / Upload, три пунктирные карточки,
-Tasks, Your returns, Explore, Transfer calculator, «Your money, protected». Cards: Travel hub и «Global spending
-made simple». Recipients: Invite / Add / Upload и список. Payments: Send / Request, шесть пунктирных карточек и
-Payment tools (Wisetag, Send via link, Auto Conversions).
-Наша функция вставлена в двух местах, как в продуктовом описании: **Payments → Payment tools → «Family protection»**
-и **Home → Tasks → «Mom needs your help»** (появляется, когда есть запрос Марии). Код: `features/fullwise/*`,
-route-файлы `app/full/*` стали тонкими. Фото и иллюстрации заменены плоскими формами, настоящие логотипы и
-ассеты не копировались. Имена и Wisetag демонстрационные.
+1. `app/approval.tsx`: Follow the design with a gray card showing Recipient, Amount, Requested (“5 min ago”), and IBAN when available. Show reason flags, a shield hint, a green Approve button, a red outlined Decline button, and a text “Call Mom” action. Omit the top bell card and “Waiting” label. After a decision, show a checkmark with “Approved.”, “Declined.”, or “Expired.”, the amount, and one line of text.
+2. `app/full/payments.tsx`: Add a dashed “Family protection” card for the Nikita role.
+3. `app/family-protection.tsx`: Show people Nikita protects, Maria's pending request count, added people, and a dashed “Add someone to protect” card.
+   `app/family-person.tsx?id=`: For Maria, show Requests (N), Protection rules (`/rules`), and Maria’s history. For an added person, show “Invite sent”, the selected rules, and “Remove”.
+   `app/family-add.tsx`: Add a person by entering their name and relationship, choosing a threshold and the new-recipient check, then sharing an invitation with a 24-hour link. Finish with “Invite sent.”
+4. `app/family-requests.tsx`: Show all pending requests and a separate list of decided requests.
+5. `app/family-history.tsx`: Show all Maria's transfers.
+6. For Nikita, `(tabs)/index.tsx` redirects to `/full`. `full/_layout.tsx` hides the “Back to Wise Lite” strip. `full/index.tsx` shows an approval banner or a “Family protection” card.
 
-## Навигация Никиты в полном Wise
-В полном Wise **работает только наша функция**: Payments → Payment tools → «Family protection», задача
-«Mom needs your help» на Home (ведёт в Requests), аватар (переключение роли для демо), скрытие карточек
-(Dismiss и крестики), нижние вкладки. Все остальные кнопки Wise (Send, Add money, Upload, Earn €150,
-Scheduled transfers и так далее) намеренно ничего не делают: компонент `Tap` без `onPress` не реагирует на нажатие.
-Баланс Марии Никите не показывается: вместо него «You protect Maria (Mom)».
+Screens in steps 3–5 live at the root of `app/` as regular Stack screens like `approval` and `rules`. As hidden tabs under `app/full/`, they were redirected back to `/full` by `(tabs)/index`.
 
-## Мои пути
-`app/approval.tsx`, `app/family-*.tsx`, `app/full/**`, `features/helper/**`, `docs/developers/nikita/**`.
+## Full Wise screens from reference screenshots
 
-## Общие файлы
-В этой задаче **не меняются**: `lib/wise-store.ts`, `lib/wise-theme.ts`, `global.css`,
-`app/_layout.tsx`, `package.json`, lockfile.
-Изменены по прямому указанию разработчика (напомнить команде): `app/(tabs)/index.tsx` (Redirect для Nikita,
-удалён `HelperHome`), `app/rules.tsx` (переключатель в строке заголовка, без дублей подписей),
-`components/wise.tsx` (`DashedCard`: необязательный `trailing`). `app/result.tsx` не менялся.
+Home, Cards, Recipients, and Payments were rebuilt from screenshots of Wise with hardcoded content.
 
-## Важно для подключения бэкенда
-- Аватар и имя аккаунта (MA / NG) берутся только из `accountFor(role)` в `lib/wise-store.ts`, нигде не зашиваются
-  в экраны. После подключения Spring это должен быть `account` из ответа `POST /auth/login`.
-- Новый получатель в Lite ищется по Wise ID (`features/lite/demo-accounts.ts`), без IBAN. Это место заменить на
-  `GET /recipients/lookup?wiseId=`.
+- Home: “Start using Wise now”, “Welcome to Wise”, Send, Add money, Upload, three dashed cards, Tasks, Your returns, Explore, Transfer calculator, and “Your money, protected”.
+- Cards: Travel hub and “Global spending made simple”.
+- Recipients: Invite, Add, Upload, and a list.
+- Payments: Send, Request, six dashed cards, and Payment tools (Wisetag, Send via link, Auto Conversions).
 
-## Ограничения
-- Вход и список людей для запросов денег не делаем: нет эндпоинтов в контракте.
-- Добавленные люди хранятся только локально на устройстве (`features/helper/people-store.ts`,
-  AsyncStorage), сервер знает одну семью (Maria). Настоящая многосемейность требует нового контракта и схемы.
-- Push-уведомлений нет, только polling 1,5 с.
-- Карточка и экраны видны только при `role === 'nikita'`.
+The feature appears in two places described by the product plan: **Payments → Payment tools → “Family protection”** and **Home → Tasks → “Mom needs your help”**, which appears when Maria has a request. Code is in `features/fullwise/*`, with thin routes in `app/full/*`. Flat shapes replace photos and illustrations. The prototype uses demo names and Wisetags and does not copy real logos or assets.
 
-## Проверки
-`npm run check` из `frontend/`, затем ручной проход в двух вкладках браузера:
-Maria 600 € Olga → Nikita: Payments → Family protection → Requests → Approve/Decline → результат у Марии.
+## Nikita's navigation in Full Wise
+
+Working controls are Payments → Payment tools → “Family protection”, the “Mom needs your help” task on Home (opens Requests), the avatar (switches demo roles), Dismiss and close buttons, and the bottom tabs. Other Wise controls, including Send, Add money, Upload, Earn €150, and Scheduled transfers, are placeholders. A `Tap` without `onPress` ignores taps. Nikita sees “You protect Maria (Mom)” in place of Maria's balance.
+
+## Owned paths
+
+`app/approval.tsx`, `app/family-*.tsx`, `app/full/**`, `features/helper/**`, and `docs/developers/nikita/**`.
+
+## Shared files
+
+`lib/wise-store.ts`, `lib/wise-theme.ts`, `global.css`, `app/_layout.tsx`, `package.json`, and the lockfile were outside the scope of edits.
+
+At the developer's direction, changes were made in `app/(tabs)/index.tsx` (Nikita's redirect and removal of `HelperHome`), `app/rules.tsx` (toggle in the heading row with no duplicate labels), and `components/wise.tsx` (optional `trailing` for `DashedCard`). Tell the team about these changes. `app/result.tsx` stayed as it was.
+
+## Backend integration notes
+
+- The account avatar and name (MA / NG) come from `accountFor(role)` in `lib/wise-store.ts`. Use `account` from the `POST /auth/login` response after connecting Spring.
+- Lite looks up new recipients by Wise ID in `features/lite/demo-accounts.ts`. Replace this with `GET /recipients/lookup?wiseId=`.
+
+## Limitations
+
+- Sign-in and the money request contact list are outside this stage because the contract did not yet provide endpoints.
+- Added people live in AsyncStorage on the device through `features/helper/people-store.ts`. The server knows one household, Maria's. Supporting multiple households requires a new contract and schema.
+- The prototype uses 1.5-second polling. Push notifications are outside scope.
+- The card and screens are visible only for `role === 'nikita'`.
+
+## Checks
+
+Run `npm run check` from `frontend/`, then use two browser tabs. Send €600 from Maria to Olga. As Nikita, open Payments → Family protection → Requests, approve or decline, and check Maria's result.

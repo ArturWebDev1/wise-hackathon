@@ -1,34 +1,35 @@
-# План: перенос Wise Lite (Expo) в репозиторий
+# Plan for moving Wise Lite (Expo) into the repository
 
-Ветка: `codex/nikita-wise-lite`. Язык: русский.
+Branch: `codex/nikita-wise-lite`. Working language: Russian.
 
-## Цель
-Перенести готовое приложение Wise Lite в `frontend/` (вместо Next.js), оставить рабочий
-временный API, подготовить контракт для переписывания бэкенда на Spring Boot (делает команда).
+## Goal
 
-## Что сделано
-- `frontend/` — Expo-приложение (React Native, web и телефон). Next.js удалён по договорённости.
-- `api-prototype/` — временный Node API на `:3001`, подключается к Postgres из `compose.yaml`,
-  таблицы с префиксом `wl_` создаёт сам. Удалить после переписывания на Spring Boot.
-- [Контракт API](wise-lite-api.md) и [схема БД](wise-lite-schema.sql) — единый источник для
-  Spring-версии. Бизнес-правила описаны там же.
-- Правила рисков и IBAN вынесены в `frontend/lib/rules.ts` с тестами Vitest (8 тестов).
+Move the existing Wise Lite app into `frontend/` in place of Next.js. Keep the temporary API working and prepare the contract for the team's Spring Boot rewrite.
 
-## Мои пути
-`frontend/**`, `api-prototype/**`, `docs/developers/nikita/**`.
+## Completed work
 
-## Общие файлы, которые изменены (согласовано устно)
-- `frontend/` целиком, включая `package-lock.json` (Next.js заменён на Expo).
-- `.gitignore` (`dist/`, `.expo/`), `README.md`, `docs/demo.md` (команды запуска).
-- `.github/workflows/ci.yml` и `.nvmrc` **не менялись**: скрипты `lint`, `typecheck`, `test`,
-  `build` у нового фронтенда совпадают с теми, что вызывает CI.
+- `frontend/` is the Expo app for React Native, web, and phones. The team agreed to remove Next.js.
+- `api-prototype/` is the temporary Node API on `:3001`. It connects to PostgreSQL from `compose.yaml` and creates its own `wl_` tables. Remove it after the Spring Boot rewrite.
+- The [API contract](wise-lite-api.md) and [database schema](wise-lite-schema.sql) are the shared source for the Spring version. They also describe the business rules.
+- Risk and IBAN rules are in `frontend/lib/rules.ts` with 8 Vitest tests.
 
-## Проверки
-`npm run check` в `frontend/`: lint, typecheck, 8 тестов, `expo export -p web` — проходит.
-Бэкенд-прототип проверен вручную `curl` на Postgres из `compose.yaml`.
+## Owned paths
 
-## Ограничения
-- Переписывание бэкенда на Spring Boot не сделано. Прототип не проверяет, кто вызывает API.
-- Старой проверки «Check connection» (Next → Spring → Postgres) во фронтенде больше нет.
-- Тестов UI нет, только чистые правила.
-- Postgres на `5432` может быть занят локальным; запуск: `POSTGRES_PORT=5433 docker compose up -d --wait`.
+`frontend/**`, `api-prototype/**`, and `docs/developers/nikita/**`.
+
+## Shared files changed by verbal agreement
+
+- All of `frontend/`, including `package-lock.json`, for the switch from Next.js to Expo.
+- `.gitignore` for `dist/` and `.expo/`, plus setup commands in `README.md` and `docs/demo.md`.
+- `.github/workflows/ci.yml` and `.nvmrc` stayed as they were. The new frontend's `lint`, `typecheck`, `test`, and `build` scripts match the CI commands.
+
+## Checks
+
+`npm run check` passed in `frontend/`, covering lint, type checking, 8 tests, and `expo export -p web`. The backend prototype was checked manually with `curl` against PostgreSQL from `compose.yaml`.
+
+## Limitations
+
+- The Spring Boot rewrite was pending at this stage. The prototype does not authenticate API callers.
+- The frontend no longer has the old “Check connection” flow from Next.js through Spring to PostgreSQL.
+- Tests cover the standalone rules. UI testing is pending.
+- A local PostgreSQL instance may already use `5432`. In that case, run `POSTGRES_PORT=5433 docker compose up -d --wait`.

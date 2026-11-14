@@ -52,7 +52,7 @@ Spring reads the root `.env` and serves [its status endpoint](http://localhost:8
 5. Sync against current `main`, resolve any conflicts with an explained proposal, run relevant checks, push, and open a PR. Merge through GitHub; self-merging is fine for ordinary changes. Ask a teammate to check shared or uncertain changes.
 6. Delete the merged task branch and start the next task from freshly updated `main`.
 
-For exact Git commands and conflict handling, read [team workflow](docs/workflow.md). Russian-speaking developers: [правила работы на русском](docs/workflow.ru.md).
+For exact Git commands and conflict handling, read [team workflow](docs/workflow.md). See also the [detailed team workflow](docs/workflow.ru.md).
 
 ## Read only the context you need
 

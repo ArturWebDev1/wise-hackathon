@@ -1,34 +1,34 @@
-# WiseEASE — переход на Spring Boot
+# WiseEASE migration to Spring Boot
 
-Ветка `codex/levin-spring-backend-only`. Базовый коммит `a49b24f`. Цель — сквозной демонстрационный сценарий Марии и Никиты на Java 21, Spring Boot, PostgreSQL и Expo.
+Branch `codex/levin-spring-backend-only`. Base commit `a49b24f`. The goal is an end-to-end demo for Maria and Nikita using Java 21, Spring Boot, PostgreSQL, and Expo.
 
-## Согласованный объём
+## Agreed scope
 
-- Вход по email и паролю для заранее созданных аккаунтов. Мария управляет своими переводами, Никита рассматривает её заявки и управляет правилами и списком для денежных запросов.
-- Перевод по Wise ID. Список знакомых получателей формируется из успешных исходящих переводов. Сервер объясняет до отправки, какие правила требуют одобрения, и сохраняет причины в заявке.
-- Заявка ждёт решения 12 часов. При отказе или истечении срока деньги остаются на счёте. Отключение проверки порога или новых получателей применяется к новым переводам через 24 часа. Повторное включение отменяет запланированное отключение.
-- История и баланс синхронизируются через `GET /state` раз в 1,5 секунды при активном приложении. После мутации клиент получает обновлённый снимок. При возврате в приложение запрашивается свежий снимок.
-- Мария создаёт денежный запрос из настроенного Никитой списка и видит подтверждение. На этом демонстрационный сценарий заканчивается.
-- В Expo Help содержит звонок Никите и просмотр правил. Вход, Wise ID, запрос денег и правила заменяют соответствующие демонстрационные заглушки. Регистрация, Scam Pause и сохранённые платежи за рамками задачи.
+- Sign in with email and password for pre-created accounts. Maria manages her transfers. Nikita reviews her approval requests and manages protection rules and the money request contact list.
+- Transfer by Wise ID. Successful outgoing transfers determine the list of known recipients. Before submission, the server reports which rules require approval and stores those reasons with the request.
+- Approval requests stay open for 12 hours. If a request is declined or expires, the funds stay in the account. Disabling the threshold or new-recipient check affects new transfers after 24 hours. Turning the rule back on cancels a scheduled deactivation.
+- While the app is active, it synchronizes history and balance through `GET /state` every 1.5 seconds. Mutations return an updated snapshot. The app also fetches a fresh snapshot when it returns to the foreground.
+- Maria creates a money request for someone on Nikita's list and sees confirmation. This completes the demo flow.
+- Expo Help lets Maria call Nikita and view protection rules. Sign-in, Wise ID lookup, money requests, and rules replace the matching demo placeholders. Registration, Scam Pause, and saved payments are outside the task scope.
 
-## Порядок и готовность
+## Implementation and acceptance
 
-1. Подготовить схему и демоданные. Проверить вход двух независимых сессий, права на чтение семьи и операции помощника.
-2. Реализовать сквозной перевод, решение и историю. Проверить обе причины одобрения, обычный перевод, отказ, истечение срока, нехватку средств и повтор отправки. Сумма и статус меняются атомарно.
-3. Добавить изменение правил и список для денежных запросов. Проверить немедленное отключение проверки и отклонение запроса человеку вне списка.
-4. Согласовать контракт и подключить Expo. Проверить появление заявки и результата на двух клиентах без ручного обновления. Подготовить запуск и данные для репетиции.
+1. Prepare the schema and demo data. Check sign-in for two independent sessions, access to household data, and helper permissions.
+2. Implement the transfer, decision, and history flow. Test both approval reasons, direct transfers, declines, expiration, insufficient funds, and retries. Update the amount and status atomically.
+3. Add rule changes and the money request contact list. Check immediate deactivation of the rule and reject requests to people outside the list.
+4. Agree on the contract and connect Expo. Check that the request and decision appear on two clients without a manual refresh. Prepare the setup and data for rehearsal.
 
-## Владение файлами
+## File ownership
 
-Levin ведёт `backend/src/main/java/com/team/hackathon/features/wiselite/`, одноимённый пакет тестов, [заметки о решениях](spring-boot-decisions.md) и [инструкцию запуска](../../../backend/README.md). В этой ветке реализован бэкенд. [Контракт Spring API](../nikita/wise-lite-api.md) служит основой для интеграции в задаче фронтенда. Схема WiseEASE изолирована от таблиц старого Express.
+Levin owns `backend/src/main/java/com/team/hackathon/features/wiselite/`, the matching test package, the [decision notes](spring-boot-decisions.md), and the [setup guide](../../../backend/README.md). This branch implements the backend. The [Spring API contract](../nikita/wise-lite-api.md) is the basis for the frontend integration task. The WiseEASE schema is separate from the legacy Express tables.
 
-## Статус
+## Status
 
-- Ветка создана от `main` (`a49b24f`) с бэкендом, его конфигурацией и шаблоном адреса API для Expo.
-- В Spring реализованы вход, права, демоданные, перевод, решение помощника, история, правила и создание денежного запроса.
-- Flyway ведёт миграции. Spring Data JPA используется для чтения и записи данных. Для критичных обновлений в репозиториях сохранены блокировки и условия на стороне PostgreSQL.
-- Java-сидер заменён на `R__wiseease_demo_seed.sql`. При включённом деморежиме SQL создаёт демосемью. При повторном старте уже созданные данные сохраняются.
-- `mvnw.cmd clean verify` прошёл на PostgreSQL 17.9. Успешны 20 проверок, включая повторный запуск, изоляцию семей, конкурентные операции, оба баланса при откате, сроки, идемпотентность, настройки и список денежных запросов.
-- Подключение Expo вынесено в отдельную ветку. Что уже работает и какие экраны требуют изменений, описано в [плане интеграции](expo-spring-integration.md).
-- Актуальный запуск описан в `backend/README.md`. Общий корневой README и старый сценарий в `docs/demo.md` ещё содержат инструкции Express.
-- Для раскрытия использования ИИ зафиксировано, что Codex использовали для плана, Spring API, миграции и JPA, интеграции Expo и автоматических проверок.
+- The branch was created from `main` at `a49b24f` with the backend, its configuration, and an API address template for Expo.
+- Spring implements sign-in, permissions, demo data, transfers, helper decisions, history, rules, and money request creation.
+- Flyway manages migrations and Spring Data JPA reads and writes data. Repositories retain PostgreSQL locks and conditions for critical updates.
+- `R__wiseease_demo_seed.sql` replaced the Java seeder. With demo mode enabled, SQL creates the demo household. Existing data survives a restart.
+- `mvnw.cmd clean verify` passed on PostgreSQL 17.9. The 20 checks included restart, household isolation, concurrent operations, both balances after rollback, deadlines, idempotency, settings, and the money request contact list.
+- Expo integration has its own branch. See the [integration plan](expo-spring-integration.md) for what works and which screens need changes.
+- Current setup instructions are in `backend/README.md`. The root README and older scenario in `docs/demo.md` still contain Express instructions.
+- The AI disclosure records that Codex was used for planning, the Spring API, migrations and JPA, Expo integration, and automated checks.
