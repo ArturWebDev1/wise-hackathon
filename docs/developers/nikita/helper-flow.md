@@ -27,6 +27,17 @@
 Экраны 3–5 лежат в корне `app/` как обычные Stack-экраны (как `approval`, `rules`). Внутри `app/full/` они
 были скрытыми табами, и `Redirect` из `(tabs)/index` возвращал на `/full`.
 
+## Полный Wise один в один (по скриншотам настоящего приложения)
+Home, Cards, Recipients и Payments пересобраны по скриншотам реального Wise и захардкожены:
+Home: баннер «Start using Wise now», «Welcome to Wise», Send / Add money / Upload, три пунктирные карточки,
+Tasks, Your returns, Explore, Transfer calculator, «Your money, protected». Cards: Travel hub и «Global spending
+made simple». Recipients: Invite / Add / Upload и список. Payments: Send / Request, шесть пунктирных карточек и
+Payment tools (Wisetag, Send via link, Auto Conversions).
+Наша функция вставлена в двух местах, как в продуктовом описании: **Payments → Payment tools → «Family protection»**
+и **Home → Tasks → «Mom needs your help»** (появляется, когда есть запрос Марии). Код: `features/fullwise/*`,
+route-файлы `app/full/*` стали тонкими. Фото и иллюстрации заменены плоскими формами, настоящие логотипы и
+ассеты не копировались. Имена и Wisetag демонстрационные.
+
 ## Навигация Никиты в полном Wise
 Рабочее ведёт в рабочее: «Send», «Send money», получатель Maria → `/send-maria`; баннер запросов → Requests;
 Family protection → список людей. Часть Wise, которой нет в прототипе (Add money, Upload, Add a currency,

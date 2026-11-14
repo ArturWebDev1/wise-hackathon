@@ -1,5 +1,5 @@
 import { View, Pressable } from 'react-native';
-import { Tabs, router } from 'expo-router';
+import { Stack, Tabs, router } from 'expo-router';
 import { Home, CreditCard, Users, ArrowLeftRight, ArrowLeft } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { Copy } from '@/components/wise';
@@ -32,6 +32,7 @@ export default function FullLayout() {
   const helper = useWise((s) => s.role) === 'nikita';
   return (
     <View style={{ flex: 1, backgroundColor: c.white }}>
+      <Stack.Screen options={{ headerShown: false }} />
       {helper ? null : <BackToLite />}
       <Tabs
         screenOptions={{
