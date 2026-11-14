@@ -24,6 +24,7 @@ import { useWise } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
 import { openDemo } from '@/features/helper/demo';
 import { RateChart } from './chart';
+import { CardNotchIcon } from './icons';
 import {
   FullPage,
   HomeHeader,
@@ -287,7 +288,7 @@ export function FullHome() {
         />
         <WiseCard
           title="Spend and withdraw abroad"
-          icon={CreditCard}
+          icon={CardNotchIcon}
           onPress={() => router.navigate('/full/cards')}
         />
         <WiseCard

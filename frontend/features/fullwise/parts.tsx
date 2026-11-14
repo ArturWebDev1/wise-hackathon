@@ -3,7 +3,10 @@ import { View, Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { ChevronRight, Plus } from 'lucide-react-native';
-import type { LucideIcon } from 'lucide-react-native';
+import type { ComponentType } from 'react';
+import type { IconProps } from './icons';
+
+type AnyIcon = ComponentType<IconProps>;
 import { Copy, WiseMark } from '@/components/wise';
 import { useWise } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
@@ -105,7 +108,7 @@ export function Chip({
   label,
   onPress,
 }: {
-  icon: LucideIcon;
+  icon: AnyIcon;
   label: string;
   onPress: () => void;
 }) {
@@ -138,7 +141,7 @@ export function RingIcon({
   size = 48,
   background = 'transparent',
 }: {
-  icon: LucideIcon;
+  icon: AnyIcon;
   plus?: boolean;
   size?: number;
   background?: string;
@@ -232,7 +235,7 @@ export function WiseCard({
 }: {
   title: string;
   text?: string;
-  icon: LucideIcon;
+  icon: AnyIcon;
   onPress: () => void;
   chevron?: boolean;
   plus?: boolean;
