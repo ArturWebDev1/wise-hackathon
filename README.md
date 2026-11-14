@@ -4,15 +4,25 @@ Spring Boot + Expo (React Native, runs on web and phones) + PostgreSQL. One day,
 
 ## First run
 
-Install **Java 21**, **Node 24** (see `.nvmrc`), and Docker with Compose. Start Docker Desktop on Windows/macOS. Maven is downloaded by the committed wrapper; a global Maven installation is unnecessary.
-
-From the repository root:
+Install Docker with Compose and start Docker Desktop on Windows/macOS. From the repository root, build and start PostgreSQL, Spring Boot, and Expo Web:
 
 ```sh
-docker compose up -d --wait
+docker compose up -d --build --wait
 ```
 
-In a second terminal:
+Open [the app](http://localhost:8081) or check [Spring and PostgreSQL readiness](http://localhost:8081/api/status). The web container serves the Expo PWA and forwards requests under `/api/` to Spring over the Compose network. Docker Compose reads the tracked development defaults from the root `.env`. Java, Maven, and Node run inside the build containers.
+
+If a host port is occupied, override `FRONTEND_PORT` (8081), `SERVER_PORT` (8080), or `POSTGRES_PORT` (5432) in your shell before running Compose.
+
+## Run Java and Expo locally
+
+For hot reload or Expo Go, install **Java 21** and **Node 24** (see `.nvmrc`). Start just PostgreSQL from the repository root:
+
+```sh
+docker compose up -d --wait postgres
+```
+
+In a second terminal, start Spring Boot with the Maven Wrapper:
 
 ```sh
 cd backend
@@ -31,11 +41,7 @@ npm start        # press w for web, or scan the QR code with Expo Go
 
 On PowerShell, use `npm.cmd` if the execution policy blocks `npm.ps1`.
 
-The app talks to a **temporary Node API** in `api-prototype/` (port 3001) until the Spring Boot backend implements the same contract, [docs/developers/nikita/wise-lite-api.md](docs/developers/nikita/wise-lite-api.md). Start it in a fourth terminal; see [api-prototype/README.md](api-prototype/README.md). Spring Boot direct check: [localhost:8080/api/status](http://localhost:8080/api/status).
-
-The tracked root `.env` contains disposable Postgres credentials. Compose reads it automatically; Spring explicitly imports it when launched from `backend/`. `frontend/.env.example` documents the optional `EXPO_PUBLIC_API_URL`. No copying or private credential exchange is required for the baseline.
-
-Postgres listens on localhost:5432, backend on :8080, api-prototype on :3001, Expo web on :8081. If 5432 is occupied, change `POSTGRES_PORT` in root `.env`, recreate the container, and restart the backend. If the API port changes, set `EXPO_PUBLIC_API_URL` for the app. Coordinate changes to these shared files.
+Spring reads the root `.env` and serves [its status endpoint](http://localhost:8080/api/status). For a different Spring host or port, see `frontend/.env.example` for the Expo API URL.
 
 ## Start a task
 
@@ -86,9 +92,9 @@ To see CI on GitHub, push this baseline, then create and push a task branch with
 - Maven, npm, Java 21, Node 24; commit `frontend/package-lock.json` and use `npm ci` after cloning.
 - Feature-based backend with layers added only when useful. Minimal interfaces/mappers; essential behavioral tests.
 - Feature-local frontend components and helpers; small shared UI foundation. No global store or extra libraries until a feature needs them.
-- Browser calls use Next.js `/api/*` rewrites, so the baseline needs no cross-origin CORS setup. Authentication is deferred until the problem requires it.
-- Hibernate `ddl-auto=update` is a deliberate disposable-prototype shortcut. Coordinate database schema changes and agree before adding migrations or changing that policy.
-- Commit disposable development settings. Keep production credentials and private overrides out of Git; never expose keys with `NEXT_PUBLIC_*`.
+- Expo Web in Compose uses same-origin `/api/*` requests. During local development Expo can call Spring directly.
+- Flyway manages the PostgreSQL schema and Hibernate validates it. Coordinate database schema changes and agree before adding migrations.
+- Commit disposable development settings. Keep production credentials and private overrides out of Git. Expo bundles `EXPO_PUBLIC_*` variables into the client.
 - `.editorconfig` and `.gitattributes` define shared formatting/line endings. Keep local `.idea/` and `.vscode/` state ignored. Enable EditorConfig support in your editor; avoid repository-wide formatting.
 
 ## Stop and reset
