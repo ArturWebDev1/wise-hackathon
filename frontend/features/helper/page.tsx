@@ -3,9 +3,9 @@ import { Stack } from 'expo-router';
 import { Copy, Screen } from '@/components/wise';
 import { wise as c } from '@/lib/wise-theme';
 
-/** Back arrow only, like the real Wise: no page name next to it and no Close pill. */
+/** Back arrow only, like the real Wise: no page name next to it. */
 export function BareHeader() {
-  return <Stack.Screen options={{ headerTitle: '', headerRight: () => null }} />;
+  return <Stack.Screen options={{ headerTitle: '' }} />;
 }
 
 /** A sub-screen of the full Wise: 16 pt gutters, a big heading in the page, nothing in the header. */

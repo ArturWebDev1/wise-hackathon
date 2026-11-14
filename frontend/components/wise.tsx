@@ -314,7 +314,7 @@ export function IconCircle({
     </View>
   );
 }
-export function TopBar({ helper = false }: { helper?: boolean }) {
+export function TopBar() {
   return (
     <View
       style={{
@@ -325,7 +325,7 @@ export function TopBar({ helper = false }: { helper?: boolean }) {
       }}
     >
       <Pressable onPress={() => router.push('/roles')} accessibilityLabel="Switch demo role">
-        <Avatar initials={helper ? 'NG' : 'MA'} size={48} />
+        <Avatar initials="MA" size={48} />
       </Pressable>
       <Pressable
         onPress={() => router.push('/rules')}
@@ -342,7 +342,7 @@ export function TopBar({ helper = false }: { helper?: boolean }) {
       >
         <ShieldCheck color={c.forest} size={18} strokeWidth={1.8} />
         <Copy bold size={13} color={c.forest} numberOfLines={1}>
-          {helper ? 'Trusted Helper' : 'Protected by Nikita'}
+          Protected by Nikita
         </Copy>
       </Pressable>
     </View>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View, Share, Linking, Platform } from 'react-native';
-import { router, Stack } from 'expo-router';
+import { router } from 'expo-router';
 import { Share2, MessageCircle, Send, MessageSquare, Link, Users } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import {
@@ -18,14 +18,10 @@ import {
 import { useWise, recipients, money, type Recipient } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
 import { LiteAmountInput } from '@/features/lite/lite-amount-input';
-import { LiteCloseButton } from '@/features/lite/lite-close-button';
 
 export default function RequestMoney() {
   return (
-    <>
-      <Stack.Screen options={{ headerRight: () => <LiteCloseButton /> }} />
-      <RequestMoneyContent />
-    </>
+    <RequestMoneyContent />
   );
 }
 

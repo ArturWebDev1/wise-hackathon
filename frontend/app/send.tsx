@@ -36,7 +36,6 @@ import {
 } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
 import { LiteAmountInput } from '@/features/lite/lite-amount-input';
-import { LiteCloseButton } from '@/features/lite/lite-close-button';
 import { LiteConfirmCard } from '@/features/lite/lite-confirm-card';
 
 type SendParams = {
@@ -48,10 +47,7 @@ type SendParams = {
 };
 export default function Send() {
   return (
-    <>
-      <Stack.Screen options={{ headerRight: () => <LiteCloseButton /> }} />
-      <SendContent />
-    </>
+    <SendContent />
   );
 }
 

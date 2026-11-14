@@ -23,7 +23,6 @@ import {
   type ErrorBoundaryProps,
   SplashScreen,
   Stack,
-  router,
 } from 'expo-router';
 
 import { patchExpoGoAssetUrls } from '@/lib/expoGoAssets';
@@ -32,7 +31,6 @@ import { initPostHog } from '@/lib/posthog';
 import { registerServiceWorker } from '@/lib/registerServiceWorker';
 import { reportErrorToParent } from '@/lib/reportPreviewError';
 import { InstallPrompt } from '@/components/InstallPrompt';
-import { Pill } from '@/components/wise';
 
 /**
  * Custom ErrorBoundary that reports React render errors to the parent window (Bilt preview iframe)
@@ -163,11 +161,6 @@ export default function RootLayout() {
           screenOptions={{
             headerShown: true,
             headerTintColor: wise.forest,
-            headerRight: () => (
-              <Pill small tone="white" onPress={() => router.dismissTo('/')}>
-                Close
-              </Pill>
-            ),
             headerShadowVisible: false,
             headerStyle: { backgroundColor: wise.white },
             contentStyle: { backgroundColor: wise.white },
