@@ -1,36 +1,36 @@
-# Баланс на главном экране Full Wise
+# Balance on the Full Wise Home screen
 
-## Согласованная задача
+## Agreed task
 
-Заменить карточку `Start using Wise now` в `frontend/features/fullwise/home.tsx` на блок по референсу: `Total balance`, скрытая сумма `**** EUR`, круглая кнопка показа суммы и декоративный значок графика. Курбан подтвердил план и сохранение своего изменения прав `backend/mvnw` при создании ветки.
+Replace the `Start using Wise now` card in `frontend/features/fullwise/home.tsx` with a block matching the reference: `Total balance`, the hidden amount `**** EUR`, a round visibility button, and a decorative chart icon. Kurban approved the plan and asked to preserve his file mode change to `backend/mvnw` when creating the branch.
 
-## Владение и API
+## Ownership and API
 
-- Курбан: `frontend/features/fullwise/home.tsx` и этот план.
-- `backend/mvnw` сохраняется с пользовательским изменением прав.
-- Дополнение после проверки на телефоне: пользователь согласовал общие `frontend/app/full/_layout.tsx` и `frontend/features/fullwise/parts.tsx` ответом «делай» на запрос координации. Верхняя безопасная зона переносится в layout всего Regular Wise; повторный отступ `FullPage` удаляется. Цель — расположить `Back to Wise Lite` ниже выреза камеры.
-- Используется существующий `useWise.balance`. Новых запросов или изменений API нет. Источник HTTP-контракта: `docs/developers/nikita/wise-lite-api.md`.
-- Остальные секции экрана сохраняются.
-- Дополнение по запросу пользователя: перенести сообщение о заявках из `Tasks` в компактную заметную плашку перед балансом на Home. Показывать только помощнику при наличии исходящих непросроченных `pending`, по нажатию открывать `/family-requests`. Использовать существующие данные store и polling, без новых API и общих файлов.
+- Kurban owns `frontend/features/fullwise/home.tsx` and this plan.
+- Keep the developer's file mode change to `backend/mvnw`.
+- After checking on a phone, the developer approved changes to the shared `frontend/app/full/_layout.tsx` and `frontend/features/fullwise/parts.tsx`. Move the top safe area into the Regular Wise layout and remove the duplicate inset in `FullPage`. This places `Back to Wise Lite` below the camera cutout.
+- Use the existing `useWise.balance`. See `docs/developers/nikita/wise-lite-api.md` for the HTTP contract. No new requests or API changes are required.
+- Keep the other sections of the screen.
+- At the developer's request, move the approval alert from `Tasks` to a compact, prominent banner above the balance on Home. Show it only to the helper when outgoing `pending` transfers have yet to expire. Tapping it opens `/family-requests`. Use the existing store and polling.
 
-## Шаги и проверки
+## Implementation and checks
 
-1. Заменить карточку, скрывать сумму по умолчанию и переключать её кнопкой с доступной подписью.
-2. Проверить скрытие, показ и повторное скрытие в браузере при мобильной ширине.
-3. Запустить `npm run check` и `git diff --check`.
+1. Replace the card. Hide the balance by default and toggle it using a button with an accessible label.
+2. Check hiding, showing, and hiding again in a browser at mobile width.
+3. Run `npm run check` and `git diff --check`.
 
-## Результат
+## Result
 
-Карточка заменена блоком баланса. Сумма скрыта по умолчанию, кнопка с подписями `Show balance` / `Hide balance` показывает и скрывает значение store. График декоративный.
+The balance block replaced the card. The amount is hidden by default, and the button labeled `Show balance` or `Hide balance` toggles the value from the store. The chart is decorative.
 
-`npm run check` прошёл: lint, TypeScript, 8 тестов и web export. В браузере при ширине 390 px проверен цикл `**** EUR` → `4 000,00 EUR` → `**** EUR`; вёрстка соответствует референсу. `git diff --check` прошёл. На физическом телефоне проверка не проводилась.
+`npm run check` passed lint, TypeScript, 8 tests, and web export. At 390 px in the browser, the display changed from `**** EUR` to `4 000,00 EUR` and back, matching the reference. `git diff --check` passed. The physical phone check was pending.
 
-Ветка: `codex/kurban-full-home-balance`. Пользовательское изменение прав `backend/mvnw` сохранено; коммиты и push не выполнялись.
+Branch: `codex/kurban-full-home-balance`. The developer's file mode change to `backend/mvnw` was preserved. At this stage, the work had not been committed or pushed.
 
-Дополнение safe area выполнено: `SafeAreaView` в layout учитывает верхний и боковые inset устройства для кнопки и всех вкладок. `FullPage` использует обычный `View`, чтобы не добавлять верхний inset повторно.
+The layout uses `SafeAreaView` to apply the device's top and side insets to the button and all tabs. `FullPage` uses a regular `View` to avoid adding a second top inset.
 
-Проверки дополнения: `npm run check` прошёл (lint, TypeScript, 8 тестов, web export), `git diff --check` прошёл. В браузере проверено открытие Regular Wise и возврат кнопкой в Lite. Физический телефон с вырезом камеры недоступен для проверки; нужно перезагрузить Expo Go и проверить переход Марии.
+For the safe area change, `npm run check` passed lint, TypeScript, 8 tests, and web export, and `git diff --check` passed. Opening Regular Wise and returning to Lite worked in a browser. A phone with a camera cutout was unavailable. Reload Expo Go and check Maria's transition on a physical phone.
 
-Уведомление о заявках выполнено: компактная жёлтая плашка с колокольчиком и счётчиком находится перед балансом. Показывается только помощнику при наличии исходящих непросроченных `pending`. Обновляется существующим polling, исчезает при нулевом счётчике; нажатие открывает `/family-requests`. Прежняя карточка в `Tasks` удалена, чтобы не дублировать уведомление.
+The compact yellow approval banner sits above the balance with a bell and a count. It appears only for the helper when there are outgoing, unexpired `pending` transfers. Existing polling updates it. It disappears when the count reaches zero and opens `/family-requests` when tapped. The old `Tasks` card was removed to avoid showing the same alert twice.
 
-Проверки уведомления: `npm run check` прошёл (lint, TypeScript, 8 тестов, web export), `git diff --check` прошёл. В браузере проверено отсутствие плашки у Марии, наличие у Никиты с двумя реальными заявками, мобильная ширина 390 px и переход к списку `Waiting for you (2)`. Одобрения и отказы при проверке не выполнялись. Скриншот: `/tmp/wiseease-pending-home.jpg`.
+For the banner, `npm run check` and `git diff --check` passed. In the browser at 390 px, Maria saw no banner and Nikita saw two real pending requests. Tapping opened `Waiting for you (2)`. The check did not approve or decline either request. Screenshot: `/tmp/wiseease-pending-home.jpg`.

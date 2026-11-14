@@ -1,30 +1,30 @@
-# План: ожидание решения помощника
+# Pending transfer screen plan
 
-## Цель
+## Goal
 
-Показать Марии ожидающий перевод по референсу `final.png` без градиента: крупный знак ожидания, сумма и получатель, пояснение о безопасности денег и сроке 12 часов. Внизу сначала `Call Nikita`, затем `Back home` — порядок обратный референсу.
+Show Maria a pending transfer screen based on `final.png`. Use solid colors, a large waiting icon, the amount and recipient, and text explaining that the money is safe and the request lasts 12 hours. Put `Call Nikita` above `Back home`, reversing the order in the reference.
 
-## Владение и общие файлы
+## Ownership and shared files
 
-- Свой компонент: `frontend/features/lite/lite-pending-result.tsx`.
-- Свой план: `docs/developers/gruba/lite-pending-result.md`.
-- Для подключения потребуется **общий** `frontend/app/result.tsx` (в плане Gruba владельцем предложен Nikita). Точное изменение: при `transfer.status === 'pending'` и роли Maria показать новый компонент; другие статусы сохранить. До правки этого файла Gruba подтверждает с Nikita отсутствие параллельной работы или согласует владельца.
+- Component: `frontend/features/lite/lite-pending-result.tsx`.
+- Plan: `docs/developers/gruba/lite-pending-result.md`.
+- Integration uses the shared `frontend/app/result.tsx`. Gruba's plan proposes Nikita as its owner. Show the new component for Maria when `transfer.status === 'pending'`, keeping the existing handling for other statuses. Before editing, Gruba confirms with Nikita that there is no overlapping work or agrees on ownership.
 
-## API и шаги
+## API and implementation
 
-Контракт: [Wise Lite API](../nikita/wise-lite-api.md). Использовать уже полученный `Transfer` из `useWise`; новые запросы, зависимости и изменения статусов не нужны.
+Use the `Transfer` already returned by `useWise` under the [Wise Lite API contract](../nikita/wise-lite-api.md). The change needs no new requests, dependencies, or statuses.
 
-1. Подготовить компонент только в `features/lite/`: сумма и имя из `Transfer`, `Call Nikita` через существующий `callPerson()`, `Back home` через `router.dismissTo('/')`.
-2. После координации подключить компонент в `frontend/app/result.tsx` только для ожидающего перевода Марии.
-3. Выполнить `npm run check` и проверить на телефоне переход от отправки к ожиданию и обновление результата после решения Никиты.
+1. Add the component under `features/lite/`. Read the amount and recipient name from `Transfer`. Use the existing `callPerson()` for `Call Nikita` and `router.dismissTo('/')` for `Back home`.
+2. After coordination, connect the component in `frontend/app/result.tsx` for Maria's pending transfers only.
+3. Run `npm run check`. On a phone, check the transition from sending to waiting and the result update after Nikita's decision.
 
-## Ограничение
+## Scope
 
-Текущий номер Никиты демонстрационный. Реальный контакт и механизм звонка за рамками этой визуальной правки.
+Nikita's current number is for the demo. A real contact and changes to calling are outside this visual update.
 
-## Текущий статус
+## Status
 
-- Компонент подготовлен; кнопки стоят в порядке `Call Nikita`, затем `Back home`.
-- `npm run check` прошёл: lint, TypeScript, 8 тестов, web export.
-- Gruba подтвердил согласование правки `frontend/app/result.tsx` с Nikita; экран подключён только для `pending` в роли Maria.
-- После подключения `npm run check` прошёл повторно: lint, TypeScript, 8 тестов, web export. Проверка на физическом телефоне остаётся за разработчиком.
+- The component is ready with `Call Nikita` followed by `Back home`.
+- `npm run check` passed lint, TypeScript, 8 tests, and web export.
+- Gruba confirmed coordination with Nikita on `frontend/app/result.tsx`. The screen is connected for `pending` transfers in Maria's role.
+- `npm run check` passed again after integration. The developer still needs to check on a physical phone.

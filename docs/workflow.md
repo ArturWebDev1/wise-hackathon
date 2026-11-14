@@ -1,6 +1,6 @@
 # Team workflow
 
-For Russian: [правила команды](workflow.ru.md). Communicate in the developer's preferred language, including plans, questions, conflict explanations, and coordination reminders. Keep code identifiers and commands in their conventional form.
+See also the [detailed team workflow](workflow.ru.md). Communicate in the developer's preferred language, including plans, questions, conflict explanations, and coordination reminders. Keep code identifiers and commands in their conventional form.
 
 ## Start from current main
 

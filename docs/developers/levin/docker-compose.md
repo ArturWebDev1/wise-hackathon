@@ -1,17 +1,17 @@
-# Запуск через Docker Compose
+# Running with Docker Compose
 
-Из корня проекта `docker compose up -d --build --wait` собирает Spring Boot и Expo Web и поднимает их с PostgreSQL. В браузере приложение открывается на `http://localhost:8081`. Compose сохраняет существующий том PostgreSQL.
+From the project root, `docker compose up -d --build --wait` builds Spring Boot and Expo Web and starts them with PostgreSQL. Open the app in a browser at `http://localhost:8081`. Compose preserves the existing PostgreSQL volume.
 
-Основа ветки согласована с Levin: коммит `de66d50` со связкой Expo и Spring, отдельная рабочая копия. Согласованные общие файлы — `compose.yaml` и `README.md`. Levin также ведёт новые `backend/Dockerfile`, `backend/.dockerignore`, `frontend/Dockerfile`, `frontend/.dockerignore` и `frontend/nginx.conf`.
+Levin agreed to base the branch on commit `de66d50`, which integrates Expo and Spring, in a separate worktree. The agreed shared files are `compose.yaml` and `README.md`. Levin also owns the new `backend/Dockerfile`, `backend/.dockerignore`, `frontend/Dockerfile`, `frontend/.dockerignore`, and `frontend/nginx.conf`.
 
-## API и шаги
+## API and implementation
 
-HTTP-контракт описан в [плане Wise Lite API](../nikita/wise-lite-api.md). Для веб-сборки Expo использует адрес `/api`. Nginx пересылает `POST /api/auth/login` и `GET /api/state` в Spring как `POST /auth/login` и `GET /state`. `GET /api/status` сохраняет путь Spring и возвращает `{"status":"ok","database":"connected"}`. REST-контракт приложения сохраняется.
+See the [Wise Lite API plan](../nikita/wise-lite-api.md) for the HTTP contract. The Expo web build uses `/api`. Nginx forwards `POST /api/auth/login` and `GET /api/state` to Spring as `POST /auth/login` and `GET /state`. `GET /api/status` keeps its Spring path and returns `{"status":"ok","database":"connected"}`. The app retains the same REST contract.
 
-1. Собрать JAR на Java 21 через Maven Wrapper и Expo Web на Node 24. Раздавать веб-сборку через Nginx с переходами по прямым ссылкам.
-2. Настроить порядок готовности PostgreSQL → Spring → Expo Web. Описать запуск всего стека и отдельной базы в README.
-3. Проверить `docker compose config`, сборку и запуск на отдельных портах и томе, ответ `/api/status`, вход в демоаккаунт и чтение `/api/state` через Nginx.
+1. Build the JAR with Java 21 and the Maven Wrapper, and Expo Web with Node 24. Serve the web build through Nginx with support for direct links.
+2. Start PostgreSQL, Spring, and Expo Web in that order, waiting for each to become ready. Document how to start the stack and how to start only the database.
+3. Check `docker compose config`, build and start on separate ports and a separate volume, and test `/api/status`, demo sign-in, and `/api/state` through Nginx.
 
-## Результаты проверки
+## Verification results
 
-Все три контейнера перешли в `healthy` в проекте `wise-hackathon-compose-check` с отдельным томом. Через Nginx проверены прямой переход на `/full`, выдача service worker, `/api/status`, вход, чтение состояния и выход. Chrome показал демобаланс Марии 4 000 €. Прошли `npm run check` и Maven `verify` на отдельной схеме тестовой базы.
+All three containers became `healthy` in the `wise-hackathon-compose-check` project with a separate volume. Checks through Nginx covered direct navigation to `/full`, service worker delivery, `/api/status`, sign-in, state reads, and sign-out. Chrome showed Maria's €4,000 demo balance. `npm run check` and Maven `verify` passed with a separate test database schema.

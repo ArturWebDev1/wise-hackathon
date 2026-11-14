@@ -1,16 +1,16 @@
-# Правила работы команды
+# Detailed team workflow
 
-У нас около 12 часов. Цель — рабочий прототип и понятная демонстрация. Минимум абстракций, только необходимые тесты, без лишних рефакторингов. Код организован по фичам; подробности и пути — в `docs/architecture.md`.
+We have about 12 hours to deliver a working prototype and a clear demonstration. Keep abstractions and tests to the essentials and avoid unnecessary refactoring. The code is organized by feature. See `docs/architecture.md` for details and paths.
 
-## Язык и контекст
+## Language and context
 
-Сначала прочитай `README.md` своего разработчика в `docs/developers/<имя>/`. Artur предпочитает английский; Nikita, Gruba, Levin и Kurban — русский. Планы, вопросы, объяснения конфликтов и напоминания пиши на языке разработчика. Если человек явно попросил другой язык, следуй его просьбе. Имена в коде и команды оставляй в обычном виде.
+Start with your developer's `README.md` in `docs/developers/<name>/`. Artur prefers English. Nikita, Gruba, Levin, and Kurban prefer Russian. Use the developer's preferred language for plans, questions, conflict explanations, and reminders. Follow any explicit language request. Keep code names and commands in their conventional form.
 
-Читай только нужный контекст: корневой `AGENTS.md`, личный README, актуальный `docs/brief.md`, руководство по архитектуре и согласованный план задачи. Чужие черновики и все документы подряд читать не нужно. `AGENTS.md` после первоначальной настройки редактируют только люди.
+Read the root `AGENTS.md`, your personal README, the current `docs/brief.md`, the relevant architecture guidance, and the agreed task plan. Read other drafts only as needed. After initial setup, developers maintain `AGENTS.md` themselves.
 
-## Новая задача — новая ветка от обновлённого main
+## Start a new task from updated main
 
-Перед переключением проверь `git status --short`. Не удаляй и не прячь чужие или несвязанные изменения автоматически.
+Check `git status --short` before switching branches. Ask how to handle unrelated changes and preserve other people's work.
 
 ```sh
 git fetch origin
@@ -19,56 +19,56 @@ git pull --ff-only origin main
 git switch -c codex/nikita-task-name
 ```
 
-Если обновление невозможно без расхождения истории — объясни проблему, не делай reset или force-push. Прямая работа в `main` разрешена только для первоначального каркаса по договорённости.
+If the branch histories diverge, explain the problem and avoid resetting or force-pushing. The initial scaffold was the only agreed exception for direct work on `main`.
 
-## Сначала согласованный план
+## Agree on the plan first
 
-Обсуди с разработчиком минимальную реализацию, критерии готовности, границы ответственности и API. После согласования сохрани план в `docs/developers/<имя>/<задача>.md`, затем реализуй небольшими шагами. Уточняй важную неопределённость; обычные технические решения принимай самостоятельно.
+Discuss the minimum implementation, acceptance criteria, scope of ownership, and API with the developer. After agreement, save the plan in `docs/developers/<name>/<task>.md`, then implement it in small steps. Clarify material uncertainties and make routine technical choices independently.
 
-Для frontend/backend используй один согласованный документ с методами, путями, запросами и примерами ответов/ошибок. Оба агента читают этот документ. Не копируй изменяемые контракты в `AGENTS.md`.
+For frontend and backend work, use a single agreed document for methods, paths, requests, and example responses and errors. Both agents read it. Keep evolving contracts in that document rather than `AGENTS.md`.
 
-## Где размещать код
+## Code organization
 
-- Backend: `features/<фича>/api` — HTTP; `application` — сценарии и бизнес-логика; `domain` — модели/правила при необходимости; `infrastructure` — БД и внешние интеграции. Не создавай пустые слои, лишние интерфейсы и мапперы.
-- Frontend: компоненты, API, типы, хуки, CSS и помощники конкретной фичи — в `src/features/<фича>/`.
-- `src/components/ui/` — только общие примитивы; `src/lib/` — общий транспорт и действительно общие помощники. Страницы в `src/app/` преимущественно собирают фичи.
-- Небольшое дублирование допустимо, если выделение общего кода замедлит команду.
+- Backend: `features/<feature>/api` handles HTTP, `application` handles use cases and business logic, `domain` holds models and rules when needed, and `infrastructure` handles the database and external integrations. Add layers, interfaces, and mappers only when they serve a purpose.
+- Frontend: Feature-specific components, APIs, types, hooks, CSS, and helpers belong in `src/features/<feature>/`.
+- Put shared primitives in `src/components/ui/` and common transport and helpers in `src/lib/`. Pages under `src/app/` mainly compose features.
+- A little duplication is acceptable when extracting shared code would slow the team down.
 
-## Общие файлы: сначала устная договорённость
+## Coordinate shared files before editing
 
-Общие конфиги, зависимости и lockfile, `.env`, Compose, CI, глобальные стили, layout, существующие общие компоненты/помощники, схема БД и общие документы затрагивают всю команду.
+Shared configuration, dependencies and lockfiles, `.env`, Compose, CI, global styles, layouts, existing shared components and helpers, the database schema, and shared documents affect the whole team.
 
-Перед их изменением агент должен назвать точные файлы, объяснить причину и предложенное изменение, затем попросить разработчика **устно предупредить команду и подтвердить, что никто параллельно не меняет эти файлы, либо согласовать владельца изменений**. Дождись подтверждения. Уже согласованные в задании пути не требуют повторного вопроса. Пока можно продолжать независимую работу внутри фичи.
+Before editing, name the exact files and explain the reason and proposed change. Ask the developer to **tell the team verbally and confirm that nobody is editing those files in parallel, or agree on a single owner**. Wait for confirmation. Paths already agreed for the task require no further confirmation. Continue independent feature work in the meantime.
 
-Агент не видит незапушенные изменения других людей. После правки перечисли общие файлы и напомни сообщить команде. Автоматически писать участникам не нужно.
+An agent cannot see teammates' unpushed changes. After editing, list the shared files and remind the developer to tell the team. The developer handles team communication.
 
-## Синхронизация и конфликты
+## Synchronization and conflicts
 
-Перед готовностью задачи закоммить согласованные изменения, проверь чистоту рабочего дерева и, оставаясь в своей ветке, выполни:
+Before handoff, commit the agreed changes, confirm the working tree is clean, and run the following from the task branch.
 
 ```sh
 git fetch origin
 git merge origin/main
 ```
 
-Это обновляет ветку задачи, а не `main`. Если есть конфликты, до исправления покажи пути, изменения обеих сторон, причину конфликта и предложенное решение. Обсуди неоднозначные решения с разработчиком. Не выбирай целиком ours/theirs ради исчезновения конфликта.
+This updates the task branch. If conflicts arise, show the developer the affected paths, what each side changed, why the changes overlap, and the proposed resolution before editing.
 
-После согласования исправь локально, покажи diff и коротко объясни результат по каждому файлу. Закоммить разрешение и запусти проверки объединённого кода. Отсутствие текстовых конфликтов не означает корректность приложения. Если нужен отказ от слияния, объясни `git merge --abort`, сохранив исходную работу.
+Discuss uncertain choices and preserve the behavior each side needs. Avoid choosing all of “ours” or “theirs” just to clear the conflict. After agreement, resolve it locally, show the diff and a short explanation for each file, commit the resolution, and run the combined checks. A clean merge still needs validation. If the merge must be abandoned, explain `git merge --abort` and preserve the original work.
 
-## Проверки, PR и завершение
+## Checks, pull requests, and handoff
 
-- Frontend: `npm run check` из `frontend/` — lint, TypeScript, тесты, сборка.
-- Backend: `./mvnw verify` из `backend/`; Windows: `.\mvnw.cmd verify`. Нужен работающий Postgres: `docker compose up -d --wait` из корня.
-- Frontend-тесты `src/**/*.test.ts(x)` / `*.spec.ts(x)` и backend-тесты `src/test/java/**/*Test.java` / `*Tests.java` обнаруживаются автоматически. Проверяй существенное поведение и границы интеграции; не добавляй тесты ради количества.
-- CI запускается на PR в `main`, его обновлениях и push в `main`. Результаты — Checks/Actions и артефакты тестов. Новые тесты с согласованными именами попадут туда автоматически.
-- Пуш и PR выполняй, когда разработчик разрешил. Можно пушить незавершённую ветку для сохранения, но явно укажи, что она не готова к merge.
-- В PR укажи результат, проверки, общие файлы и ограничения. Обычный PR можно слить самому; спорные общие изменения стоит обсудить с коллегой.
-- Если за время ожидания изменился `main`, повтори синхронизацию и нужные проверки. Финальный merge — через GitHub. После него удали ветку и начинай следующую задачу от обновлённого `main`.
+- Frontend: Run `npm run check` from `frontend/` for lint, TypeScript, tests, and the build.
+- Backend: Run `./mvnw verify` from `backend/` or `.\mvnw.cmd verify` on Windows. Start PostgreSQL with `docker compose up -d --wait` from the root.
+- CI automatically discovers frontend tests named `src/**/*.test.ts(x)` or `*.spec.ts(x)` and backend tests named `src/test/java/**/*Test.java` or `*Tests.java`. Focus on meaningful behavior and integration boundaries.
+- CI runs on pull requests targeting `main`, updates to those PRs, and pushes to `main`. Find results under Checks or Actions and in the test artifacts.
+- Push and open a PR when the developer authorizes it. You may push an unfinished branch for backup, with its merge status clearly marked.
+- In the PR, summarize the result, checks, shared files, and limitations. You may merge an ordinary PR yourself when authorized. Discuss disputed shared changes with teammates.
+- If `main` advances while the PR is waiting, sync again and rerun the relevant checks. Merge through GitHub, delete the merged branch, and start the next task from updated `main`.
 
-На рабочем завершённом этапе напоминай: «Сейчас полезно проверить изменения, сделать коммит и интегрировать ветку, чтобы она не расходилась с main». Не прерывай разработчика постоянным таймером. Самостоятельно не делай commit/push/merge без разрешения на эти действия.
+At a coherent milestone, remind the developer to review, commit, and integrate the branch so it stays close to `main`. Keep reminders milestone-based. Commits, pushes, and merges require authorization.
 
-## Настройки и демо
+## Settings and demo
 
-Рабочие development-настройки и одноразовые локальные пароли хранятся в Git по договорённости. Production-секреты и личные переопределения туда не добавлять. `NEXT_PUBLIC_*` доступно браузеру. Запросы через Next.js `/api/*` не требуют CORS для базового сценария. Авторизация — только если нужна задаче. PostgreSQL — Docker; автоматическое обновление схемы Hibernate допустимо для прототипа, изменения схемы согласовываем.
+The team keeps development settings and disposable local passwords in Git by agreement. Keep production secrets and personal overrides out of Git. Browsers can read `NEXT_PUBLIC_*` variables. The Next.js `/api/*` route handles the basic flow without CORS. Add authorization when the task calls for it. Run PostgreSQL in Docker. Hibernate may update the schema automatically for the prototype, with schema changes coordinated first.
 
-Инструкции запуска — в корневом `README.md`; актуальный MVP — `docs/brief.md`; клики, данные, сброс и запасной сценарий демонстрации — `docs/demo.md`. Деплой необязателен.
+See the root `README.md` for setup, `docs/brief.md` for the current MVP, and `docs/demo.md` for demo steps, data, reset, and fallback. Deployment is optional.

@@ -1,41 +1,44 @@
-# План: поле суммы и Close в Wise Lite
+# Wise Lite amount field and Close button plan
 
-## Цель
+## Goal
 
-На экранах Send и Ask for money убрать вложенную рамку у суммы и двойное оформление кнопки Close на iPhone, сохранив ввод суммы, быстрые суммы, навигацию и отправку.
-Экран суммы Send дополнительно привести к референсу `IMG_6206.png`: строка получателя, светло-серая карточка с зелёным контуром, крупная сумма, два пояснения с иконками, выделенный пресет и стрелка после Continue. Градиенты не использовать.
-Экран подтверждения Send привести к референсу `DC6D0B22-3989-42E3-94EF-AE23DBB4A292.png`: светло-серая карточка с тонким зелёным контуром, получатель и сумма по центру, статус перевода под суммой и большая кнопка отправки снизу. Градиенты не использовать.
-Обе карточки Send имеют одинаковый фон `wise.card`; карточка Request сохраняет прежний белый фон.
+Remove the nested border around the amount and the double styling of the Close button on iPhone in Send and Ask for money. Preserve manual entry, amount presets, navigation, and submission.
 
-## Владение файлами
+Match the Send amount screen to `IMG_6206.png`. Use a recipient row, a light gray card with a green outline, a large amount, two icon-supported notes, a highlighted preset, and an arrow after Continue. Use solid colors.
 
-- `frontend/app/send.tsx`, `frontend/app/request.tsx` — экраны Gruba.
-- `frontend/features/lite/lite-amount-input.tsx`, `frontend/features/lite/lite-close-button.tsx`, `frontend/features/lite/lite-confirm-card.tsx` — новые компоненты только для экранов Gruba.
-- `docs/developers/gruba/lite-amount-header.md` — этот план.
-- Общие файлы не меняются. Общий `Calculator` и `frontend/app/_layout.tsx` остаются для других экранов.
+Match the Send confirmation screen to `DC6D0B22-3989-42E3-94EF-AE23DBB4A292.png`. Use a light gray card with a thin green outline, center the recipient and amount, show the transfer status below the amount, and place a large Send button at the bottom. Use solid colors.
 
-## API и границы
+Both Send cards use `wise.card`. The Request card keeps its white background.
 
-Контракт: [Wise Lite API](../nikita/wise-lite-api.md). HTTP-вызовы, store и бизнес-правила не меняются. Новые зависимости не нужны.
+## File ownership
 
-## Шаги
+- `frontend/app/send.tsx` and `frontend/app/request.tsx` are Gruba's screens.
+- `frontend/features/lite/lite-amount-input.tsx`, `frontend/features/lite/lite-close-button.tsx`, and `frontend/features/lite/lite-confirm-card.tsx` are new components for those screens.
+- `docs/developers/gruba/lite-amount-header.md` contains this plan.
+- Other screens continue using the shared `Calculator` and `frontend/app/_layout.tsx`. Shared files are outside the edit scope.
 
-1. Добавить компонент суммы: одна визуальная поверхность, число и Euro на одной строке, отдельные быстрые суммы, подсказка и существующая ошибка. На Request использовать текст о запросе, а не о переводе.
-2. Добавить простую текстовую кнопку Close и переопределить `headerRight` только для Send и Request.
-3. Проверить оба экрана на iPhone, если доступно; выполнить `npm run check` из `frontend/`; просмотреть diff и статус Git.
-4. Для Send добавить строку получателя с возвратом к выбору, перенести сумму в белую карточку и выделить выбранную быструю сумму; сделать Continue со стрелкой справа. Request сохраняет тот же простой ввод без утверждений о комиссии и скорости перевода.
-5. Для подтверждения Send заменить серую карточку на белую с контуром; сохранить данные из API, отображение IBAN нового получателя, рискованный статус, ошибки и блокировку повторного отправления.
+## API and scope
 
-## Критерии
+See the [Wise Lite API](../nikita/wise-lite-api.md). The change uses the existing HTTP calls, store, and business rules and needs no new dependencies.
 
-- На Send и Request нет рамки/тени вокруг числа внутри поля суммы.
-- Close не содержит второй вложенной капсулы и возвращает на Home.
-- Сумма вводится вручную и выбирается быстрыми кнопками; ошибки и Continue работают как раньше.
+## Implementation
 
-## Проверка и передача
+1. Add an amount component with one visual surface, the number and Euro on the same line, separate presets, a hint, and the existing error message. Use money request copy on Request.
+2. Add a simple text Close button and override `headerRight` only for Send and Request.
+3. Check both screens on iPhone if available. Run `npm run check` from `frontend/` and inspect the Git diff and status.
+4. On Send, add a recipient row that goes back to recipient selection, move the amount to a white card, highlight the chosen preset, and add an arrow to the right of Continue. Keep Request's simple amount entry and avoid claims about fees or transfer speed there.
+5. On the Send confirmation screen, replace the gray card with a white outlined card. Keep API data, the IBAN for a new recipient, the risk status, errors, and protection against duplicate submission.
 
-- `npm run check` в `frontend/`: прошли lint, TypeScript, 8 тестов и web export.
-- `git diff --check`: прошёл.
-- После подгонки экрана Send под `IMG_6206.png` повторный `npm run check` и `git diff --check` прошли.
-- После подгонки подтверждения под `DC6D0B22-3989-42E3-94EF-AE23DBB4A292.png` повторный `npm run check` и `git diff --check` прошли.
-- Внешний вид на физическом iPhone ещё нужно проверить после перезагрузки приложения; код не коммитился и не отправлялся.
+## Acceptance criteria
+
+- The number inside the Send and Request amount field has no nested border or shadow.
+- Close returns to Home and has a single visual layer.
+- Both manual entry and presets work. Errors and Continue behave as before.
+
+## Verification and handoff
+
+- `npm run check` in `frontend/` passed lint, TypeScript, 8 tests, and web export.
+- `git diff --check` passed.
+- Both checks passed again after matching Send to `IMG_6206.png`.
+- Both checks passed again after matching confirmation to `DC6D0B22-3989-42E3-94EF-AE23DBB4A292.png`.
+- The visual check on a physical iPhone after reloading was still pending. The code had not been committed or pushed.

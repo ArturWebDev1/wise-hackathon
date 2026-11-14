@@ -1,103 +1,54 @@
 # Nikita
 
-- Предпочтительный язык общения: **русский**.
-- Личные планы и заметки: `docs/developers/nikita/`.
-- Перед реализацией прочитай корневой `AGENTS.md`, `docs/workflow.ru.md`, нужные разделы архитектуры, brief и согласованный план задачи.
-- Сначала обсуди план, затем сохрани его здесь. Укажи свои файлы и ссылку на единый API-контракт при совместной работе.
-- Свои документы и `.gitignore` можно организовать самостоятельно. Чужие заметки по умолчанию не редактировать.
+- Preferred language for communication: **Russian**.
+- Personal plans and notes: `docs/developers/nikita/`.
+- Before implementation, read the root `AGENTS.md`, `docs/workflow.ru.md`, the relevant sections of the architecture guide, the brief, and the agreed task plan.
+- Discuss the plan first and then save it here. List your files and link to the shared API contract when working with others.
+- You can organize your own documents and `.gitignore`. Leave other developers' notes to their owners by default.
 
-## План MVP: обычный Wise + Trusted Helper и frontend-интеграция
+## MVP plan for regular Wise, Trusted Helper, and frontend integration
 
-### Цель и границы
+### Goal and scope
 
-Показать обычный аккаунт Wise с дополнительным разделом помощи Maria:
-запрос на втором устройстве → проверка причины → approve/decline → синхронный результат.
-Использовать существующие Full/Home/Helper экраны. Не строить все функции обычного банка.
-Режим Full/Lite — интерфейс, роль Maria/Nikita — личность; переключение интерфейса
-не должно превращать Maria в помощника и давать дополнительные права.
+Show a regular Wise account with a section for helping Maria. A request appears on the second device, the helper reviews the reason and approves or declines, and both devices show the result. Use the existing Full, Home, and Helper screens. Building the full banking feature set is outside the scope. Full and Lite are interface modes. Maria and Nikita are account identities. Switching modes must preserve the signed-in identity and permissions.
 
-### Обязательные задачи
+### Required work
 
-1. **Вход в помощь:** понятная точка входа из обычного аккаунта в Trusted Helper.
-   Показать, кому помогает Nikita; не изображать баланс Maria как отдельный баланс Nikita.
-   Текущий API возвращает только состояние Maria, полноценного второго баланса нет.
-2. **Запросы:** список pending, количество/пустое состояние, переход к деталям любого
-   запроса, а не только первого. Показать получателя, сумму и причины проверки:
-   новый получатель, превышение сохранённого на момент создания лимита.
-3. **Решение:** approve/decline с состоянием загрузки и ошибкой; после решения
-   отключить повторное действие. Обработать устаревший запрос (409), отсутствие (404),
-   нехватку денег (400), declined/expired и blocked. Blocked нельзя одобрить.
-4. **Результаты:** завершённые approved/declined видны отдельно от pending;
-   approved означает, что деньги уже списаны. Не добавлять competing статусы
-   completed/rejected и отдельную повторную отправку.
-5. **Настройки:** существующий порог на перевод, checkNew, scamPause, избранные
-   получатели. Maria видит настройки без редактирования. Отключение защиты вступает
-   в силу через 24 часа: показывать, что защита пока действует, и возможность отмены.
-   Для избранных использовать существующие известные контакты; управление справочником не нужно.
-6. **Интеграция:** сохранить один store, API transport и polling (сейчас 1,5 секунды),
-   обработку offline/восстановления, начальную загрузку и ошибки мутаций. Медленный
-   polling не должен перезаписывать более свежий ответ на действие. WebSockets не нужны.
-   Для второго телефона настроить общий доступный адрес API через `EXPO_PUBLIC_API_URL`,
-   не `localhost` телефона. Переключение Node → Spring делать через конфигурацию.
-7. **Вспомогательные шаги:** сохранить существующие invite/consent, отправку денег Maria
-   и reset для репетиции, если они входят в согласованные клики. Новую регистрацию
-   и реальные платежи не добавлять. Reset отделить от обычных действий пользователя.
+1. **Entry point:** Provide a clear way to open Trusted Helper from the regular account. Show whom Nikita helps and make clear whose balance the API provides. At this stage it returns only Maria's state and has no separate balance for Nikita.
+2. **Requests:** Show all pending requests, their count or an empty state, and details for each request. Show the recipient, amount, and approval reasons: a new recipient or an amount above the threshold saved at creation.
+3. **Decisions:** Show loading and errors for approval and decline. Disable repeat actions after a decision. Handle stale requests (`409`), missing requests (`404`), insufficient funds (`400`), and declined, expired, or blocked transfers. Blocked transfers cannot be approved.
+4. **Results:** Show approved and declined transfers separately from pending ones. Approved means funds have already been debited. Keep the existing statuses and avoid adding `completed` or `rejected`, or a separate resubmission.
+5. **Settings:** Keep the per-transfer threshold, `checkNew`, `scamPause`, and favorite recipients. Maria can view the settings. Deactivation takes effect after 24 hours. Indicate that protection remains active and provide a way to cancel deactivation. Use existing known contacts for favorites. Managing a contact directory is outside this task.
+6. **Integration:** Keep one store, API transport, and polling loop (currently every 1.5 seconds). Handle offline recovery, initial loading, and mutation errors. A slow polling response must not overwrite a newer mutation response. WebSockets are unnecessary. For the second phone, use `EXPO_PUBLIC_API_URL` with an address both phones can reach. Switch from Node to Spring through configuration.
+7. **Supporting steps:** Keep the existing invitation and consent flow, transfers to Maria, and rehearsal reset if they are part of the agreed demo. Registration and real payments are outside scope. Keep reset separate from regular user actions.
 
-### Владение файлами и совместная работа
+### File ownership and coordination
 
-- Свои экраны: `frontend/app/full/**`, `frontend/app/approval.tsx`,
-  `frontend/app/send-maria.tsx`, `frontend/app/roles.tsx`.
-- Новые компоненты помощника: `frontend/features/helper/**`.
-- Свои заметки: `docs/developers/nikita/**`.
-- **Предлагаемый единый владелец интеграции общих файлов — Nikita:**
-  `frontend/lib/wise-store.ts`, `frontend/app/_layout.tsx`,
-  `frontend/app/(tabs)/_layout.tsx`, `frontend/app/(tabs)/index.tsx`,
-  `frontend/app/(tabs)/help.tsx`, `frontend/app/onboarding.tsx`,
-  `frontend/app/result.tsx`, `frontend/app/rules.tsx`.
-  Gruba готовит Lite-компоненты, Nikita подключает их, сохраняя обе роли.
-- При необходимости общих UI/темы назвать точные изменения в
-  `frontend/components/wise.tsx`, `frontend/lib/wise-theme.ts`, `frontend/global.css`.
-  До любых общих правок устно согласовать владельца и отсутствие параллельной работы.
-  То же относится к зависимостям, lockfile и `.env`; сам план их не меняет.
-- Backend, схема БД и `api-prototype/` — вне этой frontend-задачи.
-  Историческое владение всем frontend из `expo-app.md` не означает эксклюзивное
-  владение после разделения: пользовательские экраны теперь в плане Gruba.
+- Owned screens: `frontend/app/full/**`, `frontend/app/approval.tsx`, `frontend/app/send-maria.tsx`, and `frontend/app/roles.tsx`.
+- New helper components: `frontend/features/helper/**`.
+- Personal notes: `docs/developers/nikita/**`.
+- **Nikita is the proposed single owner for integration in shared files:** `frontend/lib/wise-store.ts`, `frontend/app/_layout.tsx`, `frontend/app/(tabs)/_layout.tsx`, `frontend/app/(tabs)/index.tsx`, `frontend/app/(tabs)/help.tsx`, `frontend/app/onboarding.tsx`, `frontend/app/result.tsx`, and `frontend/app/rules.tsx`. Gruba prepares the Lite components, and Nikita integrates them for both roles.
+- If shared UI or theme changes are needed, name the exact changes in `frontend/components/wise.tsx`, `frontend/lib/wise-theme.ts`, and `frontend/global.css`. Before editing, agree verbally on the owner and confirm there is no overlapping work. The same applies to dependencies, the lockfile, and `.env`, which are outside the scope of this plan.
+- The backend, database schema, and `api-prototype/` are outside this frontend task. The historical frontend ownership in `expo-app.md` predates the split. Gruba's plan covers the user screens.
 
-### API: что уже есть и что согласовать
+### Existing API and decisions to agree on
 
-[Канонический контракт](wise-lite-api.md) и [схема](wise-lite-schema.sql) уже существуют.
-Методы, JSON-примеры и ошибки читать там; второй контракт не создавать.
-Pending/историю/настройки получать из `/state`; отдельный endpoint списка approvals
-для одной демонстрационной семьи не нужен. Решения, правила, избранные и invite/consent
-уже покрыты контрактом. Spring Boot должен сохранить пути, ответы и статусы.
+The [canonical contract](wise-lite-api.md) and [schema](wise-lite-schema.sql) already exist. Use them for methods, JSON examples, and errors. Read pending requests, history, and settings through `/state`. A separate approval list endpoint is unnecessary for one demo household. The contract already covers decisions, rules, favorites, and invitation and consent. Spring Boot should preserve the paths, responses, and statuses.
 
-До расширения подтвердить с backend:
+Confirm with the backend owner before extending the scope:
 
-- **Авторизация:** текущий Node API не проверяет роль, связь или согласие. Для
-  защищённого MVP нужны серверная идентификация двух seeded users и проверка прав
-  на каждую операцию. Способ сессии/login, ответы 401/403 и изменения состояния
-  сначала записать в этот же контракт вместе с backend; не придумывать frontend-only защиту.
-- **Два аккаунта:** текущий баланс принадлежит Maria. Собственные деньги/история Nikita
-  требуют отдельного account API, но не нужны для демо помощника.
-- **Request money:** сейчас только Share demo-link. Сохранение запроса и оплата ссылки
-  потребуют нового ресурса/API; в текущую frontend-задачу не входят.
-- **Границы защит:** порог на перевод, не дневной/месячный. `pressured: true` сейчас
-  блокирует всегда, независимо от scamPause. Согласовать смысл выключателя с backend
-  до изменения поведения; не обещать работающий детектор мошенничества.
-- Отзыв согласия, редактирование контактов и многосемейность сейчас не реализованы;
-  добавлять только после отдельной договорённости, без скрытого расширения scope.
+- **Authorization:** The current Node API does not check roles, household links, or consent. The protected MVP needs server-side identification of the two seeded users and permission checks for every operation. Agree with the backend owner on sessions and sign-in, `401` and `403` responses, and state changes in the same contract. Enforce protection on the server.
+- **Two accounts:** The current balance belongs to Maria. Nikita's own funds and history would need a separate account API and are outside the helper demo.
+- **Request money:** The current flow shares a demo link. Saving requests and accepting payment through the link require a new resource or API and are outside this frontend task.
+- **Protection rules:** The threshold applies per transfer. `pressured: true` always blocks a transfer regardless of `scamPause`. Agree with the backend owner on the toggle before changing behavior. Avoid promising a working fraud detector.
+- Consent revocation, contact editing, and multiple households are outside the current implementation. Add them only after a separate agreement.
 
-### Шаги и проверки
+### Implementation and checks
 
-1. С Gruba/UI/UX подтвердить границы общих файлов и вход в Trusted Helper.
-2. Закончить список/решения/настройки на Node API, не ждать переноса на Spring.
-3. Подключить Lite-компоненты Gruba; проверить две независимые сессии/устройства.
-4. Переключить API на Spring, повторить: safe → sent; risky → pending;
-   approve → одно списание; decline/expiry → без списания; blocked нельзя approve.
-   Проверить изменения лимита/избранных, отсрочку выключения, 409, offline/recovery.
-5. Выполнить `npm run check` из `frontend/`; после появления серверной авторизации
-   вместе с backend проверить запрет чужих/неразрешённых действий и 401/403.
+1. Confirm the shared file boundaries and Trusted Helper entry point with Gruba and UI/UX.
+2. Complete the list, decisions, and settings on the Node API while the Spring migration is in progress.
+3. Integrate Gruba's Lite components and check two independent sessions or devices.
+4. Switch to Spring and repeat the checks. Safe transfers become `sent` and risky ones become `pending`. Approval debits once. Decline and expiration leave the balance unchanged. Blocked transfers cannot be approved. Check changes to the threshold and favorites, delayed deactivation, `409`, and offline recovery.
+5. Run `npm run check` from `frontend/`. When server-side authorization is available, work with the backend owner to check unauthorized and cross-household actions and `401` and `403` responses.
 
-Критерий готовности: помощник видит все запросы, понимает причины, принимает решение
-и меняет защиты; Maria получает результат без refresh. Указать реальные результаты
-проверок и оставшиеся ограничения. Сейчас изменены только планы, реализация не начата.
+The flow is ready when the helper sees every request, understands the reasons, decides, and changes protection rules, and Maria sees the result without refreshing. Report the actual checks and remaining limitations. At this stage, only the plans have changed and implementation is pending.
