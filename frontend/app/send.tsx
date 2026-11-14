@@ -4,7 +4,6 @@ import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { Input, Label } from 'heroui-native';
 import {
   ArrowRight,
-  ChevronRight,
   UserRoundPlus,
   CircleAlert,
   ShieldCheck,
@@ -212,6 +211,18 @@ function Amount({
   const [value, setValue] = useState(initial);
   const [error, setError] = useState('');
   const balance = useWise((s) => s.balance);
+  const limit = useWise((s) => s.limit);
+  const checkNew = useWise((s) => s.checkNew);
+  const known = useWise((s) => s.favouriteIds).includes(recipient.id);
+  const typed = Number(value.replace(',', '.'));
+  const hint =
+    checkNew && !known
+      ? 'New people need approval.'
+      : limit === null
+        ? ''
+        : typed > limit
+          ? `Over ${money(limit)} needs approval.`
+          : `Up to ${money(limit)} without approval.`;
   const next = () => {
     const amount = Math.round(Number(value.replace(',', '.')) * 100) / 100;
     if (!Number.isFinite(amount) || amount <= 0) {
@@ -281,7 +292,6 @@ function Amount({
         <Copy size={18} bold style={{ flex: 1 }} numberOfLines={1}>
           {recipient.name}
         </Copy>
-        <ChevronRight size={22} color={c.forest} />
       </Pressable>
       <LiteAmountInput
         value={value}
@@ -294,9 +304,14 @@ function Amount({
         }}
         error={error}
       />
-      <Copy size={16} color={c.muted}>
-        Available: {money(balance, true)}
-      </Copy>
+      {hint ? (
+        <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+          <ShieldCheck size={24} color={c.forest} />
+          <Copy size={17} style={{ flex: 1 }}>
+            {hint}
+          </Copy>
+        </View>
+      ) : null}
     </Screen>
   );
 }
@@ -383,7 +398,7 @@ function Confirm({ recipient, amount }: { recipient: Recipient; amount: number }
         <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
           <ShieldCheck size={24} color={c.forest} />
           <Copy size={17} style={{ flex: 1 }}>
-            Your money stays with you until Nikita approves.
+            Your money stays with you until then.
           </Copy>
         </View>
       ) : null}
