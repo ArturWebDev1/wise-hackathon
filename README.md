@@ -45,19 +45,22 @@ Spring reads the root `.env` and serves [its status endpoint](http://localhost:8
 
 ## Two phones with Expo Go (Maria and Nikita)
 
-Install Docker Desktop (running) and Node, then from the repository root run **one command** (Windows, macOS, Linux):
+Docker alone serves the **web** version (`docker compose up`, one address in a phone browser). Expo Go also needs Expo itself, because Expo is what puts this computer's Wi-Fi address into the QR code. Two commands from the repository root, with Docker Desktop running:
 
 ```sh
-node scripts/demo.mjs
+BIND_ADDRESS=0.0.0.0 docker compose up -d --build --wait postgres backend
+cd frontend && npm ci && npx expo start --lan
 ```
 
-It finds this computer's Wi-Fi address, starts PostgreSQL and Spring Boot in Docker so they are reachable on the network, and starts Expo with that address in the QR code. The first run builds the backend and takes a few minutes. Scan the QR code with Expo Go on both phones. On phone one choose **I'm Maria**, on phone two **I'm Nikita**: each phone keeps its own session, both talk to the same Spring server and see each other's changes within about two seconds.
+On Windows PowerShell set the variable first: `$env:BIND_ADDRESS="0.0.0.0"; docker compose up -d --build --wait postgres backend`. `BIND_ADDRESS=0.0.0.0` makes Spring reachable from the Wi-Fi (the default `127.0.0.1` keeps it private). `npm ci` is needed only the first time.
 
-- Phones and the computer must be on the same Wi-Fi, and the Wi-Fi must let devices see each other (public or guest networks often do not). A phone hotspot is a reliable fallback: connect the computer and the other phone to it, then run the command again. The address changes whenever the network changes, so each new network needs a new QR code.
-- If a default port is taken: `node scripts/demo.mjs --postgres-port 5434 --server-port 8081 --expo-port 8082`. The address can be forced with `--lan-ip <address>`.
+Scan the QR code with Expo Go on both phones. On phone one choose **I'm Maria**, on phone two **I'm Nikita**: each phone keeps its own session, both talk to the same Spring server and see each other's changes within about two seconds. The app finds Spring at the same host as Expo on port 8080, so leave `EXPO_PUBLIC_API_URL` unset.
+
+- Phones and the computer must be on the same Wi-Fi, and the Wi-Fi must let devices see each other (public or guest networks often do not). A phone hotspot is a reliable fallback: connect the computer and the other phone to it and restart `npx expo start --lan`. The address changes whenever the network changes, so each new network needs a new QR code; the containers keep running.
+- If the QR code shows the wrong address (Docker or a VPN confuses the detection), set it yourself: `REACT_NATIVE_PACKAGER_HOSTNAME=<Wi-Fi address> npx expo start --lan` (PowerShell: `$env:REACT_NATIVE_PACKAGER_HOSTNAME="<Wi-Fi address>"; npx expo start --lan`).
+- If a port is taken, set `POSTGRES_PORT` or `SERVER_PORT` before the Docker command, and use `npx expo start --lan --port <free port>` for Expo.
 - CORS is only a browser rule and does not apply to Expo Go. A browser on another origin needs `WISEEASE_CORS_ORIGIN_PATTERN` (default `http://*:8081`).
 - If a phone cannot connect, allow incoming connections for Docker and Node in the computer's firewall.
-- Stop Expo with Ctrl+C; stop the containers with `docker compose down`.
 
 ## Start a task
 
