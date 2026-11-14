@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import type { ReactElement } from 'react';
-import { View, Pressable } from 'react-native';
+import { Image, View, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import {
   ArrowDownUp,
-  ArrowRight,
   ArrowUp,
   BellRing,
   ChevronDown,
@@ -31,12 +30,14 @@ import {
   RingIcon,
   WiseCard,
   dashed,
-  display,
   ink,
   openSend,
   rowBg,
   useIsHelper,
 } from './parts';
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports -- bundled image, no module typing in this project
+const shareWise: number = require('./images/share-wise.jpg');
 
 function H({ children }: { children: string }) {
   return (
@@ -396,50 +397,18 @@ export function FullHome() {
 
       <H>Explore</H>
       {hideShare ? null : (
-        <View
-          style={{
-            backgroundColor: '#0C0D0A',
-            borderRadius: 31,
-            aspectRatio: 0.95,
-            overflow: 'hidden',
-            padding: 20,
-            justifyContent: 'space-between',
-          }}
-        >
-          <View
-            style={{
-              position: 'absolute',
-              left: -28,
-              right: -28,
-              bottom: -84,
-              height: 252,
-              borderRadius: 280,
-              backgroundColor: '#3B4A2B',
-            }}
+        <View style={{ borderRadius: 34, overflow: 'hidden', aspectRatio: 1066 / 1148 }}>
+          <Image source={shareWise} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+          <Pressable
+            onPress={() => setHideShare(true)}
+            accessibilityLabel="Dismiss"
+            style={{ position: 'absolute', left: '84%', top: '3.5%', width: '12%', aspectRatio: 1 }}
           />
-          <Copy
-            size={38}
-            color="#F2F4EF"
-            style={{ ...display, color: '#F2F4EF', lineHeight: 39, width: '85%' }}
-          >
-            {'SHARE WISE,\nEARN REWARDS'}
-          </Copy>
-          <CloseButton dark onPress={() => setHideShare(true)} />
           <Pressable
             onPress={() => openDemo('Earn €150')}
             accessibilityLabel="Share Wise"
-            style={{
-              alignSelf: 'flex-end',
-              width: 59,
-              height: 59,
-              borderRadius: 29,
-              backgroundColor: c.green,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <ArrowRight size={28} color={c.forest} strokeWidth={1.8} />
-          </Pressable>
+            style={{ position: 'absolute', left: '81.5%', top: '83%', width: '17%', aspectRatio: 1 }}
+          />
         </View>
       )}
 
