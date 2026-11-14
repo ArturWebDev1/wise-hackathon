@@ -43,14 +43,19 @@ export default function Rules() {
   return (
     <Screen>
       <Heading compact>{helper ? 'A safety net for Mom.' : 'Nikita has your back.'}</Heading>
-      <DashedCard title={`Ask me above ${money(limit ?? 300)}`} icon={SlidersHorizontal} compact>
-        <SwitchRow
-          label="Transfer limit"
-          accessibilityLabel="Check transfers above the limit"
-          isSelected={enabledLimit && !scheduled.limit}
-          isDisabled={!helper}
-          onChange={(value) => toggle('limit', value)}
-        />
+      <DashedCard
+        title={`Ask me above ${money(limit ?? 300)}`}
+        icon={SlidersHorizontal}
+        compact
+        trailing={
+          <Switch
+            accessibilityLabel="Check transfers above the limit"
+            isSelected={enabledLimit && !scheduled.limit}
+            isDisabled={!helper}
+            onSelectedChange={(value) => toggle('limit', value)}
+          />
+        }
+      >
         <Slider
           value={limit ?? 300}
           minValue={50}
@@ -81,28 +86,38 @@ export default function Rules() {
           </Copy>
         ) : null}
       </DashedCard>
-      <DashedCard title="Ask me for any new person" icon={UserRoundPlus} compact>
-        <SwitchRow
-          label="New recipients"
-          accessibilityLabel="Ask for any new person"
-          isSelected={checkNew && !scheduled.checkNew}
-          isDisabled={!helper}
-          onChange={(value) => toggle('checkNew', value)}
-        />
+      <DashedCard
+        title="Ask me for any new person"
+        icon={UserRoundPlus}
+        compact
+        trailing={
+          <Switch
+            accessibilityLabel="Ask for any new person"
+            isSelected={checkNew && !scheduled.checkNew}
+            isDisabled={!helper}
+            onSelectedChange={(value) => toggle('checkNew', value)}
+          />
+        }
+      >
         {scheduled.checkNew ? (
           <Copy size={14} color={c.forest}>
             Protection stays on for 24 hours. Switch on to cancel.
           </Copy>
         ) : null}
       </DashedCard>
-      <DashedCard title="Scam Pause" icon={ShieldCheck} compact>
-        <SwitchRow
-          label="Check for pressure"
-          accessibilityLabel="Scam Pause"
-          isSelected={scamPause && !scheduled.scamPause}
-          isDisabled={!helper}
-          onChange={(value) => toggle('scamPause', value)}
-        />
+      <DashedCard
+        title="Scam Pause"
+        icon={ShieldCheck}
+        compact
+        trailing={
+          <Switch
+            accessibilityLabel="Scam Pause"
+            isSelected={scamPause && !scheduled.scamPause}
+            isDisabled={!helper}
+            onSelectedChange={(value) => toggle('scamPause', value)}
+          />
+        }
+      >
         {scheduled.scamPause ? (
           <Copy size={14} color={c.forest}>
             Scam Pause stays on for 24 hours.
@@ -151,33 +166,5 @@ export default function Rules() {
         ) : null}
       </GreyCard>
     </Screen>
-  );
-}
-
-function SwitchRow({
-  label,
-  accessibilityLabel,
-  isSelected,
-  isDisabled,
-  onChange,
-}: {
-  label: string;
-  accessibilityLabel: string;
-  isSelected: boolean;
-  isDisabled: boolean;
-  onChange: (value: boolean) => void;
-}) {
-  return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-      <Copy size={16} color={c.muted}>
-        {label}
-      </Copy>
-      <Switch
-        accessibilityLabel={accessibilityLabel}
-        isSelected={isSelected}
-        isDisabled={isDisabled}
-        onSelectedChange={onChange}
-      />
-    </View>
   );
 }

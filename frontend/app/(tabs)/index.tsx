@@ -1,14 +1,7 @@
 import { useEffect } from 'react';
-import { View, FlatList, Pressable } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { router, useLocalSearchParams } from 'expo-router';
-import {
-  ArrowUpRight,
-  ArrowDownLeft,
-  SlidersHorizontal,
-  Clock3,
-  ShieldCheck,
-} from 'lucide-react-native';
+import { View, Pressable } from 'react-native';
+import { Redirect, router, useLocalSearchParams } from 'expo-router';
+import { ArrowUpRight, ArrowDownLeft } from 'lucide-react-native';
 import { Skeleton } from 'heroui-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import {
@@ -18,7 +11,6 @@ import {
   Pill,
   GreyCard,
   TransferRow,
-  DashedCard,
   Empty,
 } from '@/components/wise';
 import { RolePicker } from '@/app/roles';
@@ -48,7 +40,7 @@ export default function HomeScreen() {
       </Screen>
     );
   if (!role) return <RolePicker />;
-  return role === 'nikita' ? <HelperHome /> : <MariaHome />;
+  return role === 'nikita' ? <Redirect href="/full" /> : <MariaHome />;
 }
 function MariaHome() {
   const balance = useWise((s) => s.balance);
@@ -118,92 +110,5 @@ function MariaHome() {
         )}
       </GreyCard>
     </Screen>
-  );
-}
-function HelperHome() {
-  const transfers = useWise((s) => s.transfers);
-  const pending = transfers.filter((t) => t.status === 'pending');
-  const blocked = transfers.find((t) => t.status === 'blocked');
-  return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: c.white }}>
-      <FlatList
-        data={transfers}
-        keyExtractor={(t) => t.id}
-        contentContainerStyle={{ padding: 24 }}
-        showsVerticalScrollIndicator={false}
-        ListHeaderComponent={
-          <View style={{ gap: 24, marginBottom: 4 }}>
-            <TopBar helper />
-            <Copy size={28} bold style={{ letterSpacing: -1 }}>
-              You protect:{'\n'}Maria (Mom)
-            </Copy>
-            <Pill icon={ArrowUpRight} onPress={() => router.push('/send-maria')}>
-              Send money to Maria
-            </Pill>
-            {pending.length ? (
-              <Pressable
-                onPress={() =>
-                  router.push({ pathname: '/approval', params: { id: pending[0].id } })
-                }
-                style={{ backgroundColor: c.yellow, borderRadius: 24, padding: 20, gap: 8 }}
-              >
-                <Clock3 size={24} color={c.yellowText} strokeWidth={1.8} />
-                <Copy bold size={18} color={c.yellowText}>
-                  {pending.length} {pending.length === 1 ? 'request needs' : 'requests need'} your
-                  answer
-                </Copy>
-                <Copy size={14} color={c.yellowText}>
-                  Review transfer
-                </Copy>
-              </Pressable>
-            ) : null}
-            {blocked ? (
-              <Pressable
-                onPress={() => router.push({ pathname: '/approval', params: { id: blocked.id } })}
-                style={{ backgroundColor: c.dangerPale, borderRadius: 24, padding: 20, gap: 8 }}
-              >
-                <ShieldCheck color={c.dangerText} size={24} />
-                <Copy size={17} bold color={c.dangerText}>
-                  Scam Pause protected Mom
-                </Copy>
-                <Copy size={14} color={c.dangerText}>
-                  She said someone was calling. Her transfer was blocked.
-                </Copy>
-              </Pressable>
-            ) : null}
-            <Copy size={20} bold>
-              Mom’s activity
-            </Copy>
-          </View>
-        }
-        renderItem={({ item }) => (
-          <Animated.View
-            entering={FadeIn}
-            exiting={FadeOut}
-            style={{ borderBottomWidth: 1, borderBottomColor: c.card }}
-          >
-            <TransferRow transfer={item} helper />
-          </Animated.View>
-        )}
-        ListEmptyComponent={
-          <Empty icon={ShieldCheck} action="Invite Mom" onPress={() => router.push('/onboarding')}>
-            Mom’s transfers will appear here.
-          </Empty>
-        }
-        ListFooterComponent={
-          <View style={{ gap: 16, paddingTop: 28 }}>
-            <DashedCard
-              title="Rules"
-              icon={SlidersHorizontal}
-              compact
-              onPress={() => router.push('/rules')}
-            />
-            <Pill small tone="pale" onPress={() => router.push('/onboarding')}>
-              Invite Mom
-            </Pill>
-          </View>
-        }
-      />
-    </SafeAreaView>
   );
 }
