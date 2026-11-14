@@ -18,7 +18,7 @@ import { money } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
 import { Detail } from './detail';
 import { HelperOnly, goBack } from './helper-only';
-import { BareHeader, H1, Page } from './page';
+import { H1, Page } from './page';
 import { usePeople } from './people-store';
 import { WiseSwitch } from './wise-switch';
 
@@ -79,7 +79,6 @@ export function AddPerson() {
           }
           style={{ justifyContent: 'center', alignItems: 'center', paddingVertical: 48, gap: 16 }}
         >
-          <BareHeader />
           <IconCircle icon={Check} size={88} background={`${c.green}99`} color={c.forest} />
           <Heading center>Invite sent.</Heading>
           <Copy size={17} color={c.muted} style={{ textAlign: 'center' }}>

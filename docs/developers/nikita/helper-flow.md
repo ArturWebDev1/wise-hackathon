@@ -55,6 +55,12 @@ Scheduled transfers и так далее) намеренно ничего не �
 удалён `HelperHome`), `app/rules.tsx` (переключатель в строке заголовка, без дублей подписей),
 `components/wise.tsx` (`DashedCard`: необязательный `trailing`). `app/result.tsx` не менялся.
 
+## Важно для подключения бэкенда
+- Аватар и имя аккаунта (MA / NG) берутся только из `accountFor(role)` в `lib/wise-store.ts`, нигде не зашиваются
+  в экраны. После подключения Spring это должен быть `account` из ответа `POST /auth/login`.
+- Новый получатель в Lite ищется по Wise ID (`features/lite/demo-accounts.ts`), без IBAN. Это место заменить на
+  `GET /recipients/lookup?wiseId=`.
+
 ## Ограничения
 - Вход и список людей для запросов денег не делаем: нет эндпоинтов в контракте.
 - Добавленные люди хранятся только локально на устройстве (`features/helper/people-store.ts`,

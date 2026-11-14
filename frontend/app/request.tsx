@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { View, Share, Linking, Platform } from 'react-native';
+import { View, Share } from 'react-native';
 import { router } from 'expo-router';
-import { Share2, MessageCircle, Send, MessageSquare, Link, Users } from 'lucide-react-native';
+import { Share2, Link, Users } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import {
   Screen,
@@ -12,10 +12,9 @@ import {
   GreyCard,
   Avatar,
   ErrorCopy,
-  WiseMark,
   Empty,
 } from '@/components/wise';
-import { useWise, recipients, money, type Recipient } from '@/lib/wise-store';
+import { useWise, recipients, money, accountFor, type Recipient } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
 import { LiteAmountInput } from '@/features/lite/lite-amount-input';
 
@@ -27,6 +26,7 @@ export default function RequestMoney() {
 
 function RequestMoneyContent() {
   const favourites = useWise((s) => s.favouriteIds);
+  const role = useWise((s) => s.role);
   const [recipient, setRecipient] = useState<Recipient | null>(null);
   const [value, setValue] = useState('50');
   const [stage, setStage] = useState<'who' | 'amount' | 'share'>('who');
@@ -58,23 +58,6 @@ function RequestMoneyContent() {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     } finally {
       setBusy(false);
-    }
-  };
-  const shareApp = async (app: 'whatsapp' | 'telegram' | 'sms') => {
-    const encoded = encodeURIComponent(message);
-    const url =
-      app === 'whatsapp'
-        ? `https://wa.me/?text=${encoded}`
-        : app === 'telegram'
-          ? `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encoded}`
-          : `sms:${Platform.OS === 'ios' ? '&' : '?'}body=${encoded}`;
-    try {
-      await Linking.openURL(url);
-      setShared(true);
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    } catch {
-      setError('That app couldn’t open. Try Share link instead.');
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   };
   if (stage === 'who')
@@ -140,99 +123,47 @@ function RequestMoneyContent() {
     <Screen
       footer={
         <View style={{ gap: 12 }}>
-          <Pill
-            icon={Share2}
-            onPress={() => {
-              void share();
-            }}
-            loading={busy}
-          >
-            {shared ? 'Share again' : 'Share link'}
+          <Pill icon={Share2} onPress={() => void share()} loading={busy}>
+            {shared ? 'Share again' : 'Share'}
           </Pill>
           {shared ? (
             <Pill tone="dark" onPress={() => router.dismissTo('/')} disabled={busy}>
               Done
             </Pill>
-          ) : (
-            <Pill
-              tone="white"
-              disabled={busy}
-              onPress={() => {
-                setStage('amount');
-                setError('');
-              }}
-            >
-              Back
-            </Pill>
-          )}
+          ) : null}
         </View>
       }
     >
-      <Heading>
-        {shared ? 'Your link is ready.' : `Ask ${recipient?.name} for ${money(amount)}`}
-      </Heading>
-      <GreyCard style={{ alignItems: 'center', paddingVertical: 30, gap: 16 }}>
-        <WiseMark size={30} />
-        <Avatar initials="MA" size={72} />
-        <Copy size={26} bold>
-          @maria1147
-        </Copy>
-        <Copy size={40} bold>
-          {money(amount)}
-        </Copy>
+      <Heading>{shared ? 'Your link is ready.' : `Ask ${recipient?.name} for ${money(amount)}`}</Heading>
+      <GreyCard style={{ padding: 24, gap: 20, alignItems: 'center' }}>
+        <Avatar initials={accountFor(role).initials} size={64} badge background={c.white} />
+        <View style={{ alignItems: 'center', gap: 2 }}>
+          <Copy size={20} bold>
+            {accountFor(role).name}
+          </Copy>
+          <Copy size={15} color={c.muted}>
+            {`@${accountFor(role).wiseId}`}
+          </Copy>
+        </View>
+        <View style={{ height: 1, alignSelf: 'stretch', backgroundColor: c.border }} />
+        <View style={{ alignItems: 'center', gap: 4 }}>
+          <Copy size={15} color={c.muted}>
+            is requesting
+          </Copy>
+          <Copy size={48} bold style={{ letterSpacing: -1.5 }}>
+            {money(amount)}
+          </Copy>
+        </View>
         <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
           <Link size={18} color={c.forest} />
-          <Copy size={14} color={c.forest}>
-            Maria’s request link
+          <Copy size={15} color={c.forest}>
+            Link works for 30 days
           </Copy>
         </View>
       </GreyCard>
-      <View style={{ gap: 12 }}>
-        <Pill
-          tone="pale"
-          icon={MessageCircle}
-          onPress={() => {
-            void shareApp('whatsapp');
-          }}
-        >
-          WhatsApp
-        </Pill>
-        <Pill
-          tone="pale"
-          icon={Send}
-          onPress={() => {
-            void shareApp('telegram');
-          }}
-        >
-          Telegram
-        </Pill>
-        <Pill
-          tone="white"
-          icon={MessageSquare}
-          onPress={() => {
-            void shareApp('sms');
-          }}
-        >
-          SMS
-        </Pill>
-      </View>
       {error ? <ErrorCopy>{error}</ErrorCopy> : null}
-      {shared ? (
-        <Pill
-          small
-          tone="white"
-          disabled={busy}
-          onPress={() => {
-            setStage('amount');
-            setShared(false);
-            setError('');
-          }}
-        >
-          Change amount
-        </Pill>
-      ) : null}
       <Copy size={14} color={c.muted}>
-        This is a demo link. It can’t collect real money.
+        Demo link. No real money.
       </Copy>
     </Screen>
   );

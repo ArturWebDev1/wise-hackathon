@@ -161,6 +161,7 @@ export default function RootLayout() {
           screenOptions={{
             headerShown: true,
             headerTintColor: wise.forest,
+            headerTitle: '',
             headerShadowVisible: false,
             headerStyle: { backgroundColor: wise.white },
             contentStyle: { backgroundColor: wise.white },

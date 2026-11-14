@@ -4,6 +4,7 @@ import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { Input, Label } from 'heroui-native';
 import {
   ArrowRight,
+  Check,
   UserRoundPlus,
   CircleAlert,
   ShieldCheck,
@@ -17,7 +18,7 @@ import {
   Pill,
   Row,
   DashedCard,
-  GreyCard,
+  Avatar,
   Statement,
   IconCircle,
   ErrorCopy,
@@ -28,13 +29,13 @@ import {
   useWise,
   recipients,
   money,
-  validIban,
   initialsOf,
   isRisky,
   type Recipient,
 } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
 import { LiteAmountInput } from '@/features/lite/lite-amount-input';
+import { findAccount } from '@/features/lite/demo-accounts';
 import { LiteConfirmCard } from '@/features/lite/lite-confirm-card';
 
 type SendParams = {
@@ -128,27 +129,21 @@ function ChooseRecipient({
   );
 }
 function NewRecipient({ onContinue }: { onContinue: (r: Recipient) => void }) {
-  const [name, setName] = useState('');
-  const [iban, setIban] = useState('');
+  const [value, setValue] = useState('');
   const [error, setError] = useState('');
+  const account = findAccount(value);
   const next = () => {
-    const clean = iban.replace(/\s/g, '').toUpperCase();
-    if (!name.trim()) {
-      setError('Enter the person’s name.');
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      return;
-    }
-    if (!validIban(clean)) {
-      setError('Check the IBAN and try again.');
+    if (!account) {
+      setError(value.trim() ? 'No Wise account with this ID.' : 'Enter a Wise ID.');
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return;
     }
     onContinue({
-      id: `new-${clean}`,
-      name: name.trim(),
-      initials: initialsOf(name),
+      id: `new-${account.iban}`,
+      name: account.name,
+      initials: initialsOf(account.name),
       relationship: 'New person',
-      iban: clean,
+      iban: account.iban,
     });
   };
   return (
@@ -156,45 +151,40 @@ function NewRecipient({ onContinue }: { onContinue: (r: Recipient) => void }) {
       <Heading>Someone new</Heading>
       <View style={styles.section}>
         <Label>
-          <Label.Text style={{ fontSize: 20, fontFamily: 'Inter_600SemiBold' }}>
-            Full name
-          </Label.Text>
+          <Label.Text style={{ fontSize: 20, fontFamily: 'Inter_600SemiBold' }}>Wise ID</Label.Text>
         </Label>
         <Input
-          value={name}
+          value={value}
           onChangeText={(v) => {
-            setName(v);
+            setValue(v);
             setError('');
           }}
-          placeholder="Name of the person"
-          autoCapitalize="words"
-          style={styles.field}
-        />
-      </View>
-      <View style={styles.section}>
-        <Label>
-          <Label.Text style={{ fontSize: 20, fontFamily: 'Inter_600SemiBold' }}>IBAN</Label.Text>
-        </Label>
-        <Input
-          value={iban}
-          onChangeText={(v) => {
-            setIban(v);
-            setError('');
-          }}
-          placeholder="DE89 3704 0044 0532 0130 00"
-          autoCapitalize="characters"
+          placeholder="@ola"
+          autoCapitalize="none"
           autoCorrect={false}
           style={styles.field}
         />
       </View>
-      <GreyCard>
-        <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
-          <ShieldCheck size={24} color={c.forest} strokeWidth={1.8} />
-          <Copy size={18} color={c.muted}>
-            Nikita will check this
-          </Copy>
+      {account ? (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+          <Avatar initials={initialsOf(account.name)} size={52} badge />
+          <View style={{ flex: 1 }}>
+            <Copy size={18} bold>
+              {account.name}
+            </Copy>
+            <Copy size={15} color={c.muted}>
+              {`@${account.wiseId}`}
+            </Copy>
+          </View>
+          <Check size={24} color={c.forest} strokeWidth={2} />
         </View>
-      </GreyCard>
+      ) : null}
+      <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+        <ShieldCheck size={24} color={c.forest} strokeWidth={1.8} />
+        <Copy size={17} style={{ flex: 1 }}>
+          New people need approval.
+        </Copy>
+      </View>
       {error ? <ErrorCopy>{error}</ErrorCopy> : null}
     </Screen>
   );

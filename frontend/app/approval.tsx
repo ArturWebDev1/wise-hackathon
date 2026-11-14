@@ -18,9 +18,6 @@ import { useWise, money } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
 import { timeAgo } from '@/features/helper/time-ago';
 import { Detail } from '@/features/helper/detail';
-import { BareHeader } from '@/features/helper/page';
-
-const noClose = <BareHeader />;
 
 export default function Approval() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -55,7 +52,6 @@ export default function Approval() {
   if (!transfer)
     return (
       <Screen>
-        {noClose}
         <Empty icon={ShieldCheck} action="Back home" onPress={() => router.dismissTo('/')}>
           This request isn’t available.
         </Empty>
@@ -72,7 +68,6 @@ export default function Approval() {
         footer={backHome}
         style={{ justifyContent: 'center', alignItems: 'center', paddingVertical: 48, gap: 16 }}
       >
-        {noClose}
         <IconCircle
           icon={declined ? X : Check}
           size={88}
@@ -117,7 +112,6 @@ export default function Approval() {
         )
       }
     >
-      {noClose}
       <Heading compact>
         {pending
           ? `Mom wants to send ${money(transfer.amount)} to ${transfer.isNew ? 'a NEW person' : transfer.recipient.name}${transfer.isNew ? `: “${transfer.recipient.name}”` : ''}`

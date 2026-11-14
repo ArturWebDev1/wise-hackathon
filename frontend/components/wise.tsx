@@ -26,7 +26,7 @@ import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { Svg, Path, Circle } from '@/components/ui/primitives/Svg';
 import { wise as c } from '@/lib/wise-theme';
-import { useWise, recipients, money, dayLabel, type Transfer } from '@/lib/wise-store';
+import { useWise, recipients, money, dayLabel, accountFor, type Transfer } from '@/lib/wise-store';
 
 export function Copy({
   children,
@@ -214,8 +214,11 @@ export function Screen({
 }
 export function WiseMark({ size = 26, color = c.forest }: { size?: number; color?: string }) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 32 32">
-      <Path fill={color} d="M3 5h15l-5 7h9L11 28H4l8-12H4l6-7H3zm18 0h8L15 28h-5L24 9h-6z" />
+    <Svg width={size} height={size} viewBox="150 155 255 245">
+      <Path
+        fill={color}
+        d="M177 155H405L318 400H267L340 197H245L265 232L235 270H287L273 308H150L218 228Z"
+      />
     </Svg>
   );
 }
@@ -315,6 +318,7 @@ export function IconCircle({
   );
 }
 export function TopBar() {
+  const role = useWise((s) => s.role);
   return (
     <View
       style={{
@@ -325,11 +329,9 @@ export function TopBar() {
       }}
     >
       <Pressable onPress={() => router.push('/roles')} accessibilityLabel="Switch demo role">
-        <Avatar initials="MA" size={48} />
+        <Avatar initials={accountFor(role).initials} size={48} />
       </Pressable>
-      <Pressable
-        onPress={() => router.push('/rules')}
-        accessibilityRole="button"
+      <View
         style={{
           flexDirection: 'row',
           alignItems: 'center',
@@ -344,7 +346,7 @@ export function TopBar() {
         <Copy bold size={13} color={c.forest} numberOfLines={1}>
           Protected by Nikita
         </Copy>
-      </Pressable>
+      </View>
     </View>
   );
 }

@@ -9,7 +9,7 @@ import type { IconProps } from './icons';
 
 type AnyIcon = ComponentType<IconProps>;
 import { Copy, WiseMark } from '@/components/wise';
-import { useWise } from '@/lib/wise-store';
+import { accountFor, useWise } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
 
 export const ring = '#C9C9C4';
@@ -74,7 +74,7 @@ export function useIsHelper() {
 }
 
 export function HomeHeader() {
-  const helper = useIsHelper();
+  const role = useWise((s) => s.role);
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
       <Pressable onPress={() => router.push('/roles')} accessibilityLabel="Switch demo role">
@@ -89,7 +89,7 @@ export function HomeHeader() {
           }}
         >
           <Copy bold size={17} color="#3B3B38">
-            {helper ? 'NG' : 'MA'}
+            {accountFor(role).initials}
           </Copy>
           <View
             style={{
