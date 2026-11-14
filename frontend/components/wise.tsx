@@ -26,7 +26,7 @@ import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { Svg, Path, Circle } from '@/components/ui/primitives/Svg';
 import { wise as c } from '@/lib/wise-theme';
-import { useWise, recipients, money, dayLabel, accountFor, type Transfer } from '@/lib/wise-store';
+import { useWise, recipients, money, dayLabel, useAccount, type Transfer } from '@/lib/wise-store';
 
 export function Copy({
   children,
@@ -318,7 +318,7 @@ export function IconCircle({
   );
 }
 export function TopBar() {
-  const role = useWise((s) => s.role);
+  const account = useAccount();
   return (
     <View
       style={{
@@ -329,7 +329,7 @@ export function TopBar() {
       }}
     >
       <Pressable onPress={() => router.push('/roles')} accessibilityLabel="Switch demo role">
-        <Avatar initials={accountFor(role).initials} size={48} />
+        <Avatar initials={account.initials} size={48} />
       </Pressable>
       <View
         style={{

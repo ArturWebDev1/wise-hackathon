@@ -1,5 +1,6 @@
 package com.team.hackathon.features.wiselite.api;
 
+import com.team.hackathon.features.wiselite.application.DemoReset;
 import com.team.hackathon.features.wiselite.application.Households;
 import com.team.hackathon.features.wiselite.application.Sessions;
 import com.team.hackathon.features.wiselite.application.Transfers;
@@ -29,11 +30,13 @@ class WiseEaseController {
     private final Sessions sessions;
     private final Households households;
     private final Transfers transfers;
+    private final DemoReset demoReset;
 
-    WiseEaseController(Sessions sessions, Households households, Transfers transfers) {
+    WiseEaseController(Sessions sessions, Households households, Transfers transfers, DemoReset demoReset) {
         this.sessions = sessions;
         this.households = households;
         this.transfers = transfers;
+        this.demoReset = demoReset;
     }
 
     @PostMapping("/auth/login")
@@ -54,6 +57,15 @@ class WiseEaseController {
             @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization) {
         return ResponseEntity.ok().header(HttpHeaders.CACHE_CONTROL, "no-store")
                 .body(households.state(sessions.authenticate(authorization)));
+    }
+
+    @PostMapping("/household/connect")
+    Map<String, Households.State> connect(
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization,
+            @RequestBody Connect request) {
+        String actor = sessions.authenticate(authorization);
+        households.connect(actor, request.helperWiseId());
+        return updatedState(actor);
     }
 
     @GetMapping("/recipients/lookup")
@@ -78,6 +90,16 @@ class WiseEaseController {
         return Map.of("id", id, "state", households.state(actor));
     }
 
+    @PostMapping("/transfers/to-protected-account")
+    Map<String, Object> sendToProtectedAccount(
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization,
+            @RequestHeader(value = "Idempotency-Key", required = false) String key,
+            @RequestBody DirectPayment payment) {
+        String actor = sessions.authenticate(authorization);
+        UUID id = transfers.sendToProtectedAccount(actor, payment.amount(), key);
+        return Map.of("id", id, "state", households.state(actor));
+    }
+
     @PostMapping("/transfers/{id}/decision")
     Map<String, Households.State> decide(
             @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization,
@@ -93,6 +115,15 @@ class WiseEaseController {
             @RequestBody Threshold threshold) {
         String actor = sessions.authenticate(authorization);
         households.threshold(actor, threshold.limit());
+        return updatedState(actor);
+    }
+
+    @PutMapping("/settings/rules/limit")
+    Map<String, Households.State> thresholdRule(
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization,
+            @RequestBody Rule rule) {
+        String actor = sessions.authenticate(authorization);
+        households.thresholdRule(actor, rule.enabled());
         return updatedState(actor);
     }
 
@@ -123,6 +154,14 @@ class WiseEaseController {
         return Map.of("id", id, "state", households.state(actor));
     }
 
+    @PostMapping("/demo/reset")
+    Map<String, Households.State> resetDemo(
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization) {
+        String actor = sessions.authenticate(authorization);
+        demoReset.reset(actor);
+        return updatedState(actor);
+    }
+
     @ExceptionHandler(ResponseStatusException.class)
     ResponseEntity<Map<String, String>> error(ResponseStatusException failure) {
         return ResponseEntity.status(failure.getStatusCode()).body(Map.of("error", failure.getReason()));
@@ -143,6 +182,8 @@ class WiseEaseController {
 
     record Payment(String recipientId, BigDecimal amount, List<String> expectedReasons) {}
 
+    record Connect(String helperWiseId) {}
+    record DirectPayment(BigDecimal amount) {}
     record Decision(Boolean approve) {}
 
     record Threshold(BigDecimal limit) {}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { Input, Label } from 'heroui-native';
@@ -27,7 +27,6 @@ import {
 } from '@/components/wise';
 import {
   useWise,
-  recipients,
   money,
   initialsOf,
   isRisky,
@@ -35,14 +34,13 @@ import {
 } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
 import { LiteAmountInput } from '@/features/lite/lite-amount-input';
-import { findAccount } from '@/features/lite/demo-accounts';
+import type { Person } from '@/lib/wise-spring-api';
 import { LiteConfirmCard } from '@/features/lite/lite-confirm-card';
 
 type SendParams = {
   stage?: string;
   recipient?: string;
   name?: string;
-  iban?: string;
   amount?: string;
 };
 export default function Send() {
@@ -54,19 +52,21 @@ export default function Send() {
 function SendContent() {
   const params = useLocalSearchParams<SendParams>();
   const stage = params.stage ?? 'who';
-  const recipient = recipients.find((r) => r.id === params.recipient) ?? {
+  const known = useWise((state) =>
+    state.transferRecipients.find((person) => person.id === params.recipient),
+  );
+  const recipient = known ?? {
     id: params.recipient ?? 'new-person',
     name: params.name ?? 'Someone new',
     initials: initialsOf(params.name ?? 'New person'),
     relationship: 'New person',
-    iban: params.iban,
   };
   const go = (nextStage: string, extra: Partial<SendParams> = {}) =>
     router.push({ pathname: '/send', params: { ...params, stage: nextStage, ...extra } });
   if (stage === 'new')
     return (
       <NewRecipient
-        onContinue={(r) => go('amount', { recipient: r.id, name: r.name, iban: r.iban })}
+        onContinue={(r) => go('amount', { recipient: r.id, name: r.name })}
       />
     );
   if (stage === 'amount')
@@ -90,7 +90,10 @@ function SendContent() {
     );
   if (stage === 'confirm') return <Confirm recipient={recipient} amount={Number(params.amount)} />;
   return (
-    <ChooseRecipient onSelect={(r) => go('amount', { recipient: r.id })} onNew={() => go('new')} />
+    <ChooseRecipient
+      onSelect={(r) => go('amount', { recipient: r.id, name: r.name })}
+      onNew={() => go('new')}
+    />
   );
 }
 function ChooseRecipient({
@@ -100,8 +103,7 @@ function ChooseRecipient({
   onSelect: (r: Recipient) => void;
   onNew: () => void;
 }) {
-  const favouriteIds = useWise((s) => s.favouriteIds);
-  const favourites = recipients.filter((r) => favouriteIds.includes(r.id));
+  const favourites = useWise((s) => s.transferRecipients);
   return (
     <Screen>
       <Heading>Who do you want to send to?</Heading>
@@ -119,8 +121,8 @@ function ChooseRecipient({
             </View>
           ))
         ) : (
-          <Empty icon={Users} action="Choose favourites" onPress={() => router.push('/rules')}>
-            Add people you send to often.
+          <Empty icon={Users} action="Someone new" onPress={onNew}>
+            People you’ve sent money to will appear here.
           </Empty>
         )}
       </View>
@@ -131,23 +133,54 @@ function ChooseRecipient({
 function NewRecipient({ onContinue }: { onContinue: (r: Recipient) => void }) {
   const [value, setValue] = useState('');
   const [error, setError] = useState('');
-  const account = findAccount(value);
+  const lookup = useWise((state) => state.lookupRecipient);
+  const checkNew = useWise((state) => state.checkNew);
+  const wiseId = value.trim().replace(/^@/, '').toLowerCase();
+  const validId = /^[a-z0-9_.-]{1,64}$/.test(wiseId);
+  const [match, setMatch] = useState<{ query: string; account?: Person; error?: string }>();
+  const current = match?.query === wiseId ? match : undefined;
+  const account = current?.account;
+  const message = error || current?.error;
+
+  useEffect(() => {
+    if (!validId) return undefined;
+    let active = true;
+    const timer = setTimeout(() => {
+      void lookup(wiseId).then(
+        (person) => {
+          if (active) setMatch({ query: wiseId, account: person });
+        },
+        (failure: unknown) => {
+          if (active) {
+            setMatch({
+              query: wiseId,
+              error: failure instanceof Error ? failure.message : 'Could not find this account.',
+            });
+          }
+        },
+      );
+    }, 250);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [lookup, validId, wiseId]);
+
   const next = () => {
     if (!account) {
-      setError(value.trim() ? 'No Wise account with this ID.' : 'Enter a Wise ID.');
+      setError(current?.error ?? 'Enter a valid Wise ID.');
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return;
     }
     onContinue({
-      id: `new-${account.iban}`,
+      id: account.id,
       name: account.name,
       initials: initialsOf(account.name),
       relationship: 'New person',
-      iban: account.iban,
     });
   };
   return (
-    <Screen footer={<Pill onPress={next}>Continue</Pill>}>
+    <Screen footer={<Pill onPress={next} loading={validId && !current}>Continue</Pill>}>
       <Heading>Someone new</Heading>
       <View style={styles.section}>
         <Label>
@@ -159,7 +192,8 @@ function NewRecipient({ onContinue }: { onContinue: (r: Recipient) => void }) {
             setValue(v);
             setError('');
           }}
-          placeholder="@ola"
+          accessibilityLabel="Wise ID"
+          placeholder="@anna"
           autoCapitalize="none"
           autoCorrect={false}
           style={styles.field}
@@ -179,13 +213,15 @@ function NewRecipient({ onContinue }: { onContinue: (r: Recipient) => void }) {
           <Check size={24} color={c.forest} strokeWidth={2} />
         </View>
       ) : null}
-      <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
-        <ShieldCheck size={24} color={c.forest} strokeWidth={1.8} />
-        <Copy size={17} style={{ flex: 1 }}>
-          New people need approval.
-        </Copy>
-      </View>
-      {error ? <ErrorCopy>{error}</ErrorCopy> : null}
+      {checkNew ? (
+        <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+          <ShieldCheck size={24} color={c.forest} strokeWidth={1.8} />
+          <Copy size={17} style={{ flex: 1 }}>
+            New people need approval.
+          </Copy>
+        </View>
+      ) : null}
+      {message ? <ErrorCopy>{message}</ErrorCopy> : null}
     </Screen>
   );
 }

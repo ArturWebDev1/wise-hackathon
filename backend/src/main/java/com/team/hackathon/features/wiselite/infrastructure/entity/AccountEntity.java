@@ -39,6 +39,10 @@ public class AccountEntity {
     public String passwordHash() { return passwordHash; }
     public BigDecimal balance() { return balance; }
 
+    public void restoreDemoBalance(BigDecimal amount) {
+        balance = amount;
+    }
+
     public void debit(BigDecimal amount) {
         balance = balance.subtract(amount);
     }

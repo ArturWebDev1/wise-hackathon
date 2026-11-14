@@ -13,7 +13,7 @@ import {
 } from 'lucide-react-native';
 import { Copy } from '@/components/wise';
 import { wise as c } from '@/lib/wise-theme';
-import { accountFor, useWise } from '@/lib/wise-store';
+import { useAccount } from '@/lib/wise-store';
 import { FullPage, RingAvatar, Tap, WiseCard, ink, useIsHelper } from './parts';
 
 function ActionPill({
@@ -45,7 +45,7 @@ function ActionPill({
 
 export function FullPayments() {
   const helper = useIsHelper();
-  const role = useWise((s) => s.role);
+  const account = useAccount();
   return (
     <FullPage>
       <View style={{ height: 25 }} />
@@ -111,13 +111,13 @@ export function FullPayments() {
               gap: 14,
             }}
           >
-            <RingAvatar initials={accountFor(role).initials} />
+            <RingAvatar initials={account.initials} />
             <View style={{ flex: 1, gap: 3 }}>
               <Copy bold size={15} color={ink}>
                 Your Wisetag
               </Copy>
               <Copy size={15} color="#4A4A47">
-                @yourwisetag
+                {`@${account.wiseId}`}
               </Copy>
             </View>
           </View>

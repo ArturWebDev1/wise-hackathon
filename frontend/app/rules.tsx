@@ -21,13 +21,19 @@ export default function Rules() {
   const checkNew = useWise((s) => s.checkNew);
   const scamPause = useWise((s) => s.scamPause);
   const scheduled = useWise((s) => s.protectionOffAt);
-  const favourites = useWise((s) => s.favouriteIds);
+  const requestPeople = useWise((s) => s.requestPeople);
+  const ready = useWise((s) => s.ready);
   const toggleRule = useWise((s) => s.toggleRule);
   const setLimit = useWise((s) => s.setLimit);
-  const toggleFavourite = useWise((s) => s.toggleFavourite);
+  const setRequestPerson = useWise((s) => s.setRequestPerson);
   const helper = role === 'nikita';
   const enabledLimit = limit !== null;
   const [error, setError] = useState('');
+  const [savingRequestPeople, setSavingRequestPeople] = useState(false);
+  const requestCandidates = [
+    ...recipients,
+    ...requestPeople.filter((person) => !recipients.some((known) => known.id === person.id)),
+  ];
   const change = (action: Promise<void>) => {
     setError('');
     action
@@ -36,17 +42,21 @@ export default function Rules() {
         setError(e instanceof Error ? e.message : 'Your change wasn’t saved.'),
       );
   };
+  const updateRequestPerson = (id: string, enabled: boolean) => {
+    setSavingRequestPeople(true);
+    change(setRequestPerson(id, enabled).finally(() => setSavingRequestPeople(false)));
+  };
   const rule = (key: RuleKey, on: boolean) => ({
     control: (
       <WiseSwitch
         accessibilityLabel={key}
         isSelected={on && !scheduled[key]}
-        isDisabled={!helper}
+        isDisabled={!helper || !ready || key === 'scamPause'}
         onSelectedChange={(value) => change(toggleRule(key, value))}
       />
     ),
     offAt: scheduled[key],
-    keepOn: () => change(toggleRule(key, true)),
+    keepOn: helper ? () => change(toggleRule(key, true)) : undefined,
   });
   const limitRule = rule('limit', enabledLimit);
   const newRule = rule('checkNew', checkNew);
@@ -90,7 +100,7 @@ export default function Rules() {
       </View>
       <View style={{ gap: 12 }}>
         <Copy bold size={22} color={ink} style={{ letterSpacing: -0.6 }}>
-          Manage favourites
+          People Maria can ask for money
         </Copy>
         <View
           style={{
@@ -100,7 +110,7 @@ export default function Rules() {
             paddingVertical: 4,
           }}
         >
-          {recipients.map((r, index) => (
+          {requestCandidates.map((r, index) => (
             <View
               key={r.id}
               style={{
@@ -108,7 +118,7 @@ export default function Rules() {
                 alignItems: 'center',
                 gap: 14,
                 paddingVertical: 14,
-                borderBottomWidth: index < recipients.length - 1 ? 1 : 0,
+                borderBottomWidth: index < requestCandidates.length - 1 ? 1 : 0,
                 borderBottomColor: c.border,
               }}
             >
@@ -122,10 +132,10 @@ export default function Rules() {
                 </Copy>
               </View>
               <WiseSwitch
-                accessibilityLabel={`${r.name} is a favourite`}
-                isSelected={favourites.includes(r.id)}
-                isDisabled={!helper}
-                onSelectedChange={() => change(toggleFavourite(r.id))}
+                accessibilityLabel={`Maria can ask ${r.name} for money`}
+                isSelected={requestPeople.some((person) => person.id === r.id)}
+                isDisabled={!helper || !ready || savingRequestPeople}
+                onSelectedChange={(enabled) => updateRequestPerson(r.id, enabled)}
               />
             </View>
           ))}
@@ -154,7 +164,7 @@ function RuleCard({
 }: {
   icon: LucideIcon;
   title: string;
-  rule: { control: ReactNode; offAt?: number; keepOn: () => void };
+  rule: { control: ReactNode; offAt?: number; keepOn?: () => void };
   children?: ReactNode;
 }) {
   return (
@@ -185,9 +195,11 @@ function RuleCard({
           <Copy size={14} color={c.yellowText}>
             Protection stays on until then.
           </Copy>
-          <Pill small tone="white" onPress={rule.keepOn}>
-            Keep it on
-          </Pill>
+          {rule.keepOn ? (
+            <Pill small tone="white" onPress={rule.keepOn}>
+              Keep it on
+            </Pill>
+          ) : null}
         </View>
       ) : null}
     </View>

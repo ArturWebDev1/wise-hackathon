@@ -14,7 +14,7 @@ import {
   ErrorCopy,
   Empty,
 } from '@/components/wise';
-import { useWise, recipients, money, accountFor, type Recipient } from '@/lib/wise-store';
+import { useWise, useAccount, money, type Recipient } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
 import { LiteAmountInput } from '@/features/lite/lite-amount-input';
 
@@ -25,8 +25,9 @@ export default function RequestMoney() {
 }
 
 function RequestMoneyContent() {
-  const favourites = useWise((s) => s.favouriteIds);
-  const role = useWise((s) => s.role);
+  const requestPeople = useWise((s) => s.requestPeople);
+  const ready = useWise((s) => s.ready);
+  const account = useAccount();
   const [recipient, setRecipient] = useState<Recipient | null>(null);
   const [value, setValue] = useState('50');
   const [stage, setStage] = useState<'who' | 'amount' | 'share'>('who');
@@ -34,8 +35,8 @@ function RequestMoneyContent() {
   const [busy, setBusy] = useState(false);
   const [shared, setShared] = useState(false);
   const amount = Math.round(Number(value.replace(',', '.')) * 100) / 100;
-  const link = `https://example.com/wise-lite/request/maria1147?amount=${amount}`;
-  const message = `Hi ${recipient?.name}, Maria is asking for ${money(amount)}. Wise Lite hackathon demo — no real money. ${link}`;
+  const link = `https://example.com/wise-lite/request/${encodeURIComponent(account.wiseId)}?amount=${amount}`;
+  const message = `Hi ${recipient?.name}, ${account.name} is asking for ${money(amount)}. Wise Lite hackathon demo — no real money. ${link}`;
   const next = () => {
     if (!Number.isFinite(amount) || amount <= 0) {
       setError('Enter an amount greater than zero.');
@@ -48,7 +49,7 @@ function RequestMoneyContent() {
     setBusy(true);
     setError('');
     try {
-      const result = await Share.share({ message, title: `Request ${money(amount)} for Maria` });
+      const result = await Share.share({ message, title: `Request ${money(amount)} for ${account.name}` });
       if (result.action === Share.sharedAction) {
         setShared(true);
         void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -60,29 +61,33 @@ function RequestMoneyContent() {
       setBusy(false);
     }
   };
-  if (stage === 'who')
+  const recipientRemoved =
+    !shared && recipient !== null && !requestPeople.some((person) => person.id === recipient.id);
+
+  if (stage === 'who' || recipientRemoved)
     return (
       <Screen>
         <Heading>Who do you want to ask?</Heading>
         <View>
-          {recipients
-            .filter((r) => favourites.includes(r.id))
-            .map((r) => (
-              <Row
-                key={r.id}
-                initials={r.initials}
-                badge
-                title={r.name}
-                subtitle={r.relationship}
-                onPress={() => {
-                  setRecipient(r);
-                  setStage('amount');
-                }}
-              />
-            ))}
-          {!favourites.length ? (
-            <Empty icon={Users} action="Choose favourites" onPress={() => router.push('/rules')}>
-              Add someone to ask for money.
+          {recipientRemoved ? <ErrorCopy>This person is no longer on your list.</ErrorCopy> : null}
+          {requestPeople.map((r) => (
+            <Row
+              key={r.id}
+              initials={r.initials}
+              badge
+              title={r.name}
+              subtitle={r.relationship}
+              onPress={() => {
+                setRecipient(r);
+                setError('');
+                setStage('amount');
+              }}
+            />
+          ))}
+          {!ready ? <Copy>Loading your list…</Copy> : null}
+          {ready && !requestPeople.length ? (
+            <Empty icon={Users} action="Back home" onPress={() => router.dismissTo('/')}>
+              Nikita hasn’t added anyone you can ask for money yet.
             </Empty>
           ) : null}
         </View>
@@ -136,13 +141,13 @@ function RequestMoneyContent() {
     >
       <Heading>{shared ? 'Your link is ready.' : `Ask ${recipient?.name} for ${money(amount)}`}</Heading>
       <GreyCard style={{ padding: 24, gap: 20, alignItems: 'center' }}>
-        <Avatar initials={accountFor(role).initials} size={64} badge background={c.white} />
+        <Avatar initials={account.initials} size={64} badge background={c.white} />
         <View style={{ alignItems: 'center', gap: 2 }}>
           <Copy size={20} bold>
-            {accountFor(role).name}
+            {account.name}
           </Copy>
           <Copy size={15} color={c.muted}>
-            {`@${accountFor(role).wiseId}`}
+            {`@${account.wiseId}`}
           </Copy>
         </View>
         <View style={{ height: 1, alignSelf: 'stretch', backgroundColor: c.border }} />
@@ -157,7 +162,7 @@ function RequestMoneyContent() {
         <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
           <Link size={18} color={c.forest} />
           <Copy size={15} color={c.forest}>
-            Link works for 30 days
+            Request link
           </Copy>
         </View>
       </GreyCard>

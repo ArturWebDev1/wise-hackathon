@@ -8,12 +8,13 @@ import { wise as c } from '@/lib/wise-theme';
 
 export default function Help() {
   const limit = useWise((s) => s.limit);
+  const checkNew = useWise((s) => s.checkNew);
   const reset = useWise((s) => s.reset);
   return (
     <Screen safe>
       <TopBar />
       <Heading>{'A little help,\nwhenever you need.'}</Heading>
-      <Pill icon={Phone} onPress={() => callPerson(true)}>
+      <Pill icon={Phone} onPress={() => callPerson()}>
         Call Nikita
       </Pill>
       <View style={{ gap: 16 }}>
@@ -21,18 +22,22 @@ export default function Help() {
           <Zap size={26} color={c.forest} strokeWidth={1.8} />
           <Copy size={18} style={{ flex: 1 }}>
             {limit === null
-              ? 'Transfers to your favourites are sent at once.'
-              : `Up to ${money(limit)} to your favourites is sent at once.`}
+              ? 'Transfers to people you know are sent at once.'
+              : `Up to ${money(limit)} to people you know is sent at once.`}
           </Copy>
         </View>
-        <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
-          <ShieldCheck size={26} color={c.forest} strokeWidth={1.8} />
-          <Copy size={18} style={{ flex: 1 }}>
-            {limit === null
-              ? 'New people need approval.'
-              : 'New people and bigger amounts need approval.'}
-          </Copy>
-        </View>
+        {checkNew || limit !== null ? (
+          <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
+            <ShieldCheck size={26} color={c.forest} strokeWidth={1.8} />
+            <Copy size={18} style={{ flex: 1 }}>
+              {checkNew && limit !== null
+                ? 'New people and bigger amounts need approval.'
+                : checkNew
+                  ? 'New people need approval.'
+                  : `Amounts over ${money(limit ?? 0)} need approval.`}
+            </Copy>
+          </View>
+        ) : null}
       </View>
       <Pill small tone="pale" onPress={() => router.push('/switch-mode')}>
         Use regular Wise
