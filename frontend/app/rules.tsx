@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { View } from 'react-native';
-import { Switch, Slider } from 'heroui-native';
+import { Slider } from 'heroui-native';
 import { SlidersHorizontal, UserRoundPlus, ShieldCheck } from 'lucide-react-native';
 import type { LucideIcon } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
@@ -11,6 +11,7 @@ import type { RuleKey } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
 import { RingAvatar, RingIcon, dashed, ink, rowBg } from '@/features/fullwise/parts';
 import { H1, Page } from '@/features/helper/page';
+import { WiseSwitch } from '@/features/helper/wise-switch';
 
 const hoursLeft = (time: number) => Math.max(1, Math.ceil((time - Date.now()) / 3600000));
 
@@ -37,7 +38,7 @@ export default function Rules() {
   };
   const rule = (key: RuleKey, on: boolean) => ({
     control: (
-      <Switch
+      <WiseSwitch
         accessibilityLabel={key}
         isSelected={on && !scheduled[key]}
         isDisabled={!helper}
@@ -120,7 +121,7 @@ export default function Rules() {
                   {r.relationship}
                 </Copy>
               </View>
-              <Switch
+              <WiseSwitch
                 accessibilityLabel={`${r.name} is a favourite`}
                 isSelected={favourites.includes(r.id)}
                 isDisabled={!helper}

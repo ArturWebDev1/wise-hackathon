@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View, Share } from 'react-native';
-import { Input, Label, Slider, Switch } from 'heroui-native';
+import { Input, Label, Slider } from 'heroui-native';
 import { Check, Send, SlidersHorizontal, UserRoundPlus } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import {
@@ -20,12 +20,22 @@ import { Detail } from './detail';
 import { HelperOnly, goBack } from './helper-only';
 import { BareHeader, H1, Page } from './page';
 import { usePeople } from './people-store';
+import { WiseSwitch } from './wise-switch';
 
 type Stage = 'who' | 'rules' | 'invite' | 'done';
 const RELATIONSHIPS = ['Mom', 'Dad', 'Grandma', 'Grandpa', 'Other'];
+const NAME_PATTERN = /^\p{L}[\p{L}\s'’-]{1,59}$/u;
+
+function nameError(name: string, taken: string[]) {
+  if (!name) return 'Enter the person’s name.';
+  if (!NAME_PATTERN.test(name)) return 'Use letters only, at least 2 of them.';
+  if (taken.includes(name.toLowerCase())) return 'You already protect this person.';
+  return '';
+}
 
 export function AddPerson() {
   const add = usePeople((s) => s.add);
+  const people = usePeople((s) => s.people);
   const [stage, setStage] = useState<Stage>('who');
   const [name, setName] = useState('');
   const [choice, setChoice] = useState('Mom');
@@ -33,11 +43,14 @@ export function AddPerson() {
   const [limit, setLimit] = useState(250);
   const [checkNew, setCheckNew] = useState(true);
   const [error, setError] = useState('');
-  const person = name.trim();
+  const person = name.trim().replace(/\s+/g, ' ');
   const relationship = choice === 'Other' ? other.trim() : choice;
   const toRules = () => {
-    if (!person || !relationship) {
-      setError(person ? 'Write who they are to you.' : 'Enter the person’s name.');
+    const problem =
+      nameError(person, ['maria kask', ...people.map((p) => p.name.toLowerCase())]) ||
+      (relationship ? '' : 'Write who they are to you.');
+    if (problem) {
+      setError(problem);
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return;
     }
@@ -178,7 +191,7 @@ export function AddPerson() {
             icon={UserRoundPlus}
             compact
             trailing={
-              <Switch
+              <WiseSwitch
                 accessibilityLabel="Ask for any new person"
                 isSelected={checkNew}
                 onSelectedChange={setCheckNew}

@@ -115,7 +115,7 @@ export function FullPayments() {
                 Your Wisetag
               </Copy>
               <Copy size={15} color="#4A4A47">
-                {helper ? '@nikita1147' : '@maria1147'}
+                @yourwisetag
               </Copy>
             </View>
           </View>
