@@ -1,13 +1,12 @@
-import { Stack, useLocalSearchParams } from 'expo-router';
-import { Screen } from '@/components/wise';
+import { useLocalSearchParams } from 'expo-router';
+import { Page } from '@/features/helper/page';
 import { PersonScreen } from '@/features/helper/person-screen';
 
 export default function FamilyPerson() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   return (
-    <Screen>
-      <Stack.Screen options={{ title: 'Family protection', headerRight: () => null }} />
+    <Page>
       <PersonScreen id={id} />
-    </Screen>
+    </Page>
   );
 }

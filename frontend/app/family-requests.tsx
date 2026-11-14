@@ -1,12 +1,10 @@
-import { Stack } from 'expo-router';
-import { Screen } from '@/components/wise';
+import { Page } from '@/features/helper/page';
 import { RequestsList } from '@/features/helper/requests-list';
 
-export default function Requests() {
+export default function Route() {
   return (
-    <Screen>
-      <Stack.Screen options={{ title: 'Requests', headerRight: () => null }} />
+    <Page>
       <RequestsList />
-    </Screen>
+    </Page>
   );
 }

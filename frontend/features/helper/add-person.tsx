@@ -18,6 +18,7 @@ import { money } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
 import { Detail } from './detail';
 import { HelperOnly, goBack } from './helper-only';
+import { BareHeader, H1, Page } from './page';
 import { usePeople } from './people-store';
 
 type Stage = 'who' | 'rules' | 'invite' | 'done';
@@ -65,6 +66,7 @@ export function AddPerson() {
           }
           style={{ justifyContent: 'center', alignItems: 'center', paddingVertical: 48, gap: 16 }}
         >
+          <BareHeader />
           <IconCircle icon={Check} size={88} background={`${c.green}99`} color={c.forest} />
           <Heading center>Invite sent.</Heading>
           <Copy size={17} color={c.muted} style={{ textAlign: 'center' }}>
@@ -76,8 +78,8 @@ export function AddPerson() {
   return (
     <HelperOnly>
       {stage === 'who' ? (
-        <Screen footer={<Pill onPress={toRules}>Continue</Pill>}>
-          <Heading>Who do you want to protect?</Heading>
+        <Page footer={<Pill onPress={toRules}>Continue</Pill>}>
+          <H1>Who do you want to protect?</H1>
           <View style={styles.section}>
             <Label>
               <Label.Text style={{ fontSize: 20, fontFamily: 'Inter_600SemiBold' }}>
@@ -135,9 +137,9 @@ export function AddPerson() {
             </View>
           ) : null}
           {error ? <ErrorCopy>{error}</ErrorCopy> : null}
-        </Screen>
+        </Page>
       ) : stage === 'rules' ? (
-        <Screen
+        <Page
           footer={
             <View style={{ gap: 12 }}>
               <Pill onPress={() => setStage('invite')}>Continue</Pill>
@@ -145,7 +147,7 @@ export function AddPerson() {
             </View>
           }
         >
-          <Heading>Set the safety net</Heading>
+          <H1>Set the safety net</H1>
           <DashedCard title={`Ask me above ${money(limit)}`} icon={SlidersHorizontal} compact>
             <Slider
               value={limit}
@@ -186,9 +188,9 @@ export function AddPerson() {
           <Copy size={16} color={c.muted}>
             You can change this any time in Protection rules.
           </Copy>
-        </Screen>
+        </Page>
       ) : (
-        <Screen
+        <Page
           footer={
             <View style={{ gap: 12 }}>
               <Pill icon={Send} onPress={sendInvite}>
@@ -198,7 +200,7 @@ export function AddPerson() {
             </View>
           }
         >
-          <Heading>{`Invite ${person}?`}</Heading>
+          <H1>{`Invite ${person}?`}</H1>
           <GreyCard style={{ padding: 20, gap: 12 }}>
             <Detail label="Who" value={`${person} · ${relationship}`} bold />
             <Detail label="Ask me above" value={money(limit)} />
@@ -207,7 +209,7 @@ export function AddPerson() {
           <Copy size={16} color={c.muted}>
             {`${person} gets a link for 24 hours. They confirm it’s them and agree that you protect them.`}
           </Copy>
-        </Screen>
+        </Page>
       )}
     </HelperOnly>
   );

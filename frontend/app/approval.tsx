@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View, Pressable } from 'react-native';
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Check, Phone, ShieldCheck, X } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import {
@@ -18,8 +18,9 @@ import { useWise, money } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
 import { timeAgo } from '@/features/helper/time-ago';
 import { Detail } from '@/features/helper/detail';
+import { BareHeader } from '@/features/helper/page';
 
-const noClose = <Stack.Screen options={{ headerRight: () => null }} />;
+const noClose = <BareHeader />;
 
 export default function Approval() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -96,6 +97,7 @@ export default function Approval() {
   }
   return (
     <Screen
+      style={{ padding: 16, gap: 24 }}
       footer={
         pending ? (
           <View style={{ gap: 12 }}>
