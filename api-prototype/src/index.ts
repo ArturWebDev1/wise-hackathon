@@ -101,7 +101,7 @@ async function connectToDatabase() {
 }
 
 await connectToDatabase();
-const server = app.listen(port, () => console.log(`Wise Lite API on http://localhost:${port}`));
+const server = app.listen(port, () => console.log(`Wise Care API on http://localhost:${port}`));
 server.on('error', (error) => {
   console.error(`Could not start the API on port ${port}:`, error.message);
   process.exit(1);

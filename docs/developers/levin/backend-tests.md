@@ -1,4 +1,4 @@
-# WiseEASE backend checks
+# Wise Care backend checks
 
 Branch `codex/levin-backend-tests`, based on `main` at `2cf86da`.
 
@@ -16,4 +16,4 @@ Use Java 21 and PostgreSQL. Run `docker compose up -d --wait postgres` from the 
 
 ## Result
 
-On November 14, 2026, `mvnw.cmd --batch-mode --no-transfer-progress verify` succeeded on Java 21 and PostgreSQL 17.12. All 25 WiseEASE checks and the `/api/status` check passed. Maven built the executable JAR. The test covered Maria and Nikita's scenario over HTTP. Expo UI verification is a separate check.
+On November 14, 2026, `mvnw.cmd --batch-mode --no-transfer-progress verify` succeeded on Java 21 and PostgreSQL 17.12. All 25 Wise Care checks and the `/api/status` check passed. Maven built the executable JAR. The test covered Maria and Nikita's scenario over HTTP. Expo UI verification is a separate check.

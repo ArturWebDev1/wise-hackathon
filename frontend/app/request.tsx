@@ -36,7 +36,7 @@ function RequestMoneyContent() {
   const [shared, setShared] = useState(false);
   const amount = Math.round(Number(value.replace(',', '.')) * 100) / 100;
   const link = `https://example.com/wise-lite/request/${encodeURIComponent(account.wiseId)}?amount=${amount}`;
-  const message = `Hi ${recipient?.name}, ${account.name} is asking for ${money(amount)}. Wise Lite hackathon demo — no real money. ${link}`;
+  const message = `Hi ${recipient?.name}, ${account.name} is asking for ${money(amount)}. Wise Care hackathon demo — no real money. ${link}`;
   const next = () => {
     if (!Number.isFinite(amount) || amount <= 0) {
       setError('Enter an amount greater than zero.');

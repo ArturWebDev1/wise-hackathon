@@ -1,4 +1,4 @@
-# WiseEASE Expo and Spring integration
+# Wise Care Expo and Spring integration
 
 Branch `codex/levin-expo-spring-integration` is based on `main` after the Spring backend merged in PR #6. The frontend was updated from `main` after PR #7 (`69d511c`). The goal is to verify the existing Maria and Nikita flow using the team's screens.
 

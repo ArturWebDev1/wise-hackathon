@@ -63,7 +63,7 @@ export function AddPerson() {
     setStage('done');
     // The share sheet is a bonus: it may never answer on desktop browsers, so nothing waits for it.
     Share.share({
-      message: `Hi ${person}, Nikita invited you to Wise Lite so he can help keep your money safe. Wise Lite hackathon demo — no real money. https://example.com/wise-lite/invite/${encodeURIComponent(person.toLowerCase())}`,
+      message: `Hi ${person}, Nikita invited you to Wise Care so he can help keep your money safe. Wise Care hackathon demo — no real money. https://example.com/wise-lite/invite/${encodeURIComponent(person.toLowerCase())}`,
     }).catch(() => {});
   };
   const back = (to: Stage) => <Pill tone="white" onPress={() => setStage(to)}>Back</Pill>;

@@ -1,4 +1,4 @@
-# WiseEASE backend decisions
+# Wise Care backend decisions
 
 | Decision | How it works | Where to look |
 | --- | --- | --- |

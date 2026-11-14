@@ -1,4 +1,4 @@
--- Wise Lite prototype tables. The wl_ prefix keeps them apart from the Spring Boot schema.
+-- Wise Care prototype tables. The wl_ prefix keeps them apart from the Spring Boot schema.
 CREATE TABLE IF NOT EXISTS wl_settings (
   id integer PRIMARY KEY DEFAULT 1 CHECK (id = 1),
   balance numeric(12, 2) NOT NULL,

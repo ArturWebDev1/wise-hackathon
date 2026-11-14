@@ -176,9 +176,9 @@ export default function RootLayout() {
           <Stack.Screen name="approval" options={{ title: 'Check transfer' }} />
           <Stack.Screen name="rules" options={{ title: 'Protection rules' }} />
           <Stack.Screen name="onboarding" options={{ title: 'Trusted Helper' }} />
-          <Stack.Screen name="roles" options={{ title: 'Wise Lite' }} />
+          <Stack.Screen name="roles" options={{ title: 'Wise Care' }} />
           <Stack.Screen name="full" options={{ title: 'Wise' }} />
-          <Stack.Screen name="switch-mode" options={{ title: 'Wise Lite' }} />
+          <Stack.Screen name="switch-mode" options={{ title: 'Wise Care' }} />
         </Stack>
         <InstallPrompt />
       </HeroUINativeProvider>

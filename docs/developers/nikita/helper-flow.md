@@ -17,7 +17,7 @@ Nikita opens “Family protection” from regular Wise and sees Maria's requests
    `app/family-add.tsx`: Add a person by entering their name and relationship, choosing a threshold and the new-recipient check, then sharing an invitation with a 24-hour link. Finish with “Invite sent.”
 4. `app/family-requests.tsx`: Show all pending requests and a separate list of decided requests.
 5. `app/family-history.tsx`: Show all Maria's transfers.
-6. For Nikita, `(tabs)/index.tsx` redirects to `/full`. `full/_layout.tsx` hides the “Back to Wise Lite” strip. `full/index.tsx` shows an approval banner or a “Family protection” card.
+6. For Nikita, `(tabs)/index.tsx` redirects to `/full`. `full/_layout.tsx` hides the “Back to Wise Care” strip. `full/index.tsx` shows an approval banner or a “Family protection” card.
 
 Screens in steps 3–5 live at the root of `app/` as regular Stack screens like `approval` and `rules`. As hidden tabs under `app/full/`, they were redirected back to `/full` by `(tabs)/index`.
 
@@ -49,7 +49,7 @@ At the developer's direction, changes were made in `app/(tabs)/index.tsx` (Nikit
 ## Backend integration notes
 
 - The account avatar and name (MA / NG) come from `accountFor(role)` in `lib/wise-store.ts`. Use `account` from the `POST /auth/login` response after connecting Spring.
-- Lite looks up new recipients by Wise ID in `features/lite/demo-accounts.ts`. Replace this with `GET /recipients/lookup?wiseId=`.
+- Wise Care looks up new recipients by Wise ID in `features/lite/demo-accounts.ts`. Replace this with `GET /recipients/lookup?wiseId=`.
 
 ## Limitations
 

@@ -751,7 +751,7 @@ class WiseEaseApiTest {
                 execute("CREATE SCHEMA " + NAME);
                 created = true;
             } catch (SQLException error) {
-                throw new IllegalStateException("Could not create isolated PostgreSQL schema for WiseEASE tests", error);
+                throw new IllegalStateException("Could not create isolated PostgreSQL schema for Wise Care tests", error);
             }
             testUrl = url.matches(".*[?&]currentSchema=[^&]*.*")
                 ? url.replaceFirst("([?&]currentSchema=)[^&]*", "$1" + NAME)

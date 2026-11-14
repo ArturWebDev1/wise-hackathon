@@ -1,6 +1,6 @@
 # Spring Boot backend
 
-The backend uses Java 21 and PostgreSQL. WiseEASE code lives in `src/main/java/com/team/hackathon/features/wiselite/`. See the [roadmap](../docs/developers/levin/spring-boot-backend.md) and [decision notes](../docs/developers/levin/spring-boot-decisions.md) for implementation details.
+The backend uses Java 21 and PostgreSQL. Wise Care code lives in `src/main/java/com/team/hackathon/features/wiselite/`. See the [roadmap](../docs/developers/levin/spring-boot-backend.md) and [decision notes](../docs/developers/levin/spring-boot-decisions.md) for implementation details.
 
 ## Run on Windows
 
@@ -43,7 +43,7 @@ With fresh demo data, the state shows a €4,000 balance and three transfers in 
 
 ## Code and checks
 
-- `api/WiseEaseController.java` handles HTTP entry points, sessions, and WiseEASE routes.
+- `api/WiseEaseController.java` handles HTTP entry points, sessions, and Wise Care routes.
 - `application/Transfers.java` handles approval reasons, transactions, expiration, and decisions.
 - `application/Households.java` provides the account snapshot, history, settings, and money requests.
 - `application/Sessions.java` handles sign-in and session token validation.
