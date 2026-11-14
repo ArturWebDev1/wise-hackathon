@@ -1,8 +1,17 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Constants from 'expo-constants';
-import { Platform } from 'react-native';
+import { AppState, Platform } from 'react-native';
+import { initialsOf, isRisky } from './rules';
+import {
+  ApiError,
+  demoLogin,
+  request,
+  type ApprovalReason,
+  type Person,
+  type SpringMutation,
+  type SpringState,
+} from './wise-spring-api';
 
 export type Role = 'maria' | 'nikita';
 export type RuleKey = 'limit' | 'checkNew' | 'scamPause';
@@ -40,7 +49,6 @@ export type SharedData = {
   inviteSent: boolean;
   consent: boolean;
 };
-type ApiResponse = { id?: string; state: SharedData };
 type WiseState = SharedData & {
   role: Role | null;
   ready: boolean;
@@ -64,76 +72,175 @@ export const recipients: Recipient[] = [
 ];
 
 const POLL_INTERVAL_MS = 1500;
-const REQUEST_TIMEOUT_MS = 8000;
-const API_PORT = 3001;
-
-function apiBase() {
-  if (process.env.EXPO_PUBLIC_API_URL) return process.env.EXPO_PUBLIC_API_URL;
-  const host =
-    Platform.OS === 'web' ? window.location.hostname : Constants.expoConfig?.hostUri?.split(':')[0];
-  return `http://${host ?? 'localhost'}:${API_PORT}`;
-}
-
-async function request<T>(
-  method: 'GET' | 'POST' | 'PUT',
-  path: string,
-  body?: unknown,
-): Promise<T> {
-  let response: Response;
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-  try {
-    response = await fetch(`${apiBase()}${path}`, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      signal: controller.signal,
-      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-    });
-  } catch {
-    throw new Error('Can’t reach the server. Check your connection and try again.');
-  } finally {
-    clearTimeout(timeout);
-  }
-  const data: T & { error?: string } = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.error ?? 'Something went wrong. Try again.');
-  return data;
-}
+const EMPTY_STATE: SharedData = {
+  balance: 0,
+  transfers: [],
+  limit: null,
+  checkNew: true,
+  scamPause: false,
+  favouriteIds: [],
+  protectionOffAt: {},
+  inviteSent: false,
+  consent: true,
+};
 
 let hydrated = false;
-/** Counts applied changes, so a slow poll can't overwrite a newer answer from the server. */
 let changeCount = 0;
-let loaded = false;
-function markReady() {
-  if (hydrated && loaded) useWise.setState({ ready: true });
+let mutationCount = 0;
+let session: { role: Role; token: string } | undefined;
+let signingIn: { role: Role; promise: Promise<string> } | undefined;
+let syncStarted = false;
+let refreshAfterHydration: (() => void) | undefined;
+const pendingTransfers = new Map<string, { key: string; reasons?: ApprovalReason[] }>();
+
+function recipientView(person: Person): Recipient {
+  return (
+    recipients.find((known) => known.id === person.id) ?? {
+      id: person.id,
+      name: person.name,
+      initials: initialsOf(person.name),
+      relationship: '',
+    }
+  );
+}
+
+function toSharedState(state: SpringState): SharedData {
+  return {
+    ...EMPTY_STATE,
+    balance: state.accountBalance,
+    limit: state.limit,
+    checkNew: state.checkNew,
+    favouriteIds: state.recipients.map((person) => person.id),
+    transfers: state.transfers.map((item) => ({
+      ...item,
+      recipient: recipientView(item.recipient),
+      sender: item.sender ? recipientView(item.sender) : undefined,
+      pressured: false,
+    })),
+  };
+}
+
+async function authenticate(role: Role) {
+  if (session?.role === role) return session.token;
+  if (signingIn?.role === role) return signingIn.promise;
+
+  const attempt = { role, promise: demoLogin(role) };
+  signingIn = attempt;
+  try {
+    const token = await attempt.promise;
+    if (signingIn === attempt && useWise.getState().role === role) session = { role, token };
+    return token;
+  } finally {
+    if (signingIn === attempt) signingIn = undefined;
+  }
+}
+
+async function withSession<T>(role: Role, action: (token: string) => Promise<T>): Promise<T> {
+  const token = await authenticate(role);
+  try {
+    if (useWise.getState().role !== role) throw new Error('The demo account changed. Try again.');
+    return await action(token);
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401 && session?.token === token) {
+      session = undefined;
+    }
+    throw error;
+  }
+}
+
+async function unavailable(message: string): Promise<never> {
+  throw new Error(message);
 }
 
 export const useWise = create<WiseState>()(
   persist(
-    (set) => {
-      /** Sends a change to the server and applies the state it returns. */
-      const send = async (method: 'POST' | 'PUT', path: string, body?: unknown) => {
-        const { id, state } = await request<ApiResponse>(method, path, body);
-        changeCount++;
-        set(state);
-        return id ?? '';
-      };
+    (set, get) => {
+      async function mutate(action: (token: string) => Promise<SpringMutation>) {
+        const role = get().role;
+        if (!role) throw new Error('Choose a demo account first.');
+        const startedAt = ++changeCount;
+        mutationCount++;
+        try {
+          const result = await withSession(role, action);
+          if (startedAt === changeCount && get().role === role) {
+            set({ ...toSharedState(result.state), ready: true, offline: false });
+          }
+          return result.id ?? '';
+        } finally {
+          mutationCount--;
+        }
+      }
+
+      const send = (method: 'POST' | 'PUT', path: string, body: unknown) =>
+        mutate((token) => request<SpringMutation>(method, path, token, body));
+
       return {
-        balance: 0,
-        transfers: [],
-        limit: null,
-        checkNew: true,
-        scamPause: true,
-        favouriteIds: [],
-        protectionOffAt: {},
-        inviteSent: false,
-        consent: false,
+        ...EMPTY_STATE,
         role: null,
         ready: false,
         offline: false,
-        setRole: (role) => set({ role }),
-        submit: (recipient, amount, pressured) =>
-          send('POST', '/transfers', { recipient, amount, pressured }),
-        sendToMaria: (amount) => send('POST', '/transfers/send-to-maria', { amount }),
+        setRole: (role) => {
+          if (get().role === role) return;
+          changeCount++;
+          const previous = session;
+          session = undefined;
+          signingIn = undefined;
+          set({ ...EMPTY_STATE, role, ready: !role, offline: false });
+          if (previous) void request('POST', '/auth/logout', previous.token).catch(() => undefined);
+        },
+        submit: (recipient, amount, pressured) => {
+          if (pressured) return unavailable('Scam Pause is unavailable in this demo.');
+          if (recipient.iban)
+            return unavailable('This demo can send only to existing Wise accounts.');
+          const operation = JSON.stringify([get().role, recipient.id, amount]);
+          const attempt = pendingTransfers.get(operation) ?? {
+            key: [
+              Date.now(),
+              Math.random().toString(36).slice(2),
+              Math.random().toString(36).slice(2),
+            ].join('-'),
+          };
+          pendingTransfers.set(operation, attempt);
+          const expectedApproval = isRisky(get(), recipient, amount);
+          return mutate(async (token) => {
+            try {
+              const payment = { recipientId: recipient.id, amount };
+              if (!attempt.reasons) {
+                const { reasons } = await request<{ reasons: ApprovalReason[] }>(
+                  'POST',
+                  '/transfers/preview',
+                  token,
+                  payment,
+                );
+                if (reasons.length > 0 !== expectedApproval) {
+                  throw new ApiError(409, 'Protection rules changed. Review the transfer again.');
+                }
+                attempt.reasons = reasons;
+              }
+              const result = await request<SpringMutation>(
+                'POST',
+                '/transfers',
+                token,
+                { ...payment, expectedReasons: attempt.reasons },
+                attempt.key,
+              );
+              pendingTransfers.delete(operation);
+              return result;
+            } catch (error) {
+              if (
+                error instanceof ApiError &&
+                error.status >= 400 &&
+                error.status < 500 &&
+                error.status !== 401
+              ) {
+                pendingTransfers.delete(operation);
+              }
+              throw error;
+            }
+          });
+        },
+        sendToMaria: () =>
+          unavailable('Sending to Maria from this screen is unavailable in this demo.'),
         decide: async (id, approve) => {
           await send('POST', `/transfers/${id}/decision`, { approve });
         },
@@ -141,20 +248,21 @@ export const useWise = create<WiseState>()(
           await send('PUT', '/settings/limit', { limit });
         },
         toggleRule: async (key, enabled) => {
-          await send('PUT', `/settings/rules/${key}`, { enabled });
+          if (key === 'checkNew') {
+            await send('PUT', '/settings/rules/checkNew', { enabled });
+            return;
+          }
+          await unavailable(
+            key === 'limit'
+              ? 'The approval threshold is always enabled.'
+              : 'Scam Pause is unavailable in this demo.',
+          );
         },
-        toggleFavourite: async (id) => {
-          await send('POST', `/settings/favourites/${id}/toggle`);
-        },
-        invite: async () => {
-          await send('POST', '/invite');
-        },
-        agree: async () => {
-          await send('POST', '/consent');
-        },
-        reset: async () => {
-          await send('POST', '/reset');
-        },
+        toggleFavourite: () => unavailable('This list is based on completed transfers.'),
+        invite: () => unavailable('Maria and Nikita are already linked for this demo.'),
+        agree: () => unavailable('Maria and Nikita are already linked for this demo.'),
+        reset: () =>
+          unavailable('This demo has no reset action. Use a fresh demo database schema.'),
       };
     },
     {
@@ -163,31 +271,75 @@ export const useWise = create<WiseState>()(
       partialize: (s) => ({ role: s.role }),
       onRehydrateStorage: () => () => {
         hydrated = true;
-        markReady();
+        queueMicrotask(() => useWise.setState({ ready: !useWise.getState().role }));
+        refreshAfterHydration?.();
       },
     },
   ),
 );
 
-async function pull() {
-  const startedAt = changeCount;
-  try {
-    const state = await request<SharedData>('GET', '/state');
-    loaded = true;
-    useWise.setState(startedAt === changeCount ? { ...state, offline: false } : { offline: false });
-    markReady();
-  } catch {
-    useWise.setState({ offline: true });
-  }
-}
-
-let polling = false;
-/** Keeps the store in step with the server, so both phones see each other's changes. */
+/** Polls one snapshot at a time while the app is active. */
 export function startSync() {
-  if (polling) return;
-  polling = true;
+  if (syncStarted) return;
+  syncStarted = true;
+  const web = Platform.OS === 'web' && typeof document !== 'undefined';
+  const active = () => (web ? !document.hidden : AppState.currentState === 'active');
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let running = false;
+  let refresh = false;
+
+  const schedule = () => {
+    clearTimeout(timer);
+    if (active() && useWise.getState().role) {
+      timer = setTimeout(() => void pull(), POLL_INTERVAL_MS);
+    }
+  };
+  const pull = async () => {
+    const role = useWise.getState().role;
+    if (!hydrated || !role || !active()) return;
+    if (running) {
+      refresh = true;
+      return;
+    }
+    if (mutationCount > 0) {
+      schedule();
+      return;
+    }
+    running = true;
+    const startedAt = changeCount;
+    try {
+      const state = await withSession(role, (token) =>
+        request<SpringState>('GET', '/state', token),
+      );
+      if (startedAt === changeCount && useWise.getState().role === role) {
+        useWise.setState({ ...toSharedState(state), ready: true, offline: false });
+      }
+    } catch {
+      if (startedAt === changeCount && useWise.getState().role === role) {
+        useWise.setState({ offline: true });
+      }
+    } finally {
+      running = false;
+      if (refresh) {
+        refresh = false;
+        void pull();
+      } else schedule();
+    }
+  };
+
+  useWise.subscribe((current, previous) => {
+    if (current.role === previous.role) return;
+    clearTimeout(timer);
+    if (current.role) void pull();
+  });
+  const onActiveChange = () => {
+    clearTimeout(timer);
+    if (active()) void pull();
+  };
+  if (web) document.addEventListener('visibilitychange', onActiveChange);
+  else AppState.addEventListener('change', onActiveChange);
+  refreshAfterHydration = () => void pull();
   void pull();
-  setInterval(() => void pull(), POLL_INTERVAL_MS);
 }
 
 export { isRisky, initialsOf, validIban } from './rules';

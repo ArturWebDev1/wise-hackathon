@@ -19,7 +19,7 @@ cd backend
 
 На macOS и Linux из `backend/` используй `./mvnw spring-boot:run`. API слушает `http://localhost:8080`. `/api/status` проверяет доступность базы. Аккаунты Марии и Никиты доступны по `maria@example.com` и `nikita@example.com` с демопаролем `WiseEaseDemo!`. Wise ID для знакомого получателя — `olga`, для нового — `anna`.
 
-Подключение Expo к Spring входит в задачу фронтенда. Эта ветка предоставляет API и демоданные. Проверить их отдельно можно командами ниже.
+В этой ветке существующие кнопки Марии и Никиты открывают демосессии Spring. Из `frontend/` запусти `npm ci`, затем `npm run start -- --go --lan` для Expo Go или `npm run start -- --web` для браузера. По умолчанию клиент использует порт `8080` на хосте Expo. `EXPO_PUBLIC_API_URL` позволяет переопределить адрес. На телефоне укажи LAN IP компьютера со Spring. Веб-адрес вне стандартного порта Expo задаётся через `WISEEASE_CORS_ORIGIN_PATTERN` на сервере.
 
 ## Схема PostgreSQL и демоданные
 

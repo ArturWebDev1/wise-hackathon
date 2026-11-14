@@ -75,8 +75,8 @@ public class Households {
         var allowed = protection.requestPeople();
         var requestPeople = allowed.isEmpty() ? List.<Person>of()
                 : accounts.findByIdInOrderByDisplayNameAscIdAsc(allowed).stream().map(Households::person).toList();
-        return new State(account(signedIn, helper), ownerId, balance, protection.threshold(), protection.checkNew(),
-                items, recipients, requestPeople);
+        return new State(account(signedIn, helper), ownerId, balance, signedIn.balance(), protection.threshold(),
+                protection.checkNew(), items, recipients, requestPeople);
     }
 
     @Transactional
@@ -167,6 +167,7 @@ public class Households {
             String status, long createdAt, Long expiresAt, boolean expired, List<String> approvalReasons,
             boolean aboveLimit, boolean isNew, BigDecimal limitAtCreation) {}
 
-    public record State(Account account, String ownerId, BigDecimal balance, BigDecimal limit, boolean checkNew,
+    public record State(Account account, String ownerId, BigDecimal balance, BigDecimal accountBalance,
+            BigDecimal limit, boolean checkNew,
             List<Transfer> transfers, List<Person> recipients, List<Person> requestPeople) {}
 }

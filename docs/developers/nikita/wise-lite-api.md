@@ -18,7 +18,7 @@
 
 ## Снимок состояния
 
-`GET /state` возвращает `{ account, ownerId, balance, limit, checkNew, transfers, recipients, requestPeople }`. Помощник видит историю, настройки и список семьи, а `balance` для его роли равен `null`. `recipients` и `requestPeople` — массивы `{ id, wiseId, name }`. Первый формируется из успешных переводов. Второй задаёт помощник.
+`GET /state` возвращает `{ account, ownerId, balance, accountBalance, limit, checkNew, transfers, recipients, requestPeople }`. `accountBalance` — собственный баланс вошедшего аккаунта. `balance` — баланс защищаемого счёта. Для помощника он равен `null`. Помощник видит историю и настройки семьи. `recipients` и `requestPeople` — массивы `{ id, wiseId, name }`. Первый формируется из успешных переводов. Второй задаёт помощник.
 
 Операция содержит `id`, `direction` (`incoming` или `outgoing`), `recipient`, `sender` (для входящих), `amount`, `status`, `createdAt`, `expiresAt`, `expired`, `approvalReasons`, `aboveLimit`, `isNew` и `limitAtCreation`. Входящие операции содержат только завершённые зачисления. Статусы исходящих операций — `sent`, `pending`, `approved`, `declined`. `approved` означает, что списание и зачисление уже завершены в БД. Операция после истечения срока возвращается как `declined` с `expired: true`.
 
