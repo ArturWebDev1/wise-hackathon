@@ -43,6 +43,19 @@ On PowerShell, use `npm.cmd` if the execution policy blocks `npm.ps1`.
 
 Spring reads the root `.env` and serves [its status endpoint](http://localhost:8080/api/status). For a different Spring host or port, see `frontend/.env.example` for the Expo API URL.
 
+## Two phones with Expo Go (Maria and Nikita)
+
+Both phones and the computer must be on the same Wi-Fi. Spring runs in Docker but must listen on the network, not only on localhost:
+
+```sh
+BIND_ADDRESS=0.0.0.0 docker compose up -d --build --wait postgres backend
+cd frontend && npm ci && npx expo start --lan
+```
+
+Scan the QR code with Expo Go on both phones. On phone one choose **I'm Maria**, on phone two **I'm Nikita**: each phone keeps its own session, so both talk to the same Spring server and see each other's changes within about two seconds. The app finds Spring at the same host as Expo on port 8080; leave `EXPO_PUBLIC_API_URL` unset (or point it at `http://<computer LAN IP>:8080`).
+
+CORS is only a browser rule and does not apply to Expo Go. A browser on another origin needs `WISEEASE_CORS_ORIGIN_PATTERN` (default `http://*:8081`). If a phone cannot connect, allow incoming connections for Docker and Node in the macOS firewall and check the computer's current LAN IP (it changes between networks).
+
 ## Start a task
 
 1. Tell Codex your name: Artur, Nikita, Gruba, Levin, or Kurban. It reads your `docs/developers/<name>/README.md` for language and note location.
