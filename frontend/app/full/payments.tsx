@@ -8,6 +8,7 @@ import {
 } from 'lucide-react-native';
 import { Screen, Heading, DashedCard, Copy } from '@/components/wise';
 import { useWise } from '@/lib/wise-store';
+import { openDemo } from '@/features/helper/demo';
 export default function Payments() {
   const helper = useWise((s) => s.role) === 'nikita';
   return (
@@ -25,25 +26,25 @@ export default function Payments() {
         title="Request money"
         icon={ArrowDownLeft}
         compact
-        onPress={() => router.push('/request')}
+        onPress={() => openDemo('Request money')}
       />
       <DashedCard
         title="Scheduled transfers"
         icon={CalendarClock}
         compact
-        onPress={() => router.push('/send')}
+        onPress={() => openDemo('Scheduled transfers')}
       />
       <DashedCard
         title="Direct debits"
         icon={Landmark}
         compact
-        onPress={() => router.push('/rules')}
+        onPress={() => openDemo('Direct debits')}
       />
       <DashedCard
         title="Send money"
         icon={ArrowLeftRight}
         compact
-        onPress={() => router.push('/send')}
+        onPress={() => router.push(helper ? '/send-maria' : '/send')}
       />
       <Copy size={14}>Full Wise demo · No real payments</Copy>
     </Screen>

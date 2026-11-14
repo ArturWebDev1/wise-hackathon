@@ -16,6 +16,7 @@ import {
 import { Screen, TopBar, Copy, Pill, DashedCard, IconCircle } from '@/components/wise';
 import { wise as c } from '@/lib/wise-theme';
 import { useWise, money } from '@/lib/wise-store';
+import { openDemo } from '@/features/helper/demo';
 
 export default function FullHome() {
   const balance = useWise((s) => s.balance);
@@ -23,28 +24,33 @@ export default function FullHome() {
   const pending = useWise((s) => s.transfers.filter((t) => t.status === 'pending').length);
   return (
     <Screen style={{ padding: 20, gap: 20 }}>
-      <TopBar full />
+      <TopBar full helper={helper} />
       <View style={{ gap: 4 }}>
         <Copy size={13} color={c.muted}>
-          Total balance
+          {helper ? 'You protect' : 'Total balance'}
         </Copy>
         <Copy bold size={37} style={{ letterSpacing: -1.7 }}>
-          {money(balance, true)}
+          {helper ? 'Maria (Mom)' : money(balance, true)}
         </Copy>
       </View>
       <View style={{ flexDirection: 'row', gap: 7 }}>
         <View style={{ flex: 1 }}>
-          <Pill small dense icon={ArrowUpRight} onPress={() => router.push('/send')}>
+          <Pill
+            small
+            dense
+            icon={ArrowUpRight}
+            onPress={() => router.push(helper ? '/send-maria' : '/send')}
+          >
             Send
           </Pill>
         </View>
         <View style={{ flex: 1.5 }}>
-          <Pill small dense icon={Plus} tone="pale" onPress={() => router.push('/full/payments')}>
+          <Pill small dense icon={Plus} tone="pale" onPress={() => openDemo('Add money')}>
             Add money
           </Pill>
         </View>
         <View style={{ flex: 1.1 }}>
-          <Pill small dense icon={Upload} tone="pale" onPress={() => router.push('/full/payments')}>
+          <Pill small dense icon={Upload} tone="pale" onPress={() => openDemo('Upload')}>
             Upload
           </Pill>
         </View>
@@ -73,7 +79,7 @@ export default function FullHome() {
         )
       ) : null}
       <Pressable
-        onPress={() => router.push('/onboarding')}
+        onPress={() => openDemo('Start using Wise')}
         style={{
           backgroundColor: c.yellow,
           borderRadius: 24,
@@ -100,7 +106,7 @@ export default function FullHome() {
             <SmallCard
               title="Add a currency"
               icon={Wallet}
-              onPress={() => router.push('/full/payments')}
+              onPress={() => openDemo('Add a currency')}
             />
           </View>
           <View style={{ flex: 1 }}>
@@ -116,14 +122,14 @@ export default function FullHome() {
             <SmallCard
               title="Get account details"
               icon={Landmark}
-              onPress={() => router.push('/full/payments')}
+              onPress={() => openDemo('Account details')}
             />
           </View>
           <View style={{ flex: 1 }}>
             <SmallCard
               title="Your returns"
               icon={TrendingUp}
-              onPress={() => router.push('/full/payments')}
+              onPress={() => openDemo('Your returns')}
             />
           </View>
         </View>
@@ -133,7 +139,7 @@ export default function FullHome() {
           Explore
         </Copy>
         <Pressable
-          onPress={() => router.push('/onboarding')}
+          onPress={() => openDemo('Invite friends')}
           style={{ backgroundColor: c.forest, borderRadius: 24, padding: 22, gap: 15 }}
         >
           <Gift size={32} color={c.green} strokeWidth={1.8} />
@@ -149,7 +155,7 @@ export default function FullHome() {
         title="Wise Business"
         icon={Landmark}
         compact
-        onPress={() => router.push('/onboarding')}
+        onPress={() => openDemo('Wise Business')}
       />
     </Screen>
   );

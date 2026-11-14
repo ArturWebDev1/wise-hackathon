@@ -1,9 +1,11 @@
 import { View } from 'react-native';
 import { CreditCard, Plus, LockKeyhole } from 'lucide-react-native';
-import { router } from 'expo-router';
 import { Screen, Heading, Copy, Pill, DashedCard, WiseMark } from '@/components/wise';
 import { wise as c } from '@/lib/wise-theme';
+import { useWise } from '@/lib/wise-store';
+import { openDemo } from '@/features/helper/demo';
 export default function Cards() {
+  const helper = useWise((s) => s.role) === 'nikita';
   return (
     <Screen>
       <Heading>Cards</Heading>
@@ -22,23 +24,23 @@ export default function Cards() {
         >
           <View>
             <Copy size={14} color={c.forest}>
-              Maria
+              {helper ? 'Nikita' : 'Maria'}
             </Copy>
             <Copy size={20} bold color={c.forest}>
-              •••• 1147
+              {helper ? '•••• 2210' : '•••• 1147'}
             </Copy>
           </View>
           <CreditCard size={36} color={c.forest} />
         </View>
       </View>
-      <Pill small icon={LockKeyhole} tone="pale" onPress={() => router.push('/roles')}>
+      <Pill small icon={LockKeyhole} tone="pale" onPress={() => openDemo('Manage card')}>
         Manage card
       </Pill>
       <DashedCard
         title="Get a digital card"
         icon={Plus}
         compact
-        onPress={() => router.push('/onboarding')}
+        onPress={() => openDemo('Digital card')}
       />
       <Copy size={14} color={c.muted}>
         Demo card · Not available for payments
