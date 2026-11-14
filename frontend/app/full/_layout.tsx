@@ -1,4 +1,5 @@
-import { View, Pressable } from 'react-native';
+import { Pressable } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, Tabs, router } from 'expo-router';
 import { Home, Users, ArrowLeft } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
@@ -32,7 +33,7 @@ function BackToLite() {
 export default function FullLayout() {
   const helper = useWise((s) => s.role) === 'nikita';
   return (
-    <View style={{ flex: 1, backgroundColor: c.white }}>
+    <SafeAreaView edges={['top', 'left', 'right']} style={{ flex: 1, backgroundColor: c.white }}>
       <Stack.Screen options={{ headerShown: false }} />
       {helper ? null : <BackToLite />}
       <Tabs
@@ -87,6 +88,6 @@ export default function FullLayout() {
           }}
         />
       </Tabs>
-    </View>
+    </SafeAreaView>
   );
 }
