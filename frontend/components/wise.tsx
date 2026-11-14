@@ -26,7 +26,7 @@ import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { Svg, Path, Circle } from '@/components/ui/primitives/Svg';
 import { wise as c } from '@/lib/wise-theme';
-import { useWise, recipients, money, dayLabel, type Transfer } from '@/lib/wise-store';
+import { useWise, recipients, money, dayLabel, useAccount, type Transfer } from '@/lib/wise-store';
 
 export function Copy({
   children,
@@ -214,8 +214,11 @@ export function Screen({
 }
 export function WiseMark({ size = 26, color = c.forest }: { size?: number; color?: string }) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 32 32">
-      <Path fill={color} d="M3 5h15l-5 7h9L11 28H4l8-12H4l6-7H3zm18 0h8L15 28h-5L24 9h-6z" />
+    <Svg width={size} height={size} viewBox="150 155 255 245">
+      <Path
+        fill={color}
+        d="M177 155H405L318 400H267L340 197H245L265 232L235 270H287L273 308H150L218 228Z"
+      />
     </Svg>
   );
 }
@@ -314,7 +317,8 @@ export function IconCircle({
     </View>
   );
 }
-export function TopBar({ helper = false, full = false }: { helper?: boolean; full?: boolean }) {
+export function TopBar() {
+  const account = useAccount();
   return (
     <View
       style={{
@@ -325,11 +329,9 @@ export function TopBar({ helper = false, full = false }: { helper?: boolean; ful
       }}
     >
       <Pressable onPress={() => router.push('/roles')} accessibilityLabel="Switch demo role">
-        <Avatar initials={helper ? 'NG' : 'MA'} size={48} />
+        <Avatar initials={account.initials} size={48} />
       </Pressable>
-      <Pressable
-        onPress={() => router.push(full ? '/onboarding' : '/rules')}
-        accessibilityRole="button"
+      <View
         style={{
           flexDirection: 'row',
           alignItems: 'center',
@@ -340,11 +342,11 @@ export function TopBar({ helper = false, full = false }: { helper?: boolean; ful
           paddingVertical: 12,
         }}
       >
-        {!full ? <ShieldCheck color={c.forest} size={18} strokeWidth={1.8} /> : null}
+        <ShieldCheck color={c.forest} size={18} strokeWidth={1.8} />
         <Copy bold size={13} color={c.forest} numberOfLines={1}>
-          {full ? 'Earn €150' : helper ? 'Trusted Helper' : 'Protected by Nikita'}
+          Protected by Nikita
         </Copy>
-      </Pressable>
+      </View>
     </View>
   );
 }

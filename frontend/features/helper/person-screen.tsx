@@ -1,10 +1,12 @@
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import { Clock3, History, ShieldCheck, SlidersHorizontal } from 'lucide-react-native';
-import { Avatar, Copy, DashedCard, Empty, GreyCard, Heading, Pill } from '@/components/wise';
+import { Copy, Empty, GreyCard, Pill } from '@/components/wise';
 import { initialsOf, money, useWise } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
+import { RingAvatar, WiseCard } from '@/features/fullwise/parts';
 import { Detail } from './detail';
+import { H1, Sub } from './page';
 import { HelperOnly, goBack } from './helper-only';
 import { usePeople } from './people-store';
 
@@ -16,28 +18,31 @@ function Maria() {
   const pending = useWise((s) => s.transfers.filter((t) => t.status === 'pending').length);
   return (
     <>
-      <Heading>Maria (Mom)</Heading>
-      <Copy size={17} color={c.muted}>
-        Protected by you.
-      </Copy>
-      <DashedCard
-        title={pending ? `Requests (${pending})` : 'Requests'}
-        icon={Clock3}
-        compact
-        onPress={() => router.push('/family-requests')}
-      />
-      <DashedCard
-        title="Protection rules"
-        icon={SlidersHorizontal}
-        compact
-        onPress={() => router.push('/rules')}
-      />
-      <DashedCard
-        title="Maria’s history"
-        icon={History}
-        compact
-        onPress={() => router.push('/family-history')}
-      />
+      <H1>Maria Kask</H1>
+      <Sub>Mom · Protected by you.</Sub>
+      <View style={{ gap: 16 }}>
+        <WiseCard
+          title={pending ? `Requests (${pending})` : 'Requests'}
+          text="Approve or decline her risky transfers."
+          icon={Clock3}
+          chevron
+          onPress={() => router.push('/family-requests')}
+        />
+        <WiseCard
+          title="Protection rules"
+          text="Limits and checks for new recipients."
+          icon={SlidersHorizontal}
+          chevron
+          onPress={() => router.push('/rules')}
+        />
+        <WiseCard
+          title="Maria’s history"
+          text="See everything she sent and received."
+          icon={History}
+          chevron
+          onPress={() => router.push('/family-history')}
+        />
+      </View>
     </>
   );
 }
@@ -54,12 +59,10 @@ function AddedPerson({ id }: { id: string }) {
   return (
     <>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-        <Avatar initials={initialsOf(person.name)} size={64} />
+        <RingAvatar initials={initialsOf(person.name)} badge={false} />
         <View style={{ flex: 1, gap: 2 }}>
-          <Heading compact>{person.name}</Heading>
-          <Copy size={17} color={c.muted}>
-            {person.relationship}
-          </Copy>
+          <H1>{person.name}</H1>
+          <Sub>{person.relationship}</Sub>
         </View>
       </View>
       <View

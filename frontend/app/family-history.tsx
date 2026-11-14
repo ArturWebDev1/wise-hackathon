@@ -1,12 +1,10 @@
-import { Stack } from 'expo-router';
-import { Screen } from '@/components/wise';
+import { Page } from '@/features/helper/page';
 import { HistoryList } from '@/features/helper/history-list';
 
-export default function History() {
+export default function Route() {
   return (
-    <Screen>
-      <Stack.Screen options={{ title: 'Maria’s history', headerRight: () => null }} />
+    <Page>
       <HistoryList />
-    </Screen>
+    </Page>
   );
 }
