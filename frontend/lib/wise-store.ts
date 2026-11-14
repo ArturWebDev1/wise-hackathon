@@ -63,6 +63,17 @@ export const recipients: Recipient[] = [
   { id: 'olga', name: 'Olga', initials: 'OK', relationship: 'Your friend' },
 ];
 
+/**
+ * IMPORTANT: the signed-in account (name, initials) must always be read from here, never
+ * hard-coded in a screen, so the avatar changes with who is logged in (MA / NG).
+ * With the Spring backend this comes from the `account` in the POST /auth/login response.
+ */
+export function accountFor(role: Role | null) {
+  return role === 'nikita'
+    ? { name: 'Nikita', initials: 'NG', wiseId: 'nikita1147' }
+    : { name: 'Maria', initials: 'MA', wiseId: 'maria1147' };
+}
+
 const POLL_INTERVAL_MS = 1500;
 const REQUEST_TIMEOUT_MS = 8000;
 const API_PORT = 3001;

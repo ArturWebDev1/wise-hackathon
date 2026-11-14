@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View, Pressable } from 'react-native';
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Check, Phone, ShieldCheck, X } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import {
@@ -17,8 +17,7 @@ import {
 import { useWise, money } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
 import { timeAgo } from '@/features/helper/time-ago';
-
-const noClose = <Stack.Screen options={{ headerRight: () => null }} />;
+import { Detail } from '@/features/helper/detail';
 
 export default function Approval() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -53,7 +52,6 @@ export default function Approval() {
   if (!transfer)
     return (
       <Screen>
-        {noClose}
         <Empty icon={ShieldCheck} action="Back home" onPress={() => router.dismissTo('/')}>
           This request isn’t available.
         </Empty>
@@ -70,7 +68,6 @@ export default function Approval() {
         footer={backHome}
         style={{ justifyContent: 'center', alignItems: 'center', paddingVertical: 48, gap: 16 }}
       >
-        {noClose}
         <IconCircle
           icon={declined ? X : Check}
           size={88}
@@ -95,6 +92,7 @@ export default function Approval() {
   }
   return (
     <Screen
+      style={{ padding: 16, gap: 24 }}
       footer={
         pending ? (
           <View style={{ gap: 12 }}>
@@ -114,7 +112,6 @@ export default function Approval() {
         )
       }
     >
-      {noClose}
       <Heading compact>
         {pending
           ? `Mom wants to send ${money(transfer.amount)} to ${transfer.isNew ? 'a NEW person' : transfer.recipient.name}${transfer.isNew ? `: “${transfer.recipient.name}”` : ''}`
@@ -145,18 +142,6 @@ export default function Approval() {
       )}
       {error ? <ErrorCopy>{error}</ErrorCopy> : null}
     </Screen>
-  );
-}
-function Detail({ label, value, bold = false }: { label: string; value: string; bold?: boolean }) {
-  return (
-    <View style={{ flexDirection: 'row', gap: 16, alignItems: 'baseline' }}>
-      <Copy size={17} color={c.muted} style={{ width: 110 }}>
-        {label}
-      </Copy>
-      <Copy size={bold ? 18 : 17} bold={bold} style={{ flex: 1 }}>
-        {value}
-      </Copy>
-    </View>
   );
 }
 function CallMom() {

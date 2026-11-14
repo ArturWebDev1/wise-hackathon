@@ -73,14 +73,16 @@ export default function Result() {
       >
         {copy.summary}
       </Copy>
-      <Copy
-        size={16}
-        bold={blocked}
-        color={success ? c.forest : blocked ? undefined : c.muted}
-        style={{ textAlign: 'center' }}
-      >
-        {copy.detail}
-      </Copy>
+      {copy.detail ? (
+        <Copy
+          size={16}
+          bold={blocked}
+          color={success ? c.forest : blocked ? undefined : c.muted}
+          style={{ textAlign: 'center' }}
+        >
+          {copy.detail}
+        </Copy>
+      ) : null}
     </Screen>
   );
 }
@@ -112,14 +114,14 @@ function resultCopy(
             kind: 'success',
             title: 'SENT!',
             summary: `${name} gets ${amount} in seconds`,
-            detail: 'Nikita didn’t need to check this one.',
+            detail: '',
           };
     case 'approved':
       return {
         kind: 'success',
         title: 'APPROVED.\nSENT!',
         summary: `${name} gets ${amount} in seconds`,
-        detail: 'Nikita approved this transfer.',
+        detail: '',
       };
     case 'pending':
       return {
@@ -133,15 +135,15 @@ function resultCopy(
       return {
         kind: 'blocked',
         title: 'STOP.\nTHIS MAY\nBE A SCAM.',
-        summary: 'Banks and police never ask you to move money. We’ve told Nikita.',
-        detail: 'Your money hasn’t moved.',
+        summary: 'Banks and police never ask you to move money.',
+        detail: 'Your money is safe. Nikita knows.',
       };
     default:
       return {
         kind: 'declined',
-        title: transfer.expired ? 'This request expired' : 'Nikita declined this transfer',
-        summary: `Your money is safe. ${amount} stays with you.`,
-        detail: `Nothing was sent to ${name}.`,
+        title: transfer.expired ? 'Expired.' : 'Declined.',
+        summary: 'Your money is safe.',
+        detail: '',
       };
   }
 }

@@ -27,6 +27,24 @@
 Экраны 3–5 лежат в корне `app/` как обычные Stack-экраны (как `approval`, `rules`). Внутри `app/full/` они
 были скрытыми табами, и `Redirect` из `(tabs)/index` возвращал на `/full`.
 
+## Полный Wise один в один (по скриншотам настоящего приложения)
+Home, Cards, Recipients и Payments пересобраны по скриншотам реального Wise и захардкожены:
+Home: баннер «Start using Wise now», «Welcome to Wise», Send / Add money / Upload, три пунктирные карточки,
+Tasks, Your returns, Explore, Transfer calculator, «Your money, protected». Cards: Travel hub и «Global spending
+made simple». Recipients: Invite / Add / Upload и список. Payments: Send / Request, шесть пунктирных карточек и
+Payment tools (Wisetag, Send via link, Auto Conversions).
+Наша функция вставлена в двух местах, как в продуктовом описании: **Payments → Payment tools → «Family protection»**
+и **Home → Tasks → «Mom needs your help»** (появляется, когда есть запрос Марии). Код: `features/fullwise/*`,
+route-файлы `app/full/*` стали тонкими. Фото и иллюстрации заменены плоскими формами, настоящие логотипы и
+ассеты не копировались. Имена и Wisetag демонстрационные.
+
+## Навигация Никиты в полном Wise
+В полном Wise **работает только наша функция**: Payments → Payment tools → «Family protection», задача
+«Mom needs your help» на Home (ведёт в Requests), аватар (переключение роли для демо), скрытие карточек
+(Dismiss и крестики), нижние вкладки. Все остальные кнопки Wise (Send, Add money, Upload, Earn €150,
+Scheduled transfers и так далее) намеренно ничего не делают: компонент `Tap` без `onPress` не реагирует на нажатие.
+Баланс Марии Никите не показывается: вместо него «You protect Maria (Mom)».
+
 ## Мои пути
 `app/approval.tsx`, `app/family-*.tsx`, `app/full/**`, `features/helper/**`, `docs/developers/nikita/**`.
 
@@ -36,6 +54,12 @@
 Изменены по прямому указанию разработчика (напомнить команде): `app/(tabs)/index.tsx` (Redirect для Nikita,
 удалён `HelperHome`), `app/rules.tsx` (переключатель в строке заголовка, без дублей подписей),
 `components/wise.tsx` (`DashedCard`: необязательный `trailing`). `app/result.tsx` не менялся.
+
+## Важно для подключения бэкенда
+- Аватар и имя аккаунта (MA / NG) берутся только из `accountFor(role)` в `lib/wise-store.ts`, нигде не зашиваются
+  в экраны. После подключения Spring это должен быть `account` из ответа `POST /auth/login`.
+- Новый получатель в Lite ищется по Wise ID (`features/lite/demo-accounts.ts`), без IBAN. Это место заменить на
+  `GET /recipients/lookup?wiseId=`.
 
 ## Ограничения
 - Вход и список людей для запросов денег не делаем: нет эндпоинтов в контракте.

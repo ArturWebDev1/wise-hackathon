@@ -22,7 +22,7 @@ export function LitePendingResult({ transfer }: { transfer: Transfer }) {
       style={{ justifyContent: 'center', alignItems: 'center', gap: 30, paddingVertical: 32 }}
     >
       <IconCircle icon={Hourglass} size={88} background={c.pale} color={c.forest} />
-      <Heading center>Waiting for Nikita to approve</Heading>
+      <Heading center>Waiting for approval</Heading>
       <View
         style={{
           backgroundColor: c.pale,
@@ -49,7 +49,7 @@ export function LitePendingResult({ transfer }: { transfer: Transfer }) {
       </View>
       <View style={{ height: 1, backgroundColor: c.pale, alignSelf: 'stretch' }} />
       <Copy size={16} color={c.muted} style={{ textAlign: 'center' }}>
-        If Nikita doesn’t answer within 12 hours, this transfer is cancelled.
+        No answer in 12 hours? It cancels itself.
       </Copy>
     </Screen>
   );

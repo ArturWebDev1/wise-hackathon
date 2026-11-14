@@ -1,10 +1,11 @@
 import { View, Pressable } from 'react-native';
-import { Tabs, router } from 'expo-router';
-import { Home, CreditCard, Users, ArrowLeftRight, ArrowLeft } from 'lucide-react-native';
+import { Stack, Tabs, router } from 'expo-router';
+import { Home, Users, ArrowLeft } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { Copy } from '@/components/wise';
 import { wise as c } from '@/lib/wise-theme';
 import { useWise } from '@/lib/wise-store';
+import { CardNotchIcon, PaymentsIcon } from '@/features/fullwise/icons';
 
 function BackToLite() {
   return (
@@ -32,6 +33,7 @@ export default function FullLayout() {
   const helper = useWise((s) => s.role) === 'nikita';
   return (
     <View style={{ flex: 1, backgroundColor: c.white }}>
+      <Stack.Screen options={{ headerShown: false }} />
       {helper ? null : <BackToLite />}
       <Tabs
         screenOptions={{
@@ -39,7 +41,7 @@ export default function FullLayout() {
           sceneStyle: { backgroundColor: c.white },
           tabBarActiveTintColor: c.forest,
           tabBarInactiveTintColor: c.muted,
-          tabBarLabelStyle: { fontSize: 11, fontFamily: 'Inter_600SemiBold', marginTop: 4 },
+          tabBarLabelStyle: { fontSize: 12, fontFamily: 'Inter_600SemiBold', marginTop: 4 },
           tabBarStyle: {
             height: 80,
             backgroundColor: c.white,
@@ -67,7 +69,7 @@ export default function FullLayout() {
           name="cards"
           options={{
             title: 'Cards',
-            tabBarIcon: ({ color }) => <CreditCard size={23} color={color} strokeWidth={1.8} />,
+            tabBarIcon: ({ color }) => <CardNotchIcon size={23} color={String(color)} strokeWidth={1.8} />,
           }}
         />
         <Tabs.Screen
@@ -81,7 +83,7 @@ export default function FullLayout() {
           name="payments"
           options={{
             title: 'Payments',
-            tabBarIcon: ({ color }) => <ArrowLeftRight size={23} color={color} strokeWidth={1.8} />,
+            tabBarIcon: ({ color }) => <PaymentsIcon size={23} color={String(color)} strokeWidth={1.8} />,
           }}
         />
       </Tabs>

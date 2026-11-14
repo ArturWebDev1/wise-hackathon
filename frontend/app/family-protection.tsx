@@ -1,12 +1,10 @@
-import { Stack } from 'expo-router';
-import { Screen } from '@/components/wise';
+import { Page } from '@/features/helper/page';
 import { FamilyHub } from '@/features/helper/family-hub';
 
-export default function Family() {
+export default function Route() {
   return (
-    <Screen>
-      <Stack.Screen options={{ title: 'Family protection', headerRight: () => null }} />
+    <Page>
       <FamilyHub />
-    </Screen>
+    </Page>
   );
 }
