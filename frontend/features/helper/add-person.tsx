@@ -27,14 +27,16 @@ export function AddPerson() {
   const add = usePeople((s) => s.add);
   const [stage, setStage] = useState<Stage>('who');
   const [name, setName] = useState('');
-  const [relationship, setRelationship] = useState('Mom');
+  const [choice, setChoice] = useState('Mom');
+  const [other, setOther] = useState('');
   const [limit, setLimit] = useState(250);
   const [checkNew, setCheckNew] = useState(true);
   const [error, setError] = useState('');
   const person = name.trim();
+  const relationship = choice === 'Other' ? other.trim() : choice;
   const toRules = () => {
-    if (!person) {
-      setError('Enter the person’s name.');
+    if (!person || !relationship) {
+      setError(person ? 'Write who they are to you.' : 'Enter the person’s name.');
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return;
     }
@@ -102,14 +104,36 @@ export function AddPerson() {
                 <Pill
                   key={r}
                   small
-                  tone={relationship === r ? 'green' : 'pale'}
-                  onPress={() => setRelationship(r)}
+                  tone={choice === r ? 'green' : 'pale'}
+                  onPress={() => {
+                    setChoice(r);
+                    setError('');
+                  }}
                 >
                   {r}
                 </Pill>
               ))}
             </View>
           </View>
+          {choice === 'Other' ? (
+            <View style={styles.section}>
+              <Label>
+                <Label.Text style={{ fontSize: 20, fontFamily: 'Inter_600SemiBold' }}>
+                  Who are they?
+                </Label.Text>
+              </Label>
+              <Input
+                value={other}
+                onChangeText={(v) => {
+                  setOther(v);
+                  setError('');
+                }}
+                placeholder="For example: uncle, neighbour, friend"
+                autoCapitalize="sentences"
+                style={styles.field}
+              />
+            </View>
+          ) : null}
           {error ? <ErrorCopy>{error}</ErrorCopy> : null}
         </Screen>
       ) : stage === 'rules' ? (
