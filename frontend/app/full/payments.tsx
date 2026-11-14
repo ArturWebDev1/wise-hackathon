@@ -1,10 +1,26 @@
 import { router } from 'expo-router';
-import { CalendarClock, ArrowDownLeft, ArrowLeftRight, Landmark } from 'lucide-react-native';
+import {
+  CalendarClock,
+  ArrowDownLeft,
+  ArrowLeftRight,
+  Landmark,
+  ShieldCheck,
+} from 'lucide-react-native';
 import { Screen, Heading, DashedCard, Copy } from '@/components/wise';
+import { useWise } from '@/lib/wise-store';
 export default function Payments() {
+  const helper = useWise((s) => s.role) === 'nikita';
   return (
     <Screen>
       <Heading>Payments</Heading>
+      {helper ? (
+        <DashedCard
+          title="Family protection"
+          icon={ShieldCheck}
+          compact
+          onPress={() => router.push('/family-protection')}
+        />
+      ) : null}
       <DashedCard
         title="Request money"
         icon={ArrowDownLeft}

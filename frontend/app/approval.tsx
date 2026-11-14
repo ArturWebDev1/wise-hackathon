@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
-import { Bell, Phone, ShieldCheck } from 'lucide-react-native';
+import { View, Pressable } from 'react-native';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { Check, Phone, ShieldCheck, X } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import {
   Screen,
@@ -9,14 +9,16 @@ import {
   Heading,
   Pill,
   GreyCard,
-  Avatar,
-  StatusChip,
+  IconCircle,
   ErrorCopy,
   Empty,
   callPerson,
 } from '@/components/wise';
 import { useWise, money } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
+import { timeAgo } from '@/features/helper/time-ago';
+
+const noClose = <Stack.Screen options={{ headerRight: () => null }} />;
 
 export default function Approval() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -37,15 +39,60 @@ export default function Approval() {
       setBusy(false);
     }
   };
+  const backHome = (
+    <Pill
+      tone="dark"
+      onPress={() => {
+        useWise.getState().setRole('nikita');
+        router.dismissTo('/');
+      }}
+    >
+      Back home
+    </Pill>
+  );
   if (!transfer)
     return (
       <Screen>
+        {noClose}
         <Empty icon={ShieldCheck} action="Back home" onPress={() => router.dismissTo('/')}>
           This request isn’t available.
         </Empty>
       </Screen>
     );
   const pending = transfer.status === 'pending';
+  const blocked = transfer.status === 'blocked';
+  if (!pending && !blocked) {
+    const approved = transfer.status === 'approved';
+    const declined = transfer.status === 'declined';
+    return (
+      <Screen
+        safe
+        footer={backHome}
+        style={{ justifyContent: 'center', alignItems: 'center', paddingVertical: 48, gap: 16 }}
+      >
+        {noClose}
+        <IconCircle
+          icon={declined ? X : Check}
+          size={88}
+          background={declined ? c.dangerPale : `${c.green}99`}
+          color={declined ? c.dangerText : c.forest}
+        />
+        <Heading center>
+          {declined ? (transfer.expired ? 'Expired.' : 'Declined.') : approved ? 'Approved.' : 'Sent.'}
+        </Heading>
+        <Copy size={20} bold style={{ textAlign: 'center' }}>
+          {`${money(transfer.amount)} to ${transfer.recipient.name}`}
+        </Copy>
+        <Copy size={17} color={c.muted} style={{ textAlign: 'center' }}>
+          {declined
+            ? 'Maria’s money is safe.'
+            : approved
+              ? 'Maria will see it.'
+              : 'No approval was needed.'}
+        </Copy>
+      </Screen>
+    );
+  }
   return (
     <Screen
       footer={
@@ -57,76 +104,27 @@ export default function Approval() {
             <Pill tone="danger" onPress={() => void answer(false)} disabled={busy}>
               Decline
             </Pill>
-            <Pill small tone="pale" icon={Phone} onPress={() => callPerson(true)}>
-              Call Mom
-            </Pill>
+            <CallMom />
           </View>
         ) : (
-          <Pill
-            tone="dark"
-            onPress={() => {
-              useWise.getState().setRole('nikita');
-              router.dismissTo('/');
-            }}
-          >
-            Back home
-          </Pill>
+          <View style={{ gap: 12 }}>
+            <CallMom />
+            {backHome}
+          </View>
         )
       }
     >
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 12,
-          backgroundColor: c.card,
-          borderRadius: 20,
-          padding: 16,
-        }}
-      >
-        <Bell size={24} color={c.forest} strokeWidth={1.8} />
-        <View style={{ flex: 1 }}>
-          <Copy bold size={14}>
-            Wise · Trusted Helper
-          </Copy>
-          <Copy size={13} color={c.muted}>
-            {pending
-              ? 'Mom needs your help with a transfer'
-              : transfer.status === 'blocked'
-                ? 'Scam Pause blocked a transfer'
-                : 'Transfer update'}
-          </Copy>
-        </View>
-      </View>
+      {noClose}
       <Heading compact>
         {pending
           ? `Mom wants to send ${money(transfer.amount)} to ${transfer.isNew ? 'a NEW person' : transfer.recipient.name}${transfer.isNew ? `: “${transfer.recipient.name}”` : ''}`
-          : transfer.status === 'blocked'
-            ? 'Mom’s transfer was blocked.'
-            : transfer.status === 'declined'
-              ? transfer.expired
-                ? 'Transfer expired'
-                : 'Transfer declined'
-              : 'Transfer sent.'}
+          : 'Mom’s transfer was blocked.'}
       </Heading>
-      <GreyCard style={{ padding: 20 }}>
-        <View style={{ flexDirection: 'row', gap: 14, alignItems: 'center' }}>
-          <Avatar initials={transfer.recipient.initials} />
-          <View style={{ flex: 1 }}>
-            <Copy size={18} bold>
-              {transfer.recipient.name}
-            </Copy>
-            <Copy size={16} color={c.muted}>
-              {money(transfer.amount)}
-            </Copy>
-          </View>
-        </View>
-        <StatusChip status={transfer.status} />
-        {transfer.recipient.iban ? (
-          <Copy size={14} color={c.muted}>
-            {transfer.recipient.iban}
-          </Copy>
-        ) : null}
+      <GreyCard style={{ padding: 20, gap: 12 }}>
+        <Detail label="Recipient" value={transfer.recipient.name} bold />
+        <Detail label="Amount" value={money(transfer.amount)} bold />
+        <Detail label="Requested" value={timeAgo(transfer.createdAt)} />
+        {transfer.recipient.iban ? <Detail label="IBAN" value={transfer.recipient.iban} /> : null}
       </GreyCard>
       <View style={{ gap: 10, alignItems: 'flex-start' }}>
         {transfer.isNew ? <Flag>New person</Flag> : null}
@@ -135,26 +133,50 @@ export default function Approval() {
         ) : null}
         {transfer.pressured ? <Flag>Mom said someone is calling her</Flag> : null}
       </View>
-      {transfer.status === 'blocked' ? (
+      {blocked ? (
         <Copy size={17}>Don’t approve this transfer. Call Mom and check she’s safe.</Copy>
-      ) : pending ? (
-        <Copy size={16} color={c.muted}>
-          Only approve if you recognise this person and have checked with Mom.
-        </Copy>
       ) : (
-        <Copy size={17}>
-          {transfer.status === 'declined'
-            ? 'Mom’s money stays with her. Maria can see your answer now.'
-            : 'Maria can see this transfer update.'}
-        </Copy>
+        <View style={{ flexDirection: 'row', gap: 12, alignItems: 'flex-start' }}>
+          <ShieldCheck size={24} color={c.forest} strokeWidth={1.8} />
+          <Copy size={16} color={c.muted} style={{ flex: 1 }}>
+            Approve only if you know this person and have checked with Mom.
+          </Copy>
+        </View>
       )}
       {error ? <ErrorCopy>{error}</ErrorCopy> : null}
-      {!pending ? (
-        <Pill small tone="pale" icon={Phone} onPress={() => callPerson(true)}>
-          Call Mom
-        </Pill>
-      ) : null}
     </Screen>
+  );
+}
+function Detail({ label, value, bold = false }: { label: string; value: string; bold?: boolean }) {
+  return (
+    <View style={{ flexDirection: 'row', gap: 16, alignItems: 'baseline' }}>
+      <Copy size={17} color={c.muted} style={{ width: 110 }}>
+        {label}
+      </Copy>
+      <Copy size={bold ? 18 : 17} bold={bold} style={{ flex: 1 }}>
+        {value}
+      </Copy>
+    </View>
+  );
+}
+function CallMom() {
+  return (
+    <Pressable
+      onPress={() => callPerson(true)}
+      accessibilityRole="button"
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 8,
+        paddingVertical: 12,
+      }}
+    >
+      <Phone size={20} color={c.forest} strokeWidth={1.8} />
+      <Copy bold size={18} color={c.forest}>
+        Call Mom
+      </Copy>
+    </Pressable>
   );
 }
 function Flag({ children }: { children: string }) {
