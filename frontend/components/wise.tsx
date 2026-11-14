@@ -328,11 +328,7 @@ export function TopBar({ helper = false, full = false }: { helper?: boolean; ful
         <Avatar initials={helper ? 'NG' : 'MA'} size={48} />
       </Pressable>
       <Pressable
-        onPress={() =>
-          full
-            ? router.push({ pathname: '/demo-note', params: { title: 'Earn €150' } })
-            : router.push('/rules')
-        }
+        onPress={() => router.push(full ? '/onboarding' : '/rules')}
         accessibilityRole="button"
         style={{
           flexDirection: 'row',

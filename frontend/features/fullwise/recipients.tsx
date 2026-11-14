@@ -1,11 +1,9 @@
-import { Pressable, View } from 'react-native';
-import { router } from 'expo-router';
+import { View } from 'react-native';
 import { ChevronRight, Gift, Plus, ScanLine } from 'lucide-react-native';
 import { Copy } from '@/components/wise';
 import { recipients } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
-import { openDemo } from '@/features/helper/demo';
-import { Chip, FullPage, RingAvatar, ink, useIsHelper } from './parts';
+import { Chip, FullPage, RingAvatar, Tap, ink, useIsHelper } from './parts';
 
 function TopPill({
   children,
@@ -16,10 +14,10 @@ function TopPill({
   children: string;
   icon: typeof Plus;
   green?: boolean;
-  onPress: () => void;
+  onPress?: () => void;
 }) {
   return (
-    <Pressable
+    <Tap
       onPress={onPress}
       accessibilityRole="button"
       style={{
@@ -36,11 +34,11 @@ function TopPill({
       <Copy bold size={15} color={c.forest}>
         {children}
       </Copy>
-    </Pressable>
+    </Tap>
   );
 }
 
-type Person = { key: string; name: string; tag: string; initials: string; open: () => void };
+type Person = { key: string; name: string; tag: string; initials: string };
 
 export function FullRecipients() {
   const helper = useIsHelper();
@@ -51,7 +49,6 @@ export function FullRecipients() {
           name: 'Maria Kask',
           tag: '@maria1147',
           initials: 'MK',
-          open: () => router.push('/send-maria'),
         },
       ]
     : recipients.map((r) => ({
@@ -59,19 +56,17 @@ export function FullRecipients() {
         name: r.name,
         tag: `@${r.id}1147`,
         initials: r.initials,
-        open: () =>
-          router.push({ pathname: '/send', params: { stage: 'amount', recipient: r.id } }),
       }));
   return (
     <FullPage
       header={
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Chip icon={Gift} label="Invite" onPress={() => openDemo('Invite friends')} />
+          <Chip icon={Gift} label="Invite" />
           <View style={{ flexDirection: 'row', gap: 8 }}>
-            <TopPill green icon={Plus} onPress={() => openDemo('Add a recipient')}>
+            <TopPill green icon={Plus}>
               Add
             </TopPill>
-            <TopPill icon={ScanLine} onPress={() => openDemo('Upload')}>
+            <TopPill icon={ScanLine}>
               Upload
             </TopPill>
           </View>
@@ -86,7 +81,7 @@ export function FullRecipients() {
       </Copy>
       <View style={{ gap: 17 }}>
         {people.map((p) => (
-          <Pressable key={p.key} onPress={p.open} accessibilityRole="button">
+          <Tap key={p.key}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
               <RingAvatar initials={p.initials} />
               <View style={{ flex: 1, gap: 2 }}>
@@ -99,7 +94,7 @@ export function FullRecipients() {
               </View>
               <ChevronRight size={18} color="#6A6C6A" strokeWidth={1.8} />
             </View>
-          </Pressable>
+          </Tap>
         ))}
       </View>
     </FullPage>

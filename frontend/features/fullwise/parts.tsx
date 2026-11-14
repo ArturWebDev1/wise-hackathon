@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { View, Pressable, ScrollView } from 'react-native';
+import type { ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { ChevronRight, Plus } from 'lucide-react-native';
@@ -10,7 +11,6 @@ type AnyIcon = ComponentType<IconProps>;
 import { Copy, WiseMark } from '@/components/wise';
 import { useWise } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
-import { openDemo } from '@/features/helper/demo';
 
 export const ring = '#C9C9C4';
 export const dashed = '#D5D5D0';
@@ -43,13 +43,34 @@ export function FullPage({
   );
 }
 
-export function useIsHelper() {
-  return useWise((s) => s.role) === 'nikita';
+/** A button that only reacts when it has an action; decorative Wise buttons stay inert. */
+export function Tap({
+  onPress,
+  style,
+  accessibilityLabel,
+  children,
+}: {
+  onPress?: () => void;
+  style?: ViewStyle;
+  accessibilityRole?: 'button';
+  accessibilityLabel?: string;
+  children?: ReactNode;
+}) {
+  if (!onPress) return <View style={style}>{children}</View>;
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      style={style}
+    >
+      {children}
+    </Pressable>
+  );
 }
 
-/** Where "Send" goes: Nikita sends to Maria, Maria uses the Lite send flow. */
-export function openSend(helper: boolean) {
-  router.push(helper ? '/send-maria' : '/send');
+export function useIsHelper() {
+  return useWise((s) => s.role) === 'nikita';
 }
 
 export function HomeHeader() {
@@ -85,8 +106,7 @@ export function HomeHeader() {
           />
         </View>
       </Pressable>
-      <Pressable
-        onPress={() => openDemo('Earn €150')}
+      <Tap
         accessibilityRole="button"
         style={{
           backgroundColor: c.green,
@@ -98,7 +118,7 @@ export function HomeHeader() {
         <Copy bold size={14} color={c.forest}>
           Earn €150
         </Copy>
-      </Pressable>
+      </Tap>
     </View>
   );
 }
@@ -110,10 +130,10 @@ export function Chip({
 }: {
   icon: AnyIcon;
   label: string;
-  onPress: () => void;
+  onPress?: () => void;
 }) {
   return (
-    <Pressable
+    <Tap
       onPress={onPress}
       accessibilityRole="button"
       style={{
@@ -131,7 +151,7 @@ export function Chip({
       <Copy bold size={14} color="#3B3B38">
         {label}
       </Copy>
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -236,12 +256,12 @@ export function WiseCard({
   title: string;
   text?: string;
   icon: AnyIcon;
-  onPress: () => void;
+  onPress?: () => void;
   chevron?: boolean;
   plus?: boolean;
 }) {
   return (
-    <Pressable onPress={onPress} accessibilityRole="button">
+    <Tap onPress={onPress} accessibilityRole="button">
       <View
         style={{
           borderWidth: 1.5,
@@ -268,13 +288,13 @@ export function WiseCard({
         </View>
         {chevron ? <ChevronRight size={17} color={c.forest} strokeWidth={1.8} /> : null}
       </View>
-    </Pressable>
+    </Tap>
   );
 }
 
-export function BigPill({ children, onPress }: { children: string; onPress: () => void }) {
+export function BigPill({ children, onPress }: { children: string; onPress?: () => void }) {
   return (
-    <Pressable
+    <Tap
       onPress={onPress}
       accessibilityRole="button"
       style={{
@@ -288,7 +308,7 @@ export function BigPill({ children, onPress }: { children: string; onPress: () =
       <Copy bold size={15} color={c.forest}>
         {children}
       </Copy>
-    </Pressable>
+    </Tap>
   );
 }
 

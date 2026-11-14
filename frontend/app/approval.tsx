@@ -17,6 +17,7 @@ import {
 import { useWise, money } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
 import { timeAgo } from '@/features/helper/time-ago';
+import { Detail } from '@/features/helper/detail';
 
 const noClose = <Stack.Screen options={{ headerRight: () => null }} />;
 
@@ -145,18 +146,6 @@ export default function Approval() {
       )}
       {error ? <ErrorCopy>{error}</ErrorCopy> : null}
     </Screen>
-  );
-}
-function Detail({ label, value, bold = false }: { label: string; value: string; bold?: boolean }) {
-  return (
-    <View style={{ flexDirection: 'row', gap: 16, alignItems: 'baseline' }}>
-      <Copy size={17} color={c.muted} style={{ width: 110 }}>
-        {label}
-      </Copy>
-      <Copy size={bold ? 18 : 17} bold={bold} style={{ flex: 1 }}>
-        {value}
-      </Copy>
-    </View>
   );
 }
 function CallMom() {

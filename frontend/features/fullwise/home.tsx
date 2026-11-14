@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { ReactElement } from 'react';
-import { Image, View, Pressable } from 'react-native';
+import { Image, View } from 'react-native';
 import { router } from 'expo-router';
 import {
   ArrowDownUp,
@@ -21,7 +21,6 @@ import type { LucideIcon } from 'lucide-react-native';
 import { Copy, EUFlag } from '@/components/wise';
 import { useWise } from '@/lib/wise-store';
 import { wise as c } from '@/lib/wise-theme';
-import { openDemo } from '@/features/helper/demo';
 import { RateChart } from './chart';
 import { CardNotchIcon } from './icons';
 import {
@@ -31,8 +30,8 @@ import {
   WiseCard,
   dashed,
   ink,
-  openSend,
   rowBg,
+  Tap,
   useIsHelper,
 } from './parts';
 
@@ -56,10 +55,10 @@ function ActionPill({
   children: string;
   tone?: 'green' | 'pale';
   icon?: LucideIcon;
-  onPress: () => void;
+  onPress?: () => void;
 }) {
   return (
-    <Pressable
+    <Tap
       onPress={onPress}
       accessibilityRole="button"
       style={{
@@ -76,7 +75,7 @@ function ActionPill({
       <Copy bold size={15} color={c.forest}>
         {children}
       </Copy>
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -87,10 +86,10 @@ function SmallPill({
 }: {
   children: string;
   tone: 'green' | 'white';
-  onPress: () => void;
+  onPress?: () => void;
 }) {
   return (
-    <Pressable
+    <Tap
       onPress={onPress}
       accessibilityRole="button"
       style={{
@@ -103,7 +102,7 @@ function SmallPill({
       <Copy bold size={14} color={c.forest}>
         {children}
       </Copy>
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -120,7 +119,7 @@ function Task({
   title: string;
   text: string;
   primary: string;
-  onPrimary: () => void;
+  onPrimary?: () => void;
   secondary?: string;
   onSecondary?: () => void;
 }) {
@@ -151,9 +150,9 @@ function Task({
   );
 }
 
-function CloseButton({ onPress, dark = false }: { onPress: () => void; dark?: boolean }) {
+function CloseButton({ onPress, dark = false }: { onPress?: () => void; dark?: boolean }) {
   return (
-    <Pressable
+    <Tap
       onPress={onPress}
       accessibilityLabel="Dismiss"
       style={{
@@ -169,7 +168,7 @@ function CloseButton({ onPress, dark = false }: { onPress: () => void; dark?: bo
       }}
     >
       <X size={18} color={dark ? '#F2F4EF' : ink} strokeWidth={1.8} />
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -251,8 +250,7 @@ export function FullHome() {
             <Copy size={14} color="#3A341C">
               You can send and receive money once you’ve finished setting up your account.
             </Copy>
-            <Pressable
-              onPress={() => openDemo('Finish setup')}
+            <Tap
               accessibilityRole="button"
               style={{
                 alignSelf: 'flex-start',
@@ -266,18 +264,18 @@ export function FullHome() {
               <Copy bold size={15} color={c.yellow}>
                 Finish setup
               </Copy>
-            </Pressable>
+            </Tap>
           </View>
         </View>
       </View>
 
       <H>Welcome to Wise</H>
       <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
-        <ActionPill tone="green" onPress={() => openSend(helper)}>
+        <ActionPill tone="green">
           Send
         </ActionPill>
-        <ActionPill onPress={() => openDemo('Add money')}>Add money</ActionPill>
-        <ActionPill icon={ScanLine} onPress={() => openDemo('Upload')}>
+        <ActionPill>Add money</ActionPill>
+        <ActionPill icon={ScanLine}>
           Upload
         </ActionPill>
       </View>
@@ -285,17 +283,14 @@ export function FullHome() {
         <WiseCard
           title="Add a currency to your account"
           icon={Globe}
-          onPress={() => openDemo('Add a currency')}
         />
         <WiseCard
           title="Spend and withdraw abroad"
           icon={CardNotchIcon}
-          onPress={() => router.navigate('/full/cards')}
         />
         <WiseCard
           title="Get account details to get paid"
           icon={Landmark}
-          onPress={() => openDemo('Account details')}
         />
       </View>
 
@@ -315,8 +310,7 @@ export function FullHome() {
           title="Still need to send 0.01 EUR?"
           text="We've saved your transfer details so you can jump back in."
           primary="Check details"
-          onPrimary={() => openDemo('Transfer details')}
-          secondary="Dismiss"
+                    secondary="Dismiss"
           onSecondary={() => setHideSend(true)}
         />
       )}
@@ -334,8 +328,7 @@ export function FullHome() {
               </Copy>
             </View>
           </View>
-          <Pressable
-            onPress={() => router.navigate('/full/cards')}
+          <Tap
             accessibilityRole="button"
             style={{
               backgroundColor: '#04504E',
@@ -348,24 +341,24 @@ export function FullHome() {
             <Copy bold size={15} color={c.white}>
               Order card
             </Copy>
-          </Pressable>
+          </Tap>
         </View>
       )}
 
       <View style={{ gap: 6 }}>
         <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' }}>
           <H>Your returns</H>
-          <Pressable onPress={() => openDemo('Your returns')}>
+          <Tap>
             <Copy bold size={15} color={c.forest} style={{ textDecorationLine: 'underline' }}>
               Explore
             </Copy>
-          </Pressable>
+          </Tap>
         </View>
         <Copy size={15} color="#4A4A47">
           Provided by Wise Assets Europe
         </Copy>
       </View>
-      <Pressable onPress={() => openDemo('Your returns')} accessibilityRole="button">
+      <Tap accessibilityRole="button">
         <View
           style={{
             borderWidth: 1.5,
@@ -389,7 +382,7 @@ export function FullHome() {
           </Copy>
           <ChevronRight size={17} color="#6A6C6A" strokeWidth={1.8} />
         </View>
-      </Pressable>
+      </Tap>
       <Copy size={13} color="#4A4A47">
         Investment services are provided by Wise Assets Europe AS. Capital at risk. Growth not
         guaranteed.
@@ -399,15 +392,10 @@ export function FullHome() {
       {hideShare ? null : (
         <View style={{ borderRadius: 34, overflow: 'hidden', aspectRatio: 1066 / 1148 }}>
           <Image source={shareWise} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
-          <Pressable
+          <Tap
             onPress={() => setHideShare(true)}
             accessibilityLabel="Dismiss"
             style={{ position: 'absolute', left: '84%', top: '3.5%', width: '12%', aspectRatio: 1 }}
-          />
-          <Pressable
-            onPress={() => openDemo('Earn €150')}
-            accessibilityLabel="Share Wise"
-            style={{ position: 'absolute', left: '81.5%', top: '83%', width: '17%', aspectRatio: 1 }}
           />
         </View>
       )}
@@ -470,8 +458,7 @@ export function FullHome() {
             </Copy>
           </View>
         </View>
-        <Pressable
-          onPress={() => openSend(helper)}
+        <Tap
           accessibilityRole="button"
           style={{
             backgroundColor: c.green,
@@ -484,9 +471,9 @@ export function FullHome() {
           <Copy bold size={16} color={c.forest}>
             Send
           </Copy>
-        </Pressable>
+        </Tap>
       </View>
-      <Pressable onPress={() => openDemo('Exchange rate updates')} accessibilityRole="button">
+      <Tap accessibilityRole="button">
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
           <RingIcon icon={BellRing} plus={false} />
           <Copy bold size={17} color={ink} style={{ flex: 1 }}>
@@ -494,7 +481,7 @@ export function FullHome() {
           </Copy>
           <ChevronRight size={18} color={c.forest} strokeWidth={1.8} />
         </View>
-      </Pressable>
+      </Tap>
 
       <View style={{ alignItems: 'center', gap: 11, paddingVertical: 17 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -506,7 +493,7 @@ export function FullHome() {
         <Copy size={15} color="#4A4A47" style={{ textAlign: 'center' }}>
           We promise to protect every penny with cutting-edge tech and anytime customer support.
         </Copy>
-        <ActionPill onPress={() => openDemo('Your money, protected')}>Learn more</ActionPill>
+        <ActionPill>Learn more</ActionPill>
       </View>
     </FullPage>
   );

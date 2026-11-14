@@ -1,4 +1,4 @@
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { router } from 'expo-router';
 import {
   Banknote,
@@ -13,8 +13,7 @@ import {
 } from 'lucide-react-native';
 import { Copy } from '@/components/wise';
 import { wise as c } from '@/lib/wise-theme';
-import { openDemo } from '@/features/helper/demo';
-import { FullPage, RingAvatar, WiseCard, ink, openSend, useIsHelper } from './parts';
+import { FullPage, RingAvatar, Tap, WiseCard, ink, useIsHelper } from './parts';
 
 function ActionPill({
   children,
@@ -23,10 +22,10 @@ function ActionPill({
 }: {
   children: string;
   green?: boolean;
-  onPress: () => void;
+  onPress?: () => void;
 }) {
   return (
-    <Pressable
+    <Tap
       onPress={onPress}
       accessibilityRole="button"
       style={{
@@ -39,7 +38,7 @@ function ActionPill({
       <Copy bold size={15} color={c.forest}>
         {children}
       </Copy>
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -52,10 +51,10 @@ export function FullPayments() {
         Payments
       </Copy>
       <View style={{ flexDirection: 'row', gap: 8 }}>
-        <ActionPill green onPress={() => openSend(helper)}>
+        <ActionPill green>
           Send
         </ActionPill>
-        <ActionPill onPress={() => openDemo('Request money')}>Request</ActionPill>
+        <ActionPill>Request</ActionPill>
       </View>
       <View style={{ gap: 11 }}>
         <WiseCard
@@ -63,49 +62,43 @@ export function FullPayments() {
           text="Set up a transfer to send at a later date."
           icon={CalendarClock}
           chevron
-          onPress={() => openDemo('Scheduled transfers')}
         />
         <WiseCard
           title="Direct Debits"
           text="Set up and manage regular payments."
           icon={RefreshCw}
           chevron
-          onPress={() => openDemo('Direct Debits')}
         />
         <WiseCard
           title="Recurring card payments"
           text="Manage your repeated card transactions."
           icon={RotateCw}
           chevron
-          onPress={() => openDemo('Recurring card payments')}
         />
         <WiseCard
           title="Payment requests"
           text="Create and manage payments you've requested."
           icon={Banknote}
           chevron
-          onPress={() => openDemo('Payment requests')}
         />
         <WiseCard
           title="Forward invoices to email"
           text="Save time by emailing bills and invoices to create draft payments."
           icon={Mail}
           chevron
-          onPress={() => openDemo('Forward invoices')}
         />
         <WiseCard
           title="Bill splits"
           text="Split transactions with multiple people."
           icon={Split}
           chevron
-          onPress={() => openDemo('Bill splits')}
         />
       </View>
       <Copy bold size={24} color={ink} style={{ lineHeight: 28, letterSpacing: -1, marginTop: 6 }}>
         Payment tools
       </Copy>
       <View style={{ gap: 11 }}>
-        <Pressable onPress={() => openDemo('Your Wisetag')} accessibilityRole="button">
+        <Tap accessibilityRole="button">
           <View
             style={{
               backgroundColor: '#F0F0EC',
@@ -126,20 +119,18 @@ export function FullPayments() {
               </Copy>
             </View>
           </View>
-        </Pressable>
+        </Tap>
         <WiseCard
           title="Send via link"
           text="Create and manage links for recipients to claim money."
           icon={Link}
           chevron
-          onPress={() => openDemo('Send via link')}
         />
         <WiseCard
           title="Auto Conversions"
           text="Convert money between currencies automatically at your chosen rate."
           icon={TrendingUp}
           chevron
-          onPress={() => openDemo('Auto Conversions')}
         />
         {helper ? (
           <WiseCard

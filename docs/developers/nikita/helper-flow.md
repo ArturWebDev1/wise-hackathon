@@ -39,22 +39,21 @@ route-файлы `app/full/*` стали тонкими. Фото и иллюс�
 ассеты не копировались. Имена и Wisetag демонстрационные.
 
 ## Навигация Никиты в полном Wise
-Рабочее ведёт в рабочее: «Send», «Send money», получатель Maria → `/send-maria`; баннер запросов → Requests;
-Family protection → список людей. Часть Wise, которой нет в прототипе (Add money, Upload, Add a currency,
-Account details, Your returns, Invite friends, Wise Business, Request money, Scheduled transfers,
-Direct debits, Manage card, Digital card, Add a recipient, Earn €150), открывает `app/demo-note.tsx`
-с короткой заметкой и кнопкой «Open Family protection». Баланс Марии Никите не показывается:
-вместо него «You protect Maria (Mom)».
+В полном Wise **работает только наша функция**: Payments → Payment tools → «Family protection», задача
+«Mom needs your help» на Home (ведёт в Requests), аватар (переключение роли для демо), скрытие карточек
+(Dismiss и крестики), нижние вкладки. Все остальные кнопки Wise (Send, Add money, Upload, Earn €150,
+Scheduled transfers и так далее) намеренно ничего не делают: компонент `Tap` без `onPress` не реагирует на нажатие.
+Баланс Марии Никите не показывается: вместо него «You protect Maria (Mom)».
 
 ## Мои пути
-`app/approval.tsx`, `app/family-*.tsx`, `app/demo-note.tsx`, `app/full/**`, `features/helper/**`, `docs/developers/nikita/**`.
+`app/approval.tsx`, `app/family-*.tsx`, `app/full/**`, `features/helper/**`, `docs/developers/nikita/**`.
 
 ## Общие файлы
 В этой задаче **не меняются**: `lib/wise-store.ts`, `lib/wise-theme.ts`, `global.css`,
 `app/_layout.tsx`, `package.json`, lockfile.
 Изменены по прямому указанию разработчика (напомнить команде): `app/(tabs)/index.tsx` (Redirect для Nikita,
 удалён `HelperHome`), `app/rules.tsx` (переключатель в строке заголовка, без дублей подписей),
-`components/wise.tsx` (`DashedCard`: необязательный `trailing`; `TopBar`: «Earn €150» открывает demo-note). `app/result.tsx` не менялся.
+`components/wise.tsx` (`DashedCard`: необязательный `trailing`). `app/result.tsx` не менялся.
 
 ## Ограничения
 - Вход и список людей для запросов денег не делаем: нет эндпоинтов в контракте.

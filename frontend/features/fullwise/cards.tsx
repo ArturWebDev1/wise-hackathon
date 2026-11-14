@@ -1,7 +1,6 @@
 import { Image, View } from 'react-native';
 import { Luggage } from 'lucide-react-native';
 import { Copy } from '@/components/wise';
-import { openDemo } from '@/features/helper/demo';
 import { BigPill, Chip, FullPage, display } from './parts';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports -- bundled image, no module typing in this project
@@ -10,8 +9,8 @@ const globeCard: number = require('./images/globe-card.jpg');
 export function FullCards() {
   return (
     <FullPage
-      header={<Chip icon={Luggage} label="Travel hub" onPress={() => openDemo('Travel hub')} />}
-      footer={<BigPill onPress={() => openDemo('Order a debit card')}>Order a debit card</BigPill>}
+      header={<Chip icon={Luggage} label="Travel hub" />}
+      footer={<BigPill>Order a debit card</BigPill>}
     >
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 24 }}>
         <Image
