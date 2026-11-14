@@ -177,7 +177,6 @@ export default function RootLayout() {
         >
           <Stack.Screen name="(tabs)" options={{ title: 'Home', headerShown: false }} />
           <Stack.Screen name="send" options={{ title: 'Send money' }} />
-          <Stack.Screen name="send-maria" options={{ title: 'Send to Maria' }} />
           <Stack.Screen name="request" options={{ title: 'Ask for money' }} />
           <Stack.Screen name="result" options={{ title: 'Transfer', headerShown: false }} />
           <Stack.Screen name="approval" options={{ title: 'Check transfer' }} />

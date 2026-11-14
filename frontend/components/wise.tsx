@@ -314,7 +314,7 @@ export function IconCircle({
     </View>
   );
 }
-export function TopBar({ helper = false, full = false }: { helper?: boolean; full?: boolean }) {
+export function TopBar({ helper = false }: { helper?: boolean }) {
   return (
     <View
       style={{
@@ -328,7 +328,7 @@ export function TopBar({ helper = false, full = false }: { helper?: boolean; ful
         <Avatar initials={helper ? 'NG' : 'MA'} size={48} />
       </Pressable>
       <Pressable
-        onPress={() => router.push(full ? '/onboarding' : '/rules')}
+        onPress={() => router.push('/rules')}
         accessibilityRole="button"
         style={{
           flexDirection: 'row',
@@ -340,9 +340,9 @@ export function TopBar({ helper = false, full = false }: { helper?: boolean; ful
           paddingVertical: 12,
         }}
       >
-        {!full ? <ShieldCheck color={c.forest} size={18} strokeWidth={1.8} /> : null}
+        <ShieldCheck color={c.forest} size={18} strokeWidth={1.8} />
         <Copy bold size={13} color={c.forest} numberOfLines={1}>
-          {full ? 'Earn €150' : helper ? 'Trusted Helper' : 'Protected by Nikita'}
+          {helper ? 'Trusted Helper' : 'Protected by Nikita'}
         </Copy>
       </Pressable>
     </View>
