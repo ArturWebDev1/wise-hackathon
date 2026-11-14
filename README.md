@@ -45,14 +45,14 @@ Spring reads the root `.env` and serves [its status endpoint](http://localhost:8
 
 ## Two phones with Expo Go (Maria and Nikita)
 
-Docker alone serves the **web** version (`docker compose up`, one address in a phone browser). Expo Go also needs Expo itself, because Expo is what puts this computer's Wi-Fi address into the QR code. Two commands from the repository root, with Docker Desktop running:
+Docker alone serves the **web** version (`docker compose up`, one address in a phone browser). Expo Go also needs Expo itself, because Expo is what puts this computer's Wi-Fi address into the QR code. Two commands, with Docker Desktop running. The first one runs from the repository root, the second from `frontend/`:
 
 ```sh
-BIND_ADDRESS=0.0.0.0 docker compose up -d --build --wait postgres backend
+docker compose up -d --build --wait postgres backend
 cd frontend && npm ci && npx expo start --lan
 ```
 
-On Windows PowerShell set the variable first: `$env:BIND_ADDRESS="0.0.0.0"; docker compose up -d --build --wait postgres backend`. `BIND_ADDRESS=0.0.0.0` makes Spring reachable from the Wi-Fi (the default `127.0.0.1` keeps it private). `npm ci` is needed only the first time.
+The root `.env` already sets `BIND_ADDRESS=0.0.0.0`, which makes Spring (and the web container) reachable from the Wi-Fi; change it to `127.0.0.1` to keep them private. PostgreSQL always stays on `127.0.0.1`. `npm ci` is needed only the first time.
 
 Scan the QR code with Expo Go on both phones. On phone one choose **I'm Maria**, on phone two **I'm Nikita**: each phone keeps its own session, both talk to the same Spring server and see each other's changes within about two seconds. The app finds Spring at the same host as Expo on port 8080, so leave `EXPO_PUBLIC_API_URL` unset.
 
