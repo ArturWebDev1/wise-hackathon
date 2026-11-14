@@ -6,7 +6,7 @@ export default function FamilyPerson() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   return (
     <Screen>
-      <Stack.Screen options={{ title: 'Family protection' }} />
+      <Stack.Screen options={{ title: 'Family protection', headerRight: () => null }} />
       <PersonScreen id={id} />
     </Screen>
   );

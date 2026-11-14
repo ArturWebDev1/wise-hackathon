@@ -65,7 +65,7 @@ export function AddPerson() {
           }
           style={{ justifyContent: 'center', alignItems: 'center', paddingVertical: 48, gap: 16 }}
         >
-          <IconCircle icon={Check} size={88} background={c.pale} color={c.forest} />
+          <IconCircle icon={Check} size={88} background={`${c.green}99`} color={c.forest} />
           <Heading center>Invite sent.</Heading>
           <Copy size={17} color={c.muted} style={{ textAlign: 'center' }}>
             {`${person} gets a link that works for 24 hours.`}

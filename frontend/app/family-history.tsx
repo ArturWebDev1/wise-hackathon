@@ -5,7 +5,7 @@ import { HistoryList } from '@/features/helper/history-list';
 export default function History() {
   return (
     <Screen>
-      <Stack.Screen options={{ title: 'Maria’s history' }} />
+      <Stack.Screen options={{ title: 'Maria’s history', headerRight: () => null }} />
       <HistoryList />
     </Screen>
   );

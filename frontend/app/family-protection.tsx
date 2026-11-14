@@ -5,7 +5,7 @@ import { FamilyHub } from '@/features/helper/family-hub';
 export default function Family() {
   return (
     <Screen>
-      <Stack.Screen options={{ title: 'Family protection' }} />
+      <Stack.Screen options={{ title: 'Family protection', headerRight: () => null }} />
       <FamilyHub />
     </Screen>
   );

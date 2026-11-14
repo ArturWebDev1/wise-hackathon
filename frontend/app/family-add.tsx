@@ -4,7 +4,7 @@ import { AddPerson } from '@/features/helper/add-person';
 export default function FamilyAdd() {
   return (
     <>
-      <Stack.Screen options={{ title: 'Add someone' }} />
+      <Stack.Screen options={{ title: 'Add someone', headerRight: () => null }} />
       <AddPerson />
     </>
   );

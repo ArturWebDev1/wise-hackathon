@@ -5,7 +5,7 @@ import { RequestsList } from '@/features/helper/requests-list';
 export default function Requests() {
   return (
     <Screen>
-      <Stack.Screen options={{ title: 'Requests' }} />
+      <Stack.Screen options={{ title: 'Requests', headerRight: () => null }} />
       <RequestsList />
     </Screen>
   );
