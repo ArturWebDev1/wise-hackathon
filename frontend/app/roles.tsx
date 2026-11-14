@@ -43,7 +43,7 @@ export function RolePicker() {
             }}
           >
             <Copy size={14} bold color={c.forest}>
-              Lite
+              Care
             </Copy>
           </View>
         </View>
@@ -64,7 +64,7 @@ export function RolePicker() {
           Who’s using Wise today?
         </Copy>
         <View style={{ marginTop: 8, gap: 12 }}>
-          <Pill onPress={() => select('maria')}>{"I'm Maria (Lite user)"}</Pill>
+          <Pill onPress={() => select('maria')}>{"I'm Maria (Care user)"}</Pill>
           <Pill tone="pale" onPress={() => select('nikita')}>
             {"I'm Nikita (Helper)"}
           </Pill>

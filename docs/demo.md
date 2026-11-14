@@ -13,7 +13,7 @@ Owner/presenter: assign when the problem is known. Coordinate shared edits.
 
 | Who | Role in the demo |
 |---|---|
-| Maria (`maria@example.com`) | Lite user, 4 000 €, limit 250 €, new people need approval |
+| Maria (`maria@example.com`) | Care user, 4 000 €, limit 250 €, new people need approval |
 | Nikita (`nikita@example.com`) | Trusted helper, full Wise |
 | Anna, Nikita, Olga | People Maria already sent money to: transfers up to 250 € go straight through |
 | Ola, Liisa, Pavel (`@ola`, `@liisa`, `@pavel`) | "New people": a transfer to them always waits for Nikita |

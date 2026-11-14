@@ -6,7 +6,7 @@
 - Discuss the plan first and then save it here. List your files and link to the shared API contract when working with others.
 - You can organize your own documents and `.gitignore`. Leave other developers' notes to their owners by default.
 
-## MVP plan for the WiseEASE Lite frontend (Maria)
+## MVP plan for the Wise Care frontend (Maria)
 
 ### Goal and scope
 
@@ -26,12 +26,12 @@ Complete the existing Expo flow for an older user: view the balance, send a tran
 - Owned screens: `frontend/app/send.tsx`, `request.tsx`, and `switch-mode.tsx`.
 - New components and hooks for the user flow: `frontend/features/lite/**`. Keep route files thin as they are touched and avoid a broad refactor.
 - Personal notes: `docs/developers/gruba/**`.
-- **Nikita is the proposed single owner for shared routes:** `frontend/app/(tabs)/index.tsx`, `frontend/app/(tabs)/help.tsx`, `frontend/app/onboarding.tsx`, `frontend/app/result.tsx`, and `frontend/app/rules.tsx`. Gruba prepares the Lite components, and Nikita integrates them for both roles.
+- **Nikita is the proposed single owner for shared routes:** `frontend/app/(tabs)/index.tsx`, `frontend/app/(tabs)/help.tsx`, `frontend/app/onboarding.tsx`, `frontend/app/result.tsx`, and `frontend/app/rules.tsx`. Gruba prepares the Wise Care components, and Nikita integrates them for both roles.
 - Nikita owns the store, API, polling, and shared navigation. Coordinate exact paths for changes to shared components, the theme, global CSS, dependencies, and layouts with Nikita and the team. Confirm there is no overlapping work before making shared edits.
 
 ### Shared API source
 
-The [Wise Lite contract](../nikita/wise-lite-api.md) is the single source for methods, JSON examples, errors, and business rules. `api-prototype/` is the working temporary implementation, and Spring Boot preserves the interface. Use `useWise` from `frontend/lib/wise-store.ts`, which already supports fetching state, creating a transfer, and recording consent. Reuse its HTTP client and polling.
+The [Wise Care contract](../nikita/wise-lite-api.md) is the single source for methods, JSON examples, errors, and business rules. `api-prototype/` is the working temporary implementation, and Spring Boot preserves the interface. Use `useWise` from `frontend/lib/wise-store.ts`, which already supports fetching state, creating a transfer, and recording consent. Reuse its HTTP client and polling.
 
 The current scope has one household, a local role, and no server-side access checks. Consent alone does not grant authorization. Real sign-in, access revocation, and payment requests need an agreed update to the canonical contract. The threshold applies per transfer. The API always blocks a transfer when `pressured: true`. Agree separately on any change to its relationship with `scamPause`.
 

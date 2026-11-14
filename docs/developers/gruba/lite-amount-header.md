@@ -1,4 +1,4 @@
-# Wise Lite amount field and Close button plan
+# Wise Care amount field and Close button plan
 
 ## Goal
 
@@ -19,7 +19,7 @@ Both Send cards use `wise.card`. The Request card keeps its white background.
 
 ## API and scope
 
-See the [Wise Lite API](../nikita/wise-lite-api.md). The change uses the existing HTTP calls, store, and business rules and needs no new dependencies.
+See the [Wise Care API](../nikita/wise-lite-api.md). The change uses the existing HTTP calls, store, and business rules and needs no new dependencies.
 
 ## Implementation
 

@@ -1,4 +1,4 @@
-# Wise Lite API prototype (temporary)
+# Wise Care API prototype (temporary)
 
 Node/Express API that the Expo app in `frontend/` talks to. It is a stand-in until the Spring
 Boot backend in `backend/` implements the same contract:

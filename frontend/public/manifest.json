@@ -1,6 +1,6 @@
 {
-  "name": "Wise Lite",
-  "short_name": "Wise Lite",
+  "name": "Wise Care",
+  "short_name": "Wise Care",
   "description": "A simple mode of Wise with a trusted helper for risky transfers",
   "start_url": "/",
   "scope": "/",

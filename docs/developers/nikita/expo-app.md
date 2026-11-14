@@ -1,10 +1,10 @@
-# Plan for moving Wise Lite (Expo) into the repository
+# Plan for moving Wise Care (Expo) into the repository
 
 Branch: `codex/nikita-wise-lite`. Working language: Russian.
 
 ## Goal
 
-Move the existing Wise Lite app into `frontend/` in place of Next.js. Keep the temporary API working and prepare the contract for the team's Spring Boot rewrite.
+Move the existing Wise Care app into `frontend/` in place of Next.js. Keep the temporary API working and prepare the contract for the team's Spring Boot rewrite.
 
 ## Completed work
 

@@ -6,7 +6,7 @@ Levin agreed to base the branch on commit `de66d50`, which integrates Expo and S
 
 ## API and implementation
 
-See the [Wise Lite API plan](../nikita/wise-lite-api.md) for the HTTP contract. The Expo web build uses `/api`. Nginx forwards `POST /api/auth/login` and `GET /api/state` to Spring as `POST /auth/login` and `GET /state`. `GET /api/status` keeps its Spring path and returns `{"status":"ok","database":"connected"}`. The app retains the same REST contract.
+See the [Wise Care API plan](../nikita/wise-lite-api.md) for the HTTP contract. The Expo web build uses `/api`. Nginx forwards `POST /api/auth/login` and `GET /api/state` to Spring as `POST /auth/login` and `GET /state`. `GET /api/status` keeps its Spring path and returns `{"status":"ok","database":"connected"}`. The app retains the same REST contract.
 
 1. Build the JAR with Java 21 and the Maven Wrapper, and Expo Web with Node 24. Serve the web build through Nginx with support for direct links.
 2. Start PostgreSQL, Spring, and Expo Web in that order, waiting for each to become ready. Document how to start the stack and how to start only the database.

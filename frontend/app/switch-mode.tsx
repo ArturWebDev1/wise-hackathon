@@ -10,7 +10,7 @@ export default function SwitchMode() {
       style={{ justifyContent: 'center', alignItems: 'center', gap: 24 }}
       footer={
         <View style={{ gap: 12 }}>
-          <Pill onPress={() => router.back()}>Stay in Wise Lite</Pill>
+          <Pill onPress={() => router.back()}>Stay in Wise Care</Pill>
           <Pill small tone="white" onPress={() => router.replace('/full')}>
             Switch to full Wise
           </Pill>
@@ -18,9 +18,9 @@ export default function SwitchMode() {
       }
     >
       <IconCircle icon={ShieldCheck} size={88} background={c.pale} color={c.forest} />
-      <Heading center>Stay in Wise Lite?</Heading>
+      <Heading center>Stay in Wise Care?</Heading>
       <Copy size={20} color={c.muted} style={{ textAlign: 'center' }}>
-        Wise Lite keeps things simple. Nikita still checks risky transfers in both modes.
+        Wise Care keeps things simple. Nikita still checks risky transfers in both modes.
       </Copy>
     </Screen>
   );

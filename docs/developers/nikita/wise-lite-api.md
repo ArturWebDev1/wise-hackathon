@@ -1,4 +1,4 @@
-# WiseEASE API
+# Wise Care API
 
 This is the Spring Boot contract for Expo integration. The local demo base URL is `http://localhost:8080`. Amounts are EUR and use JSON numbers with at most two decimal places. Timestamps are Unix milliseconds. Every request except sign-in uses `Authorization: Bearer <token>`.
 
@@ -35,6 +35,6 @@ To stay in sync, the client can apply `state` from responses and poll `GET /stat
 - Approval is required when the amount is strictly above the threshold or when the new-recipient check is enabled and no successful transfer to the recipient exists. Both reasons can apply. Each deactivation affects new transfers after 24 hours. Repeating the deactivation request leaves the deadline in place. Existing approval requests continue to wait for a decision.
 - `pending` lasts 12 hours from creation. Funds stay in the account until approval. Declines and expiration leave both balances unchanged. On approval, Spring checks the balance again and records the debit, credit, and decision in one transaction.
 - Repeating a create request with the same account, key, recipient, and amount returns the existing ID. Changing the amount or recipient with the same key returns `409`. If the reasons change between preview and creation, the client receives `409` and shows the reasons again.
-- WiseEASE errors use `{ "error": "message" }`. `400` means invalid input, insufficient funds, or an unavailable money request recipient. `401` means a sign-in or session error. `403` means the role lacks permission. `404` means an unknown Wise ID or inaccessible transfer. `409` is also used for already-decided or expired approval requests.
+- Wise Care errors use `{ "error": "message" }`. `400` means invalid input, insufficient funds, or an unavailable money request recipient. `401` means a sign-in or session error. `403` means the role lacks permission. `404` means an unknown Wise ID or inaccessible transfer. `409` is also used for already-decided or expired approval requests.
 
 See the [backend guide](../../../backend/README.md) for setup, demo accounts, and verification.

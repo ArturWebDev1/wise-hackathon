@@ -12,7 +12,7 @@ Show Maria a pending transfer screen based on `final.png`. Use solid colors, a l
 
 ## API and implementation
 
-Use the `Transfer` already returned by `useWise` under the [Wise Lite API contract](../nikita/wise-lite-api.md). The change needs no new requests, dependencies, or statuses.
+Use the `Transfer` already returned by `useWise` under the [Wise Care API contract](../nikita/wise-lite-api.md). The change needs no new requests, dependencies, or statuses.
 
 1. Add the component under `features/lite/`. Read the amount and recipient name from `Transfer`. Use the existing `callPerson()` for `Call Nikita` and `router.dismissTo('/')` for `Back home`.
 2. After coordination, connect the component in `frontend/app/result.tsx` for Maria's pending transfers only.

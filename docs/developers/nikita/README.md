@@ -10,7 +10,7 @@
 
 ### Goal and scope
 
-Show a regular Wise account with a section for helping Maria. A request appears on the second device, the helper reviews the reason and approves or declines, and both devices show the result. Use the existing Full, Home, and Helper screens. Building the full banking feature set is outside the scope. Full and Lite are interface modes. Maria and Nikita are account identities. Switching modes must preserve the signed-in identity and permissions.
+Show a regular Wise account with a section for helping Maria. A request appears on the second device, the helper reviews the reason and approves or declines, and both devices show the result. Use the existing Full, Home, and Helper screens. Building the full banking feature set is outside the scope. Regular Wise and Wise Care are interface modes. Maria and Nikita are account identities. Switching modes must preserve the signed-in identity and permissions.
 
 ### Required work
 
@@ -27,7 +27,7 @@ Show a regular Wise account with a section for helping Maria. A request appears 
 - Owned screens: `frontend/app/full/**`, `frontend/app/approval.tsx`, `frontend/app/send-maria.tsx`, and `frontend/app/roles.tsx`.
 - New helper components: `frontend/features/helper/**`.
 - Personal notes: `docs/developers/nikita/**`.
-- **Nikita is the proposed single owner for integration in shared files:** `frontend/lib/wise-store.ts`, `frontend/app/_layout.tsx`, `frontend/app/(tabs)/_layout.tsx`, `frontend/app/(tabs)/index.tsx`, `frontend/app/(tabs)/help.tsx`, `frontend/app/onboarding.tsx`, `frontend/app/result.tsx`, and `frontend/app/rules.tsx`. Gruba prepares the Lite components, and Nikita integrates them for both roles.
+- **Nikita is the proposed single owner for integration in shared files:** `frontend/lib/wise-store.ts`, `frontend/app/_layout.tsx`, `frontend/app/(tabs)/_layout.tsx`, `frontend/app/(tabs)/index.tsx`, `frontend/app/(tabs)/help.tsx`, `frontend/app/onboarding.tsx`, `frontend/app/result.tsx`, and `frontend/app/rules.tsx`. Gruba prepares the Wise Care components, and Nikita integrates them for both roles.
 - If shared UI or theme changes are needed, name the exact changes in `frontend/components/wise.tsx`, `frontend/lib/wise-theme.ts`, and `frontend/global.css`. Before editing, agree verbally on the owner and confirm there is no overlapping work. The same applies to dependencies, the lockfile, and `.env`, which are outside the scope of this plan.
 - The backend, database schema, and `api-prototype/` are outside this frontend task. The historical frontend ownership in `expo-app.md` predates the split. Gruba's plan covers the user screens.
 
@@ -47,7 +47,7 @@ Confirm with the backend owner before extending the scope:
 
 1. Confirm the shared file boundaries and Trusted Helper entry point with Gruba and UI/UX.
 2. Complete the list, decisions, and settings on the Node API while the Spring migration is in progress.
-3. Integrate Gruba's Lite components and check two independent sessions or devices.
+3. Integrate Gruba's Wise Care components and check two independent sessions or devices.
 4. Switch to Spring and repeat the checks. Safe transfers become `sent` and risky ones become `pending`. Approval debits once. Decline and expiration leave the balance unchanged. Blocked transfers cannot be approved. Check changes to the threshold and favorites, delayed deactivation, `409`, and offline recovery.
 5. Run `npm run check` from `frontend/`. When server-side authorization is available, work with the backend owner to check unauthorized and cross-household actions and `401` and `403` responses.
 

@@ -31,7 +31,7 @@ cd backend
 
 On Windows PowerShell use `.\mvnw.cmd spring-boot:run` instead.
 
-In a third terminal, the Expo app (Wise Lite):
+In a third terminal, the Expo app (Wise Care):
 
 ```sh
 cd frontend

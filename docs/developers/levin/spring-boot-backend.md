@@ -1,4 +1,4 @@
-# WiseEASE migration to Spring Boot
+# Wise Care migration to Spring Boot
 
 Branch `codex/levin-spring-backend-only`. Base commit `a49b24f`. The goal is an end-to-end demo for Maria and Nikita using Java 21, Spring Boot, PostgreSQL, and Expo.
 
@@ -20,7 +20,7 @@ Branch `codex/levin-spring-backend-only`. Base commit `a49b24f`. The goal is an 
 
 ## File ownership
 
-Levin owns `backend/src/main/java/com/team/hackathon/features/wiselite/`, the matching test package, the [decision notes](spring-boot-decisions.md), and the [setup guide](../../../backend/README.md). This branch implements the backend. The [Spring API contract](../nikita/wise-lite-api.md) is the basis for the frontend integration task. The WiseEASE schema is separate from the legacy Express tables.
+Levin owns `backend/src/main/java/com/team/hackathon/features/wiselite/`, the matching test package, the [decision notes](spring-boot-decisions.md), and the [setup guide](../../../backend/README.md). This branch implements the backend. The [Spring API contract](../nikita/wise-lite-api.md) is the basis for the frontend integration task. The Wise Care schema is separate from the legacy Express tables.
 
 ## Status
 

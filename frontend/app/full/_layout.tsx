@@ -24,7 +24,7 @@ function BackToLite() {
     >
       <ArrowLeft size={20} color={c.forest} strokeWidth={2} />
       <Copy bold size={16} color={c.forest}>
-        Back to Wise Lite
+        Back to Wise Care
       </Copy>
     </Pressable>
   );
