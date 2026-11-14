@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { View } from 'react-native';
 import { Slider } from 'heroui-native';
-import { SlidersHorizontal, UserRoundPlus, ShieldCheck } from 'lucide-react-native';
+import { SlidersHorizontal, UserRoundPlus } from 'lucide-react-native';
 import type { LucideIcon } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { Copy, ErrorCopy, GreyCard, Pill } from '@/components/wise';
@@ -19,7 +19,6 @@ export default function Rules() {
   const role = useWise((s) => s.role);
   const limit = useWise((s) => s.limit);
   const checkNew = useWise((s) => s.checkNew);
-  const scamPause = useWise((s) => s.scamPause);
   const scheduled = useWise((s) => s.protectionOffAt);
   const requestPeople = useWise((s) => s.requestPeople);
   const ready = useWise((s) => s.ready);
@@ -51,7 +50,7 @@ export default function Rules() {
       <WiseSwitch
         accessibilityLabel={key}
         isSelected={on && !scheduled[key]}
-        isDisabled={!helper || !ready || key === 'scamPause'}
+        isDisabled={!helper || !ready}
         onSelectedChange={(value) => change(toggleRule(key, value))}
       />
     ),
@@ -60,7 +59,6 @@ export default function Rules() {
   });
   const limitRule = rule('limit', enabledLimit);
   const newRule = rule('checkNew', checkNew);
-  const pauseRule = rule('scamPause', scamPause);
   return (
     <Page>
       <H1>{helper ? 'A safety net for Mom.' : 'Nikita has your back.'}</H1>
@@ -96,7 +94,6 @@ export default function Rules() {
           </View>
         </RuleCard>
         <RuleCard icon={UserRoundPlus} title="Ask me for any new person" rule={newRule} />
-        <RuleCard icon={ShieldCheck} title="Scam Pause" rule={pauseRule} />
       </View>
       <View style={{ gap: 12 }}>
         <Copy bold size={22} color={ink} style={{ letterSpacing: -0.6 }}>

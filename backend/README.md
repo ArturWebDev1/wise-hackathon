@@ -17,7 +17,7 @@ cd backend
 .\mvnw.cmd spring-boot:run
 ```
 
-На macOS и Linux из `backend/` используй `./mvnw spring-boot:run`. API слушает `http://localhost:8080`. `/api/status` проверяет доступность базы. Аккаунты Марии и Никиты доступны по `maria@example.com` и `nikita@example.com` с демопаролем `WiseEaseDemo!`. Wise ID для знакомого получателя — `olga`, для нового — `anna`.
+На macOS и Linux из `backend/` используй `./mvnw spring-boot:run`. API слушает `http://localhost:8080`. `/api/status` проверяет доступность базы. Аккаунты Марии и Никиты доступны по `maria@example.com` и `nikita@example.com` с демопаролем `WiseEaseDemo!`. Знакомые Марии (есть в истории): `anna`, `nikita`, `olga`. Новые для демо: `ola`, `liisa`, `pavel`; перевод им всегда ждёт одобрения Никиты.
 
 В этой ветке существующие кнопки Марии и Никиты открывают демосессии Spring. Из `frontend/` запусти `npm ci`, затем `npm run start -- --go --lan` для Expo Go или `npm run start -- --web` для браузера. По умолчанию клиент использует порт `8080` на хосте Expo. `EXPO_PUBLIC_API_URL` позволяет переопределить адрес. На телефоне укажи LAN IP компьютера со Spring. Веб-адрес вне стандартного порта Expo задаётся через `WISEEASE_CORS_ORIGIN_PATTERN` на сервере.
 
@@ -39,7 +39,7 @@ Invoke-RestMethod -Method Post -Uri "$api/transfers/preview" -Headers $headers -
     -Body (@{ recipientId = 'anna'; amount = 600 } | ConvertTo-Json)
 ```
 
-На чистых демоданных состояние покажет баланс 4 000 €, а предпросмотр вернёт `ABOVE_THRESHOLD` и `NEW_RECIPIENT`. Остальные методы описаны в [контракте API](../docs/developers/nikita/wise-lite-api.md).
+На чистых демоданных состояние покажет баланс 4 000 € и три перевода в истории (Anna 35 €, Nikita 120 €, Olga 25 €). Предпросмотр на `anna` и 600 вернёт `ABOVE_THRESHOLD`, на `ola` и 50 — `NEW_RECIPIENT`. Остальные методы описаны в [контракте API](../docs/developers/nikita/wise-lite-api.md).
 
 ## Код и проверки
 

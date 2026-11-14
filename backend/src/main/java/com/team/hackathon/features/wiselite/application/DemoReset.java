@@ -22,8 +22,13 @@ public class DemoReset {
     // Keep these opening values aligned with R__wiseease_demo_seed.sql.
     private static final Map<String, BigDecimal> OPENING_BALANCES = Map.of(
             "maria", new BigDecimal("4000.00"), "nikita", new BigDecimal("5000.00"),
-            "olga", new BigDecimal("25.00"), "anna", new BigDecimal("0.00"));
-    private static final UUID OPENING_TRANSFER = UUID.fromString("00000000-0000-0000-0000-000000000001");
+            "olga", new BigDecimal("25.00"), "anna", new BigDecimal("35.00"),
+            "ola", new BigDecimal("0.00"), "liisa", new BigDecimal("0.00"), "pavel", new BigDecimal("0.00"));
+    private record OpeningTransfer(String id, String recipientId, String amount, Duration age) {}
+    private static final List<OpeningTransfer> OPENING_HISTORY = List.of(
+            new OpeningTransfer("00000000-0000-0000-0000-000000000001", "olga", "25.00", Duration.ofDays(2)),
+            new OpeningTransfer("00000000-0000-0000-0000-000000000002", "nikita", "120.00", Duration.ofDays(1)),
+            new OpeningTransfer("00000000-0000-0000-0000-000000000003", "anna", "35.00", Duration.ofHours(1)));
 
     private final boolean enabled;
     private final AccountRepository accounts;
@@ -64,9 +69,9 @@ public class DemoReset {
         protection.changeThresholdRule(true, now);
         protection.changeCheckNew(true, now);
         protection.replaceRequestPeople(List.of("nikita"));
-        var yesterday = now.minus(Duration.ofDays(1));
-        transfers.save(new TransferEntity(OPENING_TRANSFER, "maria", "olga", new BigDecimal("25.00"),
-                "sent", false, false, Households.DEFAULT_THRESHOLD, yesterday, null, null));
+        OPENING_HISTORY.forEach(opening -> transfers.save(new TransferEntity(UUID.fromString(opening.id()),
+                "maria", opening.recipientId(), new BigDecimal(opening.amount()), "sent", false, false,
+                Households.DEFAULT_THRESHOLD, now.minus(opening.age()), null, null)));
     }
 
     private static ResponseStatusException unavailable() {
