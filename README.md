@@ -43,6 +43,25 @@ On PowerShell, use `npm.cmd` if the execution policy blocks `npm.ps1`.
 
 Spring reads the root `.env` and serves [its status endpoint](http://localhost:8080/api/status). For a different Spring host or port, see `frontend/.env.example` for the Expo API URL.
 
+## Two phones with Expo Go (Maria and Nikita)
+
+Docker alone serves the **web** version (`docker compose up`, one address in a phone browser). Expo Go also needs Expo itself, because Expo is what puts this computer's Wi-Fi address into the QR code. Two commands, with Docker Desktop running. The first one runs from the repository root, the second from `frontend/`:
+
+```sh
+docker compose up -d --build --wait postgres backend
+cd frontend && npm ci && npx expo start --lan
+```
+
+The root `.env` already sets `BIND_ADDRESS=0.0.0.0`, which makes Spring (and the web container) reachable from the Wi-Fi; change it to `127.0.0.1` to keep them private. PostgreSQL always stays on `127.0.0.1`. `npm ci` is needed only the first time.
+
+Scan the QR code with Expo Go on both phones. On phone one choose **I'm Maria**, on phone two **I'm Nikita**: each phone keeps its own session, both talk to the same Spring server and see each other's changes within about two seconds. The app finds Spring at the same host as Expo on port 8080, so leave `EXPO_PUBLIC_API_URL` unset.
+
+- Phones and the computer must be on the same Wi-Fi, and the Wi-Fi must let devices see each other (public or guest networks often do not). A phone hotspot is a reliable fallback: connect the computer and the other phone to it and restart `npx expo start --lan`. The address changes whenever the network changes, so each new network needs a new QR code; the containers keep running.
+- If the QR code shows the wrong address (Docker or a VPN confuses the detection), set it yourself: `REACT_NATIVE_PACKAGER_HOSTNAME=<Wi-Fi address> npx expo start --lan` (PowerShell: `$env:REACT_NATIVE_PACKAGER_HOSTNAME="<Wi-Fi address>"; npx expo start --lan`).
+- If a port is taken, set `POSTGRES_PORT` or `SERVER_PORT` before the Docker command, and use `npx expo start --lan --port <free port>` for Expo.
+- CORS is only a browser rule and does not apply to Expo Go. A browser on another origin needs `WISEEASE_CORS_ORIGIN_PATTERN` (default `http://*:8081`).
+- If a phone cannot connect, allow incoming connections for Docker and Node in the computer's firewall.
+
 ## Start a task
 
 1. Tell Codex your name: Artur, Nikita, Gruba, Levin, or Kurban. It reads your `docs/developers/<name>/README.md` for language and note location.
